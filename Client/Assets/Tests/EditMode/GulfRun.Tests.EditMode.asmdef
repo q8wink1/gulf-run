@@ -1,0 +1,28 @@
+{
+    "name": "GulfRun.Tests.EditMode",
+    "rootNamespace": "GulfRun.Tests.EditMode",
+    "references": [
+        "GulfRun.Core",
+        "GulfRun.Domain",
+        "GulfRun.Infrastructure",
+        "GulfRun.Presentation",
+        "GulfRun.Editor",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

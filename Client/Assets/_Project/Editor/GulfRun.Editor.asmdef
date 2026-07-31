@@ -1,0 +1,21 @@
+{
+    "name": "GulfRun.Editor",
+    "rootNamespace": "GulfRun.Editor",
+    "references": [
+        "GulfRun.Core",
+        "GulfRun.Domain",
+        "GulfRun.Infrastructure",
+        "GulfRun.Presentation"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

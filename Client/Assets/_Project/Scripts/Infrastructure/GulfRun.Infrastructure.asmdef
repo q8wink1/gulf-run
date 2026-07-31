@@ -1,0 +1,17 @@
+{
+    "name": "GulfRun.Infrastructure",
+    "rootNamespace": "GulfRun.Infrastructure",
+    "references": [
+        "GulfRun.Core",
+        "GulfRun.Domain"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

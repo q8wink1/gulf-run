@@ -1,0 +1,21 @@
+{
+    "name": "GulfRun.Debug",
+    "rootNamespace": "GulfRun.Debug",
+    "references": [
+        "GulfRun.Core",
+        "GulfRun.Domain",
+        "GulfRun.Infrastructure"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "DEVELOPMENT_BUILD",
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

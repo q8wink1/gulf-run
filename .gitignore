@@ -1,0 +1,81 @@
+# Unity / Git ignore for GulfRun (Phase 0+)
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+**/secrets/
+**/ServiceAccount*.json
+
+# Unity
+Client/[Ll]ibrary/
+Client/[Tt]emp/
+Client/[Oo]bj/
+Client/[Bb]uild/
+Client/[Bb]uilds/
+Client/[Ll]ogs/
+Client/[Uu]ser[Ss]ettings/
+Client/MemoryCaptures/
+Client/Recordings/
+Client/*.csproj
+Client/*.unityproj
+Client/*.sln
+Client/*.slnx
+Client/*.DotSettings
+Client/sysinfo.txt
+Client/CrashReports/
+
+# Builds / artifacts
+**/Builds/
+**/artifacts/
+**/bin/
+**/obj/
+*.apk
+*.aab
+*.ipa
+*.exe
+*.dll
+!ThirdParty/**/*.dll
+
+# Node / misc tool caches (future)
+node_modules/
+.npm/
+.turbo/
+
+# Terraform
+Infrastructure/**/.terraform/
+Infrastructure/**/*.tfstate*
+Infrastructure/**/crash.log
+*.tfvars
+!*.tfvars.example
+
+# Python tool caches
+__pycache__/
+.venv/
+venv/
+
+# Generated (regenerate in CI) — keep folder, ignore outputs if policy says so
+# Shared/generated/**  # uncomment when generators land
+
+# Logs
+*.log
