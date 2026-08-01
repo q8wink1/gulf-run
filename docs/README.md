@@ -90,6 +90,7 @@ All future client, server, tools, and LiveOps *implementation* must conform to e
 | Document | Purpose |
 |----------|---------|
 | [SPRINT-01-PROJECT-FOUNDATION.md](07-sprints/SPRINT-01-PROJECT-FOUNDATION.md) | Sprint 1 report: folders, managers, scenes, packages, settings, and open items |
+| [SPRINT-02-PLAYER-CONTROLLER-FOUNDATION.md](07-sprints/SPRINT-02-PLAYER-CONTROLLER-FOUNDATION.md) | Sprint 2 report: player prefab, movement/input/camera/animator scripts, physics config, and open items |
 
 ### Architecture Decision Records
 

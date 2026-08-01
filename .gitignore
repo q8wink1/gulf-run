@@ -74,6 +74,10 @@ __pycache__/
 .venv/
 venv/
 
+# Offline compile-check scratch workspace (see Sprint reports for why this
+# exists: no licensed Unity Editor available to compile/verify in-place).
+.compile_check/
+
 # Generated (regenerate in CI) — keep folder, ignore outputs if policy says so
 # Shared/generated/**  # uncomment when generators land
 
