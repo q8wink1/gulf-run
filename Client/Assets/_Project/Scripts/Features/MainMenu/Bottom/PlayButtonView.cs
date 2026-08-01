@@ -11,8 +11,12 @@ namespace GulfRun.Features.MainMenu.Bottom
     /// (animated glow, small click animation) plus the current selected
     /// map / game mode / estimated matchmaking time readout above it.
     /// Drives <see cref="IMatchLobbySummaryProvider"/> end-to-end (Create
-    /// Match → Cancel/Leave → hand off to <see cref="SceneManager.LoadGameplay"/>)
-    /// with zero compile-time reference to Features.Multiplayer.
+    /// Match → Cancel/Leave) with zero compile-time reference to
+    /// Features.Multiplayer. Sprint 15 "QUICK PLAY: When players found:
+    /// Automatically move everyone into Pre-Race Lobby": the instant
+    /// <see cref="IMatchLobbySummaryProvider.IsInMatch"/> flips true this
+    /// view auto-navigates to <see cref="SceneManager.LoadLobby"/> — the
+    /// PLAY button itself is no longer how a player enters Gameplay.
     /// </summary>
     public sealed class PlayButtonView : MonoBehaviour
     {
@@ -21,6 +25,20 @@ namespace GulfRun.Features.MainMenu.Bottom
 
         private ButtonPressAnimator _playAnim;
         private ButtonPressAnimator _secondaryAnim;
+        private bool _wasInMatch;
+
+        private void Update()
+        {
+            IMatchLobbySummaryProvider lobby = MatchLobbySummaryService.Current;
+            bool inMatch = lobby != null && lobby.IsInMatch;
+
+            if (inMatch && !_wasInMatch)
+            {
+                SceneManager.Instance?.LoadLobby();
+            }
+
+            _wasInMatch = inMatch;
+        }
 
         private void OnGUI()
         {
@@ -76,7 +94,7 @@ namespace GulfRun.Features.MainMenu.Bottom
             bool inMatch = lobby != null && lobby.IsInMatch;
             bool matchmaking = lobby != null && lobby.IsMatchmaking;
 
-            string label = inMatch ? "START RACE" : matchmaking ? "SEARCHING..." : "PLAY";
+            string label = inMatch ? "ENTER LOBBY" : matchmaking ? "SEARCHING..." : "PLAY";
             DrawGlow(centerX, y);
 
             Rect rect = _playAnim.Apply(new Rect(centerX - ButtonWidth * 0.5f, y, ButtonWidth, ButtonHeight), 4f);
@@ -105,7 +123,9 @@ namespace GulfRun.Features.MainMenu.Bottom
 
             if (inMatch)
             {
-                SceneManager.Instance?.LoadGameplay();
+                // Safety-net fallback only — Update() above already auto-navigates
+                // to the Pre-Race Lobby the instant IsInMatch flips true.
+                SceneManager.Instance?.LoadLobby();
                 return;
             }
 

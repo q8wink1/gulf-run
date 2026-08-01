@@ -36,12 +36,16 @@ namespace GulfRun.Features.MainMenu.Widgets
             string roomCodeText = lobby != null && lobby.IsHost && !lobby.LocalRoomCode.IsNone ? lobby.LocalRoomCode.ToString() : "—";
             GUI.Label(new Rect(x + 10f, y + 46f, PanelWidth - 20f, 20f), "Room Code: " + roomCodeText, MainMenuTheme.Label);
 
-            Rect inviteRect = _inviteAnim.Apply(new Rect(x + 10f, y + 68f, PanelWidth - 20f, 24f), 2f);
-            if (GUI.Button(inviteRect, "Invite Friends", MainMenuTheme.PanelButton))
+            Rect inviteRect = _inviteAnim.Apply(new Rect(x + 10f, y + 68f, (PanelWidth - 28f) * 0.5f, 24f), 2f);
+            if (GUI.Button(inviteRect, "Invite", MainMenuTheme.PanelButton))
             {
                 _inviteAnim.NotifyPressed();
-                // Best-effort only — no push-notification/deep-link channel exists for an offline friend yet (see Sprint 9 report Remaining TODOs, still unresolved); Friends screen's own "Invite" button per-row already covers the honest local confirmation flow.
                 MenuScreenRouter.TryOpen(MenuScreen.Friends);
+            }
+
+            if (GUI.Button(new Rect(x + 14f + (PanelWidth - 28f) * 0.5f, y + 68f, (PanelWidth - 28f) * 0.5f, 24f), "Private Room", MainMenuTheme.PanelButton))
+            {
+                MenuScreenRouter.TryOpen(MenuScreen.PrivateRoom);
             }
         }
     }

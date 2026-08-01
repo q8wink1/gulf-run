@@ -17,8 +17,8 @@ namespace GulfRun.Features.Multiplayer.Configuration
         [SerializeField] private int minimumPlayersToStart = 2;
 
         [Header("Countdown")]
-        [Tooltip("Shared race-start countdown length in seconds (3, 2, 1, GO).")]
-        [SerializeField] private float countdownDurationSeconds = 3f;
+        [Tooltip("Sprint 15: the Pre-Race Lobby's Auto Start countdown length in seconds, ticked by MatchManager the instant every required player is Ready (brief: '5 4 3 2 1 GO' -> 5). Was a still-unconnected-to-any-UI 3s race-start placeholder before Sprint 15's Lobby scene became this value's first real consumer.")]
+        [SerializeField] private float countdownDurationSeconds = 5f;
 
         [Header("Synchronization")]
         [Tooltip("How many player-state snapshots are sent per second. Lower = less bandwidth.")]

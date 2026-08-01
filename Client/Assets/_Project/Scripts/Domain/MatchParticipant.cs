@@ -25,5 +25,9 @@ namespace GulfRun.Domain
 
         public MatchParticipant WithConnection(ConnectionState connection) =>
             new MatchParticipant(Identity, IsHost, Ready, connection);
+
+        /// <summary>Sprint 15 (Network "Host migration ready"): produces an updated copy with a new Host flag, used by <c>LobbyManager.PromoteToHost</c> when the current host leaves.</summary>
+        public MatchParticipant WithHost(bool isHost) =>
+            new MatchParticipant(Identity, isHost, Ready, Connection);
     }
 }

@@ -88,6 +88,10 @@ namespace GulfRun.Features.Multiplayer.Connection
         /// <summary>Round-trip time in seconds. Always 0 under the offline loopback transport; a real transport supplies measured RTT.</summary>
         public float PingSecondsFor(int connectionId) => 0f;
 
+        /// <summary>Sprint 15 (Player Cards "Connection Quality" / Network "Latency indicator"). Pure bucketing of live state + ping via <see cref="ConnectionQualityResolver"/> — never disconnected/timed-out participants are never reported as merely "Poor".</summary>
+        public ConnectionQuality GetQuality(int connectionId) =>
+            ConnectionQualityResolver.Resolve(GetState(connectionId), PingSecondsFor(connectionId) * 1000f);
+
         private void HandleParticipantJoined(MatchParticipant participant)
         {
             int id = participant.Identity.ConnectionId;

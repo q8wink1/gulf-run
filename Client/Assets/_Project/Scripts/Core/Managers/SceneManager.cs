@@ -17,6 +17,12 @@ namespace GulfRun.Core.Managers
     /// Sprint 14 adds <see cref="LoadIntro"/> — Boot now always hands off
     /// to the Brand Intro scene first (see <c>GameManager.Start</c>), which
     /// itself calls <see cref="LoadMainMenu"/> once it finishes/is skipped.
+    /// Sprint 15 adds <see cref="LoadLobby"/> — Quick Play/Private Room now
+    /// hand off to the new Pre-Race Lobby scene instead of jumping straight
+    /// from Main Menu to Gameplay (see <c>Features.MainMenu.Bottom.PlayButtonView</c>
+    /// and the new <c>Features.MainMenu.Bottom.PrivateRoomPanelView</c>); the
+    /// Lobby scene itself calls <see cref="LoadGameplay"/> once its Auto
+    /// Start countdown reaches GO.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class SceneManager : Singleton<SceneManager>
@@ -25,6 +31,9 @@ namespace GulfRun.Core.Managers
         public const string IntroSceneName = "Intro";
 
         public const string MainMenuSceneName = "MainMenu";
+
+        /// <summary>Sprint 15: the Pre-Race Lobby scene, entered once a Quick Play match is found or a Private Room is created/joined.</summary>
+        public const string LobbySceneName = "Lobby";
 
         public const string GameplaySceneName = "Gameplay";
 
@@ -39,10 +48,13 @@ namespace GulfRun.Core.Managers
         /// <summary>Sprint 14 (Boot startup): the very first scene load after Boot finishes initializing — the GulfRun Brand Intro.</summary>
         public void LoadIntro() => UnityEngine.SceneManagement.SceneManager.LoadScene(IntroSceneName);
 
-        /// <summary>Sprint 13 (Main Menu PLAY button): leaves the lobby scene for the Gameplay scene.</summary>
+        /// <summary>Sprint 15 (Quick Play match found / Private Room created or joined): leaves Main Menu for the Pre-Race Lobby scene.</summary>
+        public void LoadLobby() => UnityEngine.SceneManagement.SceneManager.LoadScene(LobbySceneName);
+
+        /// <summary>Sprint 13 (Main Menu PLAY button)/Sprint 15 (Pre-Race Lobby Auto Start "GO"): leaves the current scene for the Gameplay scene.</summary>
         public void LoadGameplay() => UnityEngine.SceneManagement.SceneManager.LoadScene(GameplaySceneName);
 
-        /// <summary>Sprint 13 (post-match/leave-match flow)/Sprint 14 (end of Brand Intro): returns to (or first enters) the Main Menu scene.</summary>
+        /// <summary>Sprint 13 (post-match/leave-match flow)/Sprint 14 (end of Brand Intro)/Sprint 15 (Cancel/Leave Room from the Lobby): returns to (or first enters) the Main Menu scene.</summary>
         public void LoadMainMenu() => UnityEngine.SceneManagement.SceneManager.LoadScene(MainMenuSceneName);
     }
 }

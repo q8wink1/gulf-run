@@ -13,6 +13,9 @@ namespace GulfRun.Core.Services
         Inventory,
         Events,
         Championships,
-        Notifications
+        Notifications,
+
+        /// <summary>Sprint 14 Matchmaking: Create / Join Private Room panel.</summary>
+        PrivateRoom
     }
 }

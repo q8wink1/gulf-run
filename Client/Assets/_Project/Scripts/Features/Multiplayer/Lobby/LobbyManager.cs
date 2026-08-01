@@ -72,6 +72,18 @@ namespace GulfRun.Features.Multiplayer.Lobby
             return true;
         }
 
+        /// <summary>Sprint 15 (Network "Host migration ready"). Marks <paramref name="connectionId"/> as the new Room Owner; a no-op if it is not currently a roster member. Called only by <see cref="Connection.HostMigrationController"/> once the previous host has left.</summary>
+        public void PromoteToHost(int connectionId)
+        {
+            if (!_participants.TryGetValue(connectionId, out MatchParticipant participant) || participant.IsHost)
+            {
+                return;
+            }
+
+            _participants[connectionId] = participant.WithHost(true);
+            LobbyChanged?.Invoke();
+        }
+
         /// <summary>Clears the roster, e.g. after leaving a match.</summary>
         public void Clear()
         {

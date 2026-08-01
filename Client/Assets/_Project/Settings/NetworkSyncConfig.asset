@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   maxPlayers: 4
   minimumPlayersToStart: 2
-  countdownDurationSeconds: 3
+  countdownDurationSeconds: 5
   snapshotSendRateHz: 15
   interpolationDelaySeconds: 0.1
   maxExtrapolationSeconds: 0.25

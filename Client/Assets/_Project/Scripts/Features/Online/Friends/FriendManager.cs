@@ -86,6 +86,26 @@ namespace GulfRun.Features.Online.Friends
 
         public IReadOnlyList<PlayerId> GetFriends() => OnlineBackendService.Current.GetFriends(LocalPlayerId);
 
+        /// <summary>Sprint 15 (Pre-Race Lobby "Invite Friends" list). Filters <see cref="GetFriends"/> down to whoever is not currently <see cref="OnlineStatus.Offline"/>.</summary>
+        public IReadOnlyList<PlayerId> GetOnlineFriends()
+        {
+            IReadOnlyList<PlayerId> friends = GetFriends();
+            var online = new List<PlayerId>(friends.Count);
+            for (int i = 0; i < friends.Count; i++)
+            {
+                if (TryGetFriendProfile(friends[i], out PlayerProfileSummary profile) && profile.Status != OnlineStatus.Offline)
+                {
+                    online.Add(friends[i]);
+                }
+            }
+
+            return online;
+        }
+
+        /// <summary>Sprint 15. Resolves a friend's nickname for display, falling back to a safe placeholder if their profile cannot be resolved.</summary>
+        public string GetFriendDisplayName(PlayerId friend) =>
+            TryGetFriendProfile(friend, out PlayerProfileSummary profile) && !string.IsNullOrEmpty(profile.Nickname) ? profile.Nickname : "Player";
+
         public IReadOnlyList<FriendRequest> GetIncomingRequests() => OnlineBackendService.Current.GetIncomingRequests(LocalPlayerId);
 
         public IReadOnlyList<FriendRequest> GetOutgoingRequests() => OnlineBackendService.Current.GetOutgoingRequests(LocalPlayerId);
@@ -116,6 +136,9 @@ namespace GulfRun.Features.Online.Friends
         /// </summary>
         public void InviteFriend(PlayerId friend, string friendNickname) =>
             NotificationManager.Instance?.Raise(NotificationType.NewEvent, "Invited " + friendNickname + " to your lobby.");
+
+        /// <summary>Sprint 15 (Pre-Race Lobby "Invite Friends" panel). Thin <see cref="IFriendsSummaryProvider"/> overload that resolves the nickname itself.</summary>
+        public void InviteFriend(PlayerId friend) => InviteFriend(friend, GetFriendDisplayName(friend));
 
         /// <summary>
         /// Best-effort only: joining requires a real remote join
