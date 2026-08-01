@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 797032d6f8334211a7a326454688468d, type: 3} # SpecialOfferCatalogConfig script GUID
+  m_Name: SpecialOfferCatalogConfig
+  m_EditorClassIdentifier:
+  offers:
+  - id: offer_ramadan
+    displayName: Ramadan Bundle
+    description: Celebrate Ramadan with an exclusive outfit and a matching profile
+      frame.
+    associatedEventLabel: Ramadan
+    bundledStoreItemIds:
+    - store_outfit_ramadan
+    - store_frame_ramadan
+    currency: 0
+    priceAmount: 300
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    isActive: 1
+    placeholderColor: {r: 0.3, g: 0.15, b: 0.55, a: 1}
+  - id: offer_eid
+    displayName: Eid Celebration Pack
+    description: Celebrate Eid with a festive outfit and a matching profile frame.
+    associatedEventLabel: Eid
+    bundledStoreItemIds:
+    - store_outfit_eid
+    - store_frame_eid_lights
+    currency: 0
+    priceAmount: 300
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    isActive: 1
+    placeholderColor: {r: 0.9, g: 0.8, b: 0.3, a: 1}
+  - id: offer_national_days
+    displayName: National Days Bundle
+    description: Show your national pride with a National Team Kit and a National
+      Day outfit.
+    associatedEventLabel: National Days
+    bundledStoreItemIds:
+    - store_outfit_national_team_kit
+    - store_outfit_national_day
+    currency: 0
+    priceAmount: 250
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    isActive: 1
+    placeholderColor: {r: 0, g: 0.5, b: 0.3, a: 1}
+  - id: offer_summer
+    displayName: Summer Splash Pack
+    description: Beat the heat with a Sportswear outfit and a Desert Storm Aura
+      effect.
+    associatedEventLabel: Summer
+    bundledStoreItemIds:
+    - store_outfit_sportswear
+    - store_effect_desert_storm
+    currency: 2
+    priceAmount: 0
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 4.99
+    isActive: 1
+    placeholderColor: {r: 0.95, g: 0.75, b: 0.2, a: 1}
+  - id: offer_winter
+    displayName: Winter Frost Pack
+    description: Stay cozy with Casual Streetwear and a Golden Trail Effect.
+    associatedEventLabel: Winter
+    bundledStoreItemIds:
+    - store_outfit_casual
+    - store_effect_golden_trail
+    currency: 2
+    priceAmount: 0
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 4.99
+    isActive: 1
+    placeholderColor: {r: 0.6, g: 0.8, b: 0.95, a: 1}
+  - id: offer_anniversary
+    displayName: Anniversary Bundle
+    description: Commemorate GulfRun's anniversary with the Golden Falcon skin and
+      the Champion Gold Frame.
+    associatedEventLabel: Anniversary
+    bundledStoreItemIds:
+    - store_outfit_limited_falcon
+    - store_frame_champion_gold
+    currency: 0
+    priceAmount: 550
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    isActive: 1
+    placeholderColor: {r: 0.85, g: 0.65, b: 0.13, a: 1}
+  - id: offer_regional_celebration
+    displayName: GCC Regional Celebration Pack
+    description: Celebrate the Gulf region with a Football Club Kit and the Falcon
+      Salute victory pose.
+    associatedEventLabel: Regional Celebration
+    bundledStoreItemIds:
+    - store_outfit_football_kit
+    - store_pose_falcon
+    currency: 1
+    priceAmount: 20000
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    isActive: 1
+    placeholderColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}

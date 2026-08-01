@@ -1,0 +1,254 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e966b2696724545a9c81930ad4c4f72, type: 3} # StoreItemCatalogConfig script GUID
+  m_Name: StoreItemCatalogConfig
+  m_EditorClassIdentifier:
+  items:
+  - id: store_char_showcase_01
+    section: 3
+    displayName: Character 01 (Included)
+    description: Every launch Character is unlocked for free from day one - shown
+      here for Store discoverability.
+    currency: 3
+    priceAmount: 0
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId: character_01
+    linkedCosmeticId:
+    saleDiscountPercent: 0
+    collectionTag: Characters
+    placeholderColor: {r: 0.85, g: 0.65, b: 0.13, a: 1}
+  - id: store_char_showcase_02
+    section: 3
+    displayName: Character 07 (Included)
+    description: Every launch Character is unlocked for free from day one - shown
+      here for Store discoverability.
+    currency: 3
+    priceAmount: 0
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId: character_07
+    linkedCosmeticId:
+    saleDiscountPercent: 0
+    collectionTag: Characters
+    placeholderColor: {r: 0.2, g: 0.5, b: 0.8, a: 1}
+  - id: store_outfit_football_kit
+    section: 4
+    displayName: Football Club Kit — Home
+    description: A premium football club kit outfit.
+    currency: 0
+    priceAmount: 150
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: outfit_football_club_kit_01
+    saleDiscountPercent: 0
+    collectionTag: Football Club Kits
+    placeholderColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
+  - id: store_outfit_national_team_kit
+    section: 4
+    displayName: National Team Kit
+    description: A premium national team kit outfit.
+    currency: 0
+    priceAmount: 150
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: outfit_national_team_kit_01
+    saleDiscountPercent: 0
+    collectionTag: National Team Kits
+    placeholderColor: {r: 0.1, g: 0.4, b: 0.2, a: 1}
+  - id: store_outfit_sportswear
+    section: 4
+    displayName: Sportswear Tracksuit
+    description: A sporty tracksuit outfit.
+    currency: 0
+    priceAmount: 100
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: outfit_sportswear_01
+    saleDiscountPercent: 0
+    collectionTag: Sports Outfits
+    placeholderColor: {r: 0.2, g: 0.2, b: 0.8, a: 1}
+  - id: store_outfit_casual
+    section: 4
+    displayName: Casual Streetwear
+    description: Casual streetwear outfit, priced in Coins to exercise the Coins
+      Store-currency path.
+    currency: 1
+    priceAmount: 8000
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: outfit_casual_01
+    saleDiscountPercent: 0
+    collectionTag: Casual Clothing
+    placeholderColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  - id: store_outfit_limited_falcon
+    section: 4
+    displayName: Limited Edition Skin — Golden Falcon
+    description: A rare limited-edition outfit skin, currently on sale.
+    currency: 0
+    priceAmount: 500
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: outfit_limited_edition_01
+    saleDiscountPercent: 20
+    collectionTag: Limited Edition Skins
+    placeholderColor: {r: 0.85, g: 0.65, b: 0.13, a: 1}
+  - id: store_outfit_ramadan
+    section: 4
+    displayName: Ramadan Collection Robe
+    description: An elegant robe from the Ramadan Collection.
+    currency: 0
+    priceAmount: 200
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: outfit_ramadan_01
+    saleDiscountPercent: 0
+    collectionTag: Ramadan Collection
+    placeholderColor: {r: 0.3, g: 0.15, b: 0.55, a: 1}
+  - id: store_outfit_eid
+    section: 4
+    displayName: Eid Collection Outfit
+    description: A festive outfit from the Eid Collection.
+    currency: 0
+    priceAmount: 200
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: outfit_eid_01
+    saleDiscountPercent: 0
+    collectionTag: Eid Collection
+    placeholderColor: {r: 0.9, g: 0.8, b: 0.3, a: 1}
+  - id: store_outfit_national_day
+    section: 4
+    displayName: National Day Collection Outfit
+    description: A patriotic outfit from the National Day Collection.
+    currency: 0
+    priceAmount: 175
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: outfit_national_day_01
+    saleDiscountPercent: 0
+    collectionTag: National Day Collections
+    placeholderColor: {r: 0, g: 0.5, b: 0.3, a: 1}
+  - id: store_outfit_seasonal_event
+    section: 4
+    displayName: Seasonal Event Skin
+    description: A rotating seasonal event outfit skin.
+    currency: 0
+    priceAmount: 250
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: outfit_seasonal_event_01
+    saleDiscountPercent: 0
+    collectionTag: Seasonal Events
+    placeholderColor: {r: 0.9, g: 0.55, b: 0.1, a: 1}
+  - id: store_emote_dance
+    section: 5
+    displayName: Khaleeji Dance Emote
+    description: A celebratory Khaleeji dance emote.
+    currency: 0
+    priceAmount: 90
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: emote_dance_01
+    saleDiscountPercent: 0
+    collectionTag: Emotes
+    placeholderColor: {r: 0.7, g: 0.3, b: 0.5, a: 1}
+  - id: store_pose_falcon
+    section: 6
+    displayName: Falcon Salute
+    description: A proud falcon-salute victory pose.
+    currency: 0
+    priceAmount: 120
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId: victorypose_falcon_01
+    saleDiscountPercent: 0
+    collectionTag: Victory Poses
+    placeholderColor: {r: 0.6, g: 0.4, b: 0.1, a: 1}
+  - id: store_effect_golden_trail
+    section: 7
+    displayName: Golden Trail Effect
+    description: A shimmering golden trail behind your character during a race.
+      No dedicated Visual Effect slot exists yet (see Sprint 10 report Remaining
+      TODOs) — ownership is tracked in the Store's own item ledger.
+    currency: 0
+    priceAmount: 300
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId:
+    saleDiscountPercent: 0
+    collectionTag: Visual Effects
+    placeholderColor: {r: 0.85, g: 0.65, b: 0.13, a: 1}
+  - id: store_effect_desert_storm
+    section: 7
+    displayName: Desert Storm Aura
+    description: A swirling sandstorm aura around your character, priced in Coins.
+    currency: 1
+    priceAmount: 15000
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId:
+    saleDiscountPercent: 0
+    collectionTag: Visual Effects
+    placeholderColor: {r: 0.76, g: 0.6, b: 0.3, a: 1}
+  - id: store_frame_champion_gold
+    section: 8
+    displayName: Champion Gold Frame
+    description: A prestigious gold Profile Frame.
+    currency: 0
+    priceAmount: 250
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId:
+    saleDiscountPercent: 0
+    collectionTag: Profile Frames
+    placeholderColor: {r: 0.85, g: 0.65, b: 0.13, a: 1}
+  - id: store_frame_ramadan
+    section: 8
+    displayName: Ramadan Crescent Frame
+    description: A crescent-and-star Profile Frame for Ramadan, currently on sale.
+    currency: 0
+    priceAmount: 180
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId:
+    saleDiscountPercent: 15
+    collectionTag: Profile Frames
+    placeholderColor: {r: 0.3, g: 0.15, b: 0.55, a: 1}
+  - id: store_frame_eid_lights
+    section: 8
+    displayName: Eid Lights Frame
+    description: A festive lights Profile Frame for Eid.
+    currency: 0
+    priceAmount: 180
+    priceCurrencyCode: USD
+    realMoneyPriceAmount: 0
+    linkedCharacterId:
+    linkedCosmeticId:
+    saleDiscountPercent: 0
+    collectionTag: Profile Frames
+    placeholderColor: {r: 0.9, g: 0.8, b: 0.3, a: 1}

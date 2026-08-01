@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1fb30db06cb44c3bfdfe4f60050a555, type: 3} # CoinPackCatalogConfig script GUID
+  m_Name: CoinPackCatalogConfig
+  m_EditorClassIdentifier:
+  packs:
+  - id: coin_pack_small
+    displayName: Small Coin Sack
+    coinAmount: 1000
+    bonusCoinAmount: 0
+    priceCurrencyCode: USD
+    priceAmount: 0.99
+    isLimitedOffer: 0
+    placeholderColor: {r: 0.95, g: 0.75, b: 0.1, a: 1}
+  - id: coin_pack_medium
+    displayName: Medium Coin Sack
+    coinAmount: 5000
+    bonusCoinAmount: 500
+    priceCurrencyCode: USD
+    priceAmount: 2.99
+    isLimitedOffer: 0
+    placeholderColor: {r: 0.9, g: 0.7, b: 0.1, a: 1}
+  - id: coin_pack_large
+    displayName: Large Coin Chest
+    coinAmount: 12000
+    bonusCoinAmount: 1500
+    priceCurrencyCode: USD
+    priceAmount: 5.99
+    isLimitedOffer: 0
+    placeholderColor: {r: 0.85, g: 0.65, b: 0.1, a: 1}
+  - id: coin_pack_mega
+    displayName: Mega Coin Chest
+    coinAmount: 30000
+    bonusCoinAmount: 5000
+    priceCurrencyCode: USD
+    priceAmount: 11.99
+    isLimitedOffer: 0
+    placeholderColor: {r: 0.8, g: 0.6, b: 0.1, a: 1}
+  - id: coin_pack_ultimate
+    displayName: Ultimate Coin Vault
+    coinAmount: 70000
+    bonusCoinAmount: 15000
+    priceCurrencyCode: USD
+    priceAmount: 23.99
+    isLimitedOffer: 1
+    placeholderColor: {r: 0.75, g: 0.55, b: 0.1, a: 1}

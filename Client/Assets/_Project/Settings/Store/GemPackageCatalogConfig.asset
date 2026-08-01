@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ead411e3de264e29bd5b0d81d77f0768, type: 3} # GemPackageCatalogConfig script GUID
+  m_Name: GemPackageCatalogConfig
+  m_EditorClassIdentifier:
+  packages:
+  - id: gem_pack_starter
+    displayName: Starter Gem Pouch
+    gemAmount: 100
+    bonusGemAmount: 0
+    priceCurrencyCode: USD
+    priceAmount: 0.99
+    isLimitedOffer: 0
+    placeholderColor: {r: 0.6, g: 0.85, b: 0.95, a: 1}
+  - id: gem_pack_small
+    displayName: Small Gem Pouch
+    gemAmount: 300
+    bonusGemAmount: 30
+    priceCurrencyCode: USD
+    priceAmount: 2.99
+    isLimitedOffer: 0
+    placeholderColor: {r: 0.5, g: 0.8, b: 0.95, a: 1}
+  - id: gem_pack_medium
+    displayName: Medium Gem Chest
+    gemAmount: 650
+    bonusGemAmount: 100
+    priceCurrencyCode: USD
+    priceAmount: 5.99
+    isLimitedOffer: 0
+    placeholderColor: {r: 0.4, g: 0.7, b: 0.95, a: 1}
+  - id: gem_pack_large
+    displayName: Large Gem Chest
+    gemAmount: 1400
+    bonusGemAmount: 300
+    priceCurrencyCode: USD
+    priceAmount: 11.99
+    isLimitedOffer: 0
+    placeholderColor: {r: 0.3, g: 0.6, b: 0.95, a: 1}
+  - id: gem_pack_mega
+    displayName: Mega Gem Vault
+    gemAmount: 3000
+    bonusGemAmount: 750
+    priceCurrencyCode: USD
+    priceAmount: 23.99
+    isLimitedOffer: 0
+    placeholderColor: {r: 0.2, g: 0.5, b: 0.95, a: 1}
+  - id: gem_pack_ultimate
+    displayName: Ultimate Gem Vault
+    gemAmount: 6500
+    bonusGemAmount: 2000
+    priceCurrencyCode: USD
+    priceAmount: 47.99
+    isLimitedOffer: 1
+    placeholderColor: {r: 0.1, g: 0.4, b: 0.95, a: 1}

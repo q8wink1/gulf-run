@@ -24,7 +24,7 @@ namespace GulfRun.Features.Character.Loadout
     /// character/outfit — never just the local player's.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class PlayerLoadoutManager : Singleton<PlayerLoadoutManager>, ILocalLoadoutProvider
+    public sealed class PlayerLoadoutManager : Singleton<PlayerLoadoutManager>, ILocalLoadoutProvider, ICosmeticGrantService
     {
         [SerializeField] private CharacterCatalogConfig characterCatalog;
         [SerializeField] private CosmeticCatalogConfig cosmeticCatalog;
@@ -91,6 +91,35 @@ namespace GulfRun.Features.Character.Loadout
 
         GulfCountry ILocalLoadoutProvider.Country => _localLoadout != null ? _localLoadout.Country : GulfCountry.SaudiArabia;
 
+        // --- Sprint 10: ICosmeticGrantService — lets Features.Store credit a
+        // purchased Outfit/Emote/Victory Pose straight into the real
+        // CosmeticInventory with zero compile-time reference to this
+        // (Features.Character) assembly. See Core.Services.ICosmeticGrantService.
+
+        bool ICosmeticGrantService.OwnsCosmetic(CosmeticId id) => _localInventory.Owns(id);
+
+        bool ICosmeticGrantService.GrantCosmetic(CosmeticId id)
+        {
+            if (id.IsNone)
+            {
+                return false;
+            }
+
+            _localInventory.Grant(id);
+            return true;
+        }
+
+        IReadOnlyList<CosmeticId> ICosmeticGrantService.GetOwnedCosmetics()
+        {
+            var owned = new List<CosmeticId>(_localInventory.OwnedIds.Count);
+            foreach (string id in _localInventory.OwnedIds)
+            {
+                owned.Add(new CosmeticId(id));
+            }
+
+            return owned;
+        }
+
         private void OnEnable()
         {
             IMatchTransport transport = MatchTransportService.Current;
@@ -98,6 +127,7 @@ namespace GulfRun.Features.Character.Loadout
             transport.ParticipantJoined += HandleParticipantJoined;
             transport.MatchStateChanged += HandleMatchStateChanged;
             LocalLoadoutProviderService.Current = this;
+            CosmeticGrantService.Current = this;
         }
 
         private void OnDisable()
@@ -105,6 +135,11 @@ namespace GulfRun.Features.Character.Loadout
             if (LocalLoadoutProviderService.Current == (ILocalLoadoutProvider)this)
             {
                 LocalLoadoutProviderService.Current = null;
+            }
+
+            if (CosmeticGrantService.Current == (ICosmeticGrantService)this)
+            {
+                CosmeticGrantService.Current = null;
             }
 
             IMatchTransport transport = MatchTransportService.Current;

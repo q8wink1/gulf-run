@@ -94,5 +94,27 @@ namespace GulfRun.Core.Managers
             GemsChanged?.Invoke(_gems);
             return true;
         }
+
+        /// <summary>
+        /// Sprint 10: the Coins-priced counterpart to <see cref="TrySpendGems"/>,
+        /// added for Store items priced in Coins (P012/P045) rather than
+        /// Gems — same atomic "afford or no-op" contract.
+        /// </summary>
+        public bool TrySpendCoins(int amount)
+        {
+            if (amount <= 0)
+            {
+                return true;
+            }
+
+            if (_coins < amount)
+            {
+                return false;
+            }
+
+            _coins -= amount;
+            CoinsChanged?.Invoke(_coins);
+            return true;
+        }
     }
 }

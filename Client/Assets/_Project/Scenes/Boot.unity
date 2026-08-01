@@ -716,3 +716,80 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3733eadfb730412f9258ca5e0eeb7cd5, type: 3} # NotificationManager script GUID
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &800700000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 800700001}
+  - component: {fileID: 800700002}
+  - component: {fileID: 800700003}
+  - component: {fileID: 800700004}
+  m_Layer: 0
+  m_Name: StoreSystems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &800700001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800700000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &800700002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800700000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae61983ce5d8471b863c0c3fdc8d42a7, type: 3} # StoreManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gemPackageCatalog: {fileID: 11400000, guid: 3eadef5603c447d3be137f3a0a6d06eb, type: 2} # GemPackageCatalogConfig asset GUID
+  coinPackCatalog: {fileID: 11400000, guid: a5e2903dfc4849fba354dd783a8dd949, type: 2} # CoinPackCatalogConfig asset GUID
+  storeItemCatalog: {fileID: 11400000, guid: e86d30f7609a4b039d915401ea74830c, type: 2} # StoreItemCatalogConfig asset GUID
+  specialOfferCatalog: {fileID: 11400000, guid: 297686316afe4116af2a4cca7da1437d, type: 2} # SpecialOfferCatalogConfig asset GUID
+--- !u!114 &800700003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800700000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d32d6b31ecc240c795c3a36c90650996, type: 3} # BattlePassManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  season: {fileID: 11400000, guid: d02067ce57e0410f942a3c33e7d5ca95, type: 2} # BattlePassSeasonConfig asset GUID
+--- !u!114 &800700004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800700000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc39e799a4584501bcf55dcdc2f78b5a, type: 3} # InventoryManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  totalLaunchCharacterCount: 12
