@@ -204,9 +204,10 @@ The original Sprint 7 skip button (§5/§6) advanced the current phase **for eve
 
 | Item | Value |
 |---|---|
-| Commit hash | `abba9e63dce938fc87256c1a2a0875e1a2c9ce1b` (Sprint 7 initial); addendum commit hash: *(filled in below after commit)* |
+| Commit hash | `abba9e63dce938fc87256c1a2a0875e1a2c9ce1b` (Sprint 7 initial); `7a243ef` (this addendum) |
 | Commit message | `Sprint 7 - Race Finish, Ranking & Victory Ceremony`; addendum: `Sprint 7 addendum - Victory Ceremony flags, champion presentation, individual skip` |
 | Branch | `main` |
-| Push status | ✅ Sprint 7 initial pushed to `origin/main` (`https://github.com/q8wink1/gulf-run.git`), fast-forward `af5d86e..abba9e6`. Addendum push status recorded below after commit. |
+| Files changed (addendum) | 31 files changed, 752 insertions(+), 67 deletions(-) |
+| Push status | ✅ Sprint 7 initial pushed to `origin/main` (`https://github.com/q8wink1/gulf-run.git`), fast-forward `af5d86e..abba9e6`. Addendum push status recorded in the follow-up commit that records the final hash (same "commit, then a small follow-up commit to record its own hash" pattern used for the initial Sprint 7 report). |
 
 Sprint 7 (including this addendum) is complete within the constraints above. Stopping here. Waiting for Sprint 8.
