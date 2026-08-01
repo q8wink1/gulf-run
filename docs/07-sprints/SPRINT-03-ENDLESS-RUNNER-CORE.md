@@ -157,7 +157,7 @@ Same constraint as Sprints 1–2: no licensed Unity Editor on this machine (Unit
 
 | Item | Value |
 |---|---|
-| Commit hash | `3bde1e39d0a4e8fd78b6450e1e672c5c8e3c6b42` |
+| Commit hash | `e947768fdf6831d3b1f4cc6527421f4d905967f0` |
 | Commit message | `Sprint 3 - Endless Runner Core` |
 | Branch | `main` |
 | Push status | Pushed to `origin/main` |
