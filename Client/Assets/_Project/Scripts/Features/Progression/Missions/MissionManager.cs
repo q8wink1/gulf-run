@@ -28,6 +28,7 @@ namespace GulfRun.Features.Progression.Missions
         [SerializeField] private MissionPoolCatalogConfig pool;
 
         private IRandomSource _random;
+        private bool _loggedMissingPool;
 
         public MissionPoolCatalogConfig Pool => pool;
 
@@ -37,12 +38,17 @@ namespace GulfRun.Features.Progression.Missions
 
         protected override void OnInitialize()
         {
-            _random = SeededRandom.FromTime();
-            DailyMissionsPreviewService.Current = this;
+            EnsureRuntimeDependencies();
         }
 
         private void OnEnable()
         {
+            // Domain reload / script recompile during Play Mode does not re-run
+            // Awake/OnInitialize, but it does clear non-serialized fields and
+            // invoke OnDisable→OnEnable. Re-bind runtime deps here so Update
+            // cannot NRE on a null IRandomSource.
+            EnsureRuntimeDependencies();
+
             PlayerStatEventService.LocalMatchCompleted += HandleLocalMatchCompleted;
             PlayerStatEventService.LocalWeaponUsed += HandleLocalWeaponUsed;
             PlayerStatEventService.LocalTrapAvoided += HandleLocalTrapAvoided;
@@ -95,12 +101,32 @@ namespace GulfRun.Features.Progression.Missions
             return true;
         }
 
+        private void EnsureRuntimeDependencies()
+        {
+            if (_random == null)
+            {
+                _random = SeededRandom.FromTime();
+            }
+
+            if (pool == null || pool.Missions.Count == 0)
+            {
+                if (!_loggedMissingPool)
+                {
+                    Debug.LogWarning(pool == null
+                        ? "MissionManager: MissionPoolCatalogConfig was not assigned; using runtime default mission pool."
+                        : "MissionManager: MissionPoolCatalogConfig has no entries; using runtime default mission pool.");
+                    _loggedMissingPool = true;
+                }
+
+                pool = MissionPoolCatalogConfig.CreateDefault();
+            }
+
+            DailyMissionsPreviewService.Current = this;
+        }
+
         private void EnsureMissionsFresh()
         {
-            if (pool == null)
-            {
-                return;
-            }
+            EnsureRuntimeDependencies();
 
             double now = NowSeconds();
             if (!ProgressionBackendService.Current.NeedsNewMissions(now))
@@ -120,7 +146,18 @@ namespace GulfRun.Features.Progression.Missions
 
         private List<ActiveMission> GenerateDailyMissions()
         {
-            var source = new List<MissionPoolCatalogConfig.MissionPoolEntry>(pool.Missions);
+            EnsureRuntimeDependencies();
+
+            var source = new List<MissionPoolCatalogConfig.MissionPoolEntry>(pool.Missions.Count);
+            for (int i = 0; i < pool.Missions.Count; i++)
+            {
+                MissionPoolCatalogConfig.MissionPoolEntry entry = pool.Missions[i];
+                if (entry != null)
+                {
+                    source.Add(entry);
+                }
+            }
+
             var result = new List<ActiveMission>(DailyMissionCount);
             int count = Math.Min(DailyMissionCount, source.Count);
 

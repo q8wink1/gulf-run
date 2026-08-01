@@ -7,6 +7,7 @@
         "GulfRun.Infrastructure",
         "GulfRun.Presentation",
         "GulfRun.Features.Matchmaking",
+        "GulfRun.Features.Progression",
         "UnityEngine.UI"
     ],
     "includePlatforms": [
