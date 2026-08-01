@@ -240,7 +240,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 705507993}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b78db8436e04c7e9659dc4d9ce3b62e, type: 3} # PodiumCameraDirector script GUID
+  m_Script: {fileID: 11500000, guid: 0b78db8436e04c7e9659dc4d9ce3b62e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   follow: {fileID: 705507997}
@@ -625,7 +625,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500300000}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e48c49457154da68c75f780a0abcb55, type: 3} # CountdownView (legacy, disabled — RaceHud owns countdown)
+  m_Script: {fileID: 11500000, guid: 4e48c49457154da68c75f780a0abcb55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   fontSize: 96
@@ -638,10 +638,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 500300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1a89285ed1a46ec880d050eb7b993cf, type: 3} # RaceHudController
+  m_Script: {fileID: 11500000, guid: b1a89285ed1a46ec880d050eb7b993cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2} # RaceHudConfig
+  config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
 --- !u!114 &500300011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -651,7 +651,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cf86eb15c41644b39574a0d3f2406a5d, type: 3} # RaceHudView
+  m_Script: {fileID: 11500000, guid: cf86eb15c41644b39574a0d3f2406a5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
@@ -664,7 +664,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a471519dba9a42b3adb5263c58ef998a, type: 3} # CountdownHudView
+  m_Script: {fileID: 11500000, guid: a471519dba9a42b3adb5263c58ef998a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
@@ -677,7 +677,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8342e7683e574f34a39fabd0c9230a06, type: 3} # FinishBannerView
+  m_Script: {fileID: 11500000, guid: 8342e7683e574f34a39fabd0c9230a06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
@@ -690,7 +690,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fde1066f46aa4be4b674cd62fb48542e, type: 3} # EmoteBarView
+  m_Script: {fileID: 11500000, guid: fde1066f46aa4be4b674cd62fb48542e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
@@ -703,7 +703,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceba3ff5189a43a49adf10f5e1267d30, type: 3} # RaceAudioDirector
+  m_Script: {fileID: 11500000, guid: ceba3ff5189a43a49adf10f5e1267d30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
@@ -716,7 +716,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41f83740ca5a4ce98bd95b4a356c1898, type: 3} # RaceVfxPresenter
+  m_Script: {fileID: 11500000, guid: 41f83740ca5a4ce98bd95b4a356c1898, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
@@ -729,7 +729,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccaf8f0c6d2a4084b729bbc04e13a48f, type: 3} # RaceHudDebugView
+  m_Script: {fileID: 11500000, guid: ccaf8f0c6d2a4084b729bbc04e13a48f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   showOnScreenDebug: 1
@@ -803,7 +803,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500400000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a5ed9e4593941749de5bf6139b6d838, type: 3} # NetworkDiagnosticsBridge
+  m_Script: {fileID: 11500000, guid: 1a5ed9e4593941749de5bf6139b6d838, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &500500000
@@ -851,10 +851,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 500500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eef5ec13dbd348e2ae821282361a9a58, type: 3} # TrapSpawnController script GUID
+  m_Script: {fileID: 11500000, guid: eef5ec13dbd348e2ae821282361a9a58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  catalog: {fileID: 11400000, guid: c90bc068e2fe4c3590caa69fad6c0fe3, type: 2} # TrapCatalogConfig asset GUID
+  catalog: {fileID: 11400000, guid: c90bc068e2fe4c3590caa69fad6c0fe3, type: 2}
 --- !u!114 &500500004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -864,10 +864,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 500500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc0f25e58bb7493fa81ab22f339912ba, type: 3} # TrapEffectApplicator script GUID
+  m_Script: {fileID: 11500000, guid: dc0f25e58bb7493fa81ab22f339912ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  catalog: {fileID: 11400000, guid: c90bc068e2fe4c3590caa69fad6c0fe3, type: 2} # TrapCatalogConfig asset GUID
+  catalog: {fileID: 11400000, guid: c90bc068e2fe4c3590caa69fad6c0fe3, type: 2}
   impactParticleLifetimeSeconds: 1.5
 --- !u!114 &500500006
 MonoBehaviour:
@@ -878,12 +878,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 500500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4774a6eab4a84cd8b538a1b0ff30e399, type: 3} # TrapsDebugView script GUID
+  m_Script: {fileID: 11500000, guid: 4774a6eab4a84cd8b538a1b0ff30e399, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   showOnScreenDebug: 1
   panelX: 1360
-  catalog: {fileID: 11400000, guid: c90bc068e2fe4c3590caa69fad6c0fe3, type: 2} # TrapCatalogConfig asset GUID
+  catalog: {fileID: 11400000, guid: c90bc068e2fe4c3590caa69fad6c0fe3, type: 2}
 --- !u!114 &500500008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -893,7 +893,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52e4772db65043f09b961ad156f1b4b4, type: 3} # TrapAvoidanceTracker script GUID
+  m_Script: {fileID: 11500000, guid: 52e4772db65043f09b961ad156f1b4b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &500500010
@@ -905,7 +905,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58214c1957144601828b2f1df94de637, type: 3} # TrapProximityWatcher
+  m_Script: {fileID: 11500000, guid: 58214c1957144601828b2f1df94de637, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   warningRadiusMeters: 8
@@ -956,10 +956,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 500600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e8242b7bf2b41f8a02f2d0a573ffdea, type: 3} # RaceProgressReporter script GUID
+  m_Script: {fileID: 11500000, guid: 2e8242b7bf2b41f8a02f2d0a573ffdea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2} # RaceFinishConfig asset GUID
+  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2}
 --- !u!114 &500600004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -969,10 +969,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 500600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ce8849a62a649988af0de06f438bb5a, type: 3} # RaceStandingsTracker script GUID
+  m_Script: {fileID: 11500000, guid: 8ce8849a62a649988af0de06f438bb5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2} # RaceFinishConfig asset GUID
+  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2}
 --- !u!114 &500600006
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -982,11 +982,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 500600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70d913a247cc499797207fe37cb73320, type: 3} # PodiumCeremonyView script GUID
+  m_Script: {fileID: 11500000, guid: 70d913a247cc499797207fe37cb73320, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2} # RaceFinishConfig asset GUID
-  flagCatalog: {fileID: 11400000, guid: 042278d72ede4d2eaadda8e6e7ec0190, type: 2} # FlagCatalogConfig asset GUID
+  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2}
+  flagCatalog: {fileID: 11400000, guid: 042278d72ede4d2eaadda8e6e7ec0190, type: 2}
 --- !u!114 &500600008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -996,10 +996,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 500600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac8b226b20fd4814b7e6f47b01b419d4, type: 3} # RewardScreenView script GUID
+  m_Script: {fileID: 11500000, guid: ac8b226b20fd4814b7e6f47b01b419d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2} # RaceFinishConfig asset GUID
+  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2}
 --- !u!114 &500600010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1009,7 +1009,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b49366844b6842149e6036394744a906, type: 3} # RaceRewardApplier script GUID
+  m_Script: {fileID: 11500000, guid: b49366844b6842149e6036394744a906, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &500600012
@@ -1021,7 +1021,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 092dc4ec356040d2b053540e5652f162, type: 3} # RaceFinishDebugView script GUID
+  m_Script: {fileID: 11500000, guid: 092dc4ec356040d2b053540e5652f162, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   showOnScreenDebug: 1
@@ -1035,7 +1035,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0236dfd18b904956b5a30c48ad3c23e1, type: 3} # CeremonySkipWaitingView script GUID
+  m_Script: {fileID: 11500000, guid: 0236dfd18b904956b5a30c48ad3c23e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &500700000
@@ -1083,7 +1083,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500700000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9cac233891540328744de5fbe639d9e, type: 3} # PlayerProfileView script GUID
+  m_Script: {fileID: 11500000, guid: c9cac233891540328744de5fbe639d9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &500700003
@@ -1095,7 +1095,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500700000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76668b8942c94d9d8efcda25cabf1f1d, type: 3} # LeaderboardView script GUID
+  m_Script: {fileID: 11500000, guid: 76668b8942c94d9d8efcda25cabf1f1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &500700004
@@ -1107,7 +1107,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500700000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 341891169a9f4f38b650257412ca0eb3, type: 3} # FriendListView script GUID
+  m_Script: {fileID: 11500000, guid: 341891169a9f4f38b650257412ca0eb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &500700005
@@ -1119,7 +1119,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500700000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d875d535fe449db996160811aa4f4f6, type: 3} # HallOfFameView script GUID
+  m_Script: {fileID: 11500000, guid: 9d875d535fe449db996160811aa4f4f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &500700006
@@ -1131,7 +1131,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500700000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af4e486233ec4317b9b8e27da4cf3866, type: 3} # NotificationView script GUID
+  m_Script: {fileID: 11500000, guid: af4e486233ec4317b9b8e27da4cf3866, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &500800000
@@ -1175,7 +1175,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500800000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c7b57260420415fa626be95ed2e1cdd, type: 3} # OnlineDebugView script GUID
+  m_Script: {fileID: 11500000, guid: 4c7b57260420415fa626be95ed2e1cdd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   showOnScreenDebug: 1
@@ -1224,7 +1224,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500900000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 109e0c99004e4f0aa7dcdd20b735368c, type: 3} # StoreView script GUID
+  m_Script: {fileID: 11500000, guid: 109e0c99004e4f0aa7dcdd20b735368c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &500900003
@@ -1236,7 +1236,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500900000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4dc229ac08464823ada6fb863e540438, type: 3} # PlayerWalletView script GUID
+  m_Script: {fileID: 11500000, guid: 4dc229ac08464823ada6fb863e540438, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &500900004
@@ -1248,7 +1248,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 500900000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f33956de119489dba6fc2fa6575ea2a, type: 3} # InventoryView script GUID
+  m_Script: {fileID: 11500000, guid: 4f33956de119489dba6fc2fa6575ea2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &501000000
@@ -1292,7 +1292,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 501000000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b226e46e7624763956a803f6d9bb8b3, type: 3} # StoreDebugView script GUID
+  m_Script: {fileID: 11500000, guid: 8b226e46e7624763956a803f6d9bb8b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   showOnScreenDebug: 1
@@ -1340,7 +1340,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 501100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5d6d92229f94b1088209c9a43ab4224, type: 3} # MissionsView script GUID
+  m_Script: {fileID: 11500000, guid: d5d6d92229f94b1088209c9a43ab4224, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &501100003
@@ -1352,7 +1352,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 501100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5388175d7db54b7f8bcae7d582aaa877, type: 3} # LoginRewardView script GUID
+  m_Script: {fileID: 11500000, guid: 5388175d7db54b7f8bcae7d582aaa877, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &501200000
@@ -1396,7 +1396,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 501200000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da6b9caf7e854f85846f4d591833e019, type: 3} # ProgressionDebugView script GUID
+  m_Script: {fileID: 11500000, guid: da6b9caf7e854f85846f4d591833e019, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   showOnScreenDebug: 1
@@ -1445,7 +1445,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 501300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ecf11ab902e947e58e7e53f2e75039be, type: 3} # MapAmbientAudioController script GUID
+  m_Script: {fileID: 11500000, guid: ecf11ab902e947e58e7e53f2e75039be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   mapCatalog: {fileID: 0}
@@ -1459,7 +1459,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 501300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a07ce28c764480f83c00572e6f0b555, type: 3} # BackgroundAmbienceController script GUID
+  m_Script: {fileID: 11500000, guid: 4a07ce28c764480f83c00572e6f0b555, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   mapCatalog: {fileID: 0}
@@ -1473,7 +1473,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 501300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4599a7574f548f08687dcb82ca20029, type: 3} # MapDebugView script GUID
+  m_Script: {fileID: 11500000, guid: f4599a7574f548f08687dcb82ca20029, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   showOnScreenDebug: 1

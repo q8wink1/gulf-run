@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1fb30db06cb44c3bfdfe4f60050a555, type: 3} # CoinPackCatalogConfig script GUID
+  m_Script: {fileID: 11500000, guid: f1fb30db06cb44c3bfdfe4f60050a555, type: 3}
   m_Name: CoinPackCatalogConfig
   m_EditorClassIdentifier:
   packs:

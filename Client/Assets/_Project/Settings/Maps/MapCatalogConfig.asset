@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adb1656333aa43818b5e3045bd08fda7, type: 3} # MapCatalogConfig script GUID
+  m_Script: {fileID: 11500000, guid: adb1656333aa43818b5e3045bd08fda7, type: 3}
   m_Name: MapCatalogConfig
   m_EditorClassIdentifier:
   maps:

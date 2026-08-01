@@ -260,7 +260,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1100100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dba0c1dffe8443969df94ecd4e729f12, type: 3} # IntroSequenceController script GUID
+  m_Script: {fileID: 11500000, guid: dba0c1dffe8443969df94ecd4e729f12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   startupSound: {fileID: 0}
@@ -279,7 +279,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1100100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1021087b3f7b4046b0eed6c45fdabe07, type: 3} # IntroBackgroundView script GUID
+  m_Script: {fileID: 11500000, guid: 1021087b3f7b4046b0eed6c45fdabe07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &1100100004
@@ -291,7 +291,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1100100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5421f3e6f8bc4dffb764e1f34cc92062, type: 3} # IntroFalconView script GUID
+  m_Script: {fileID: 11500000, guid: 5421f3e6f8bc4dffb764e1f34cc92062, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &1100100005
@@ -303,6 +303,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1100100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e9a811f51ec4e1bac4715c93e5912e6, type: 3} # IntroLogoView script GUID
+  m_Script: {fileID: 11500000, guid: 6e9a811f51ec4e1bac4715c93e5912e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

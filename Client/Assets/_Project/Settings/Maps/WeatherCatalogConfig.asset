@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 852f449012a24654b401ef36eab2b425, type: 3} # WeatherCatalogConfig script GUID
+  m_Script: {fileID: 11500000, guid: 852f449012a24654b401ef36eab2b425, type: 3}
   m_Name: WeatherCatalogConfig
   m_EditorClassIdentifier:
   weathers:

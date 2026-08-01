@@ -447,10 +447,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 800300000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82fc2c7e8f10432b83482b5dc4ad5e40, type: 3} # TrapAuthority script GUID
+  m_Script: {fileID: 11500000, guid: 82fc2c7e8f10432b83482b5dc4ad5e40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  catalog: {fileID: 11400000, guid: c90bc068e2fe4c3590caa69fad6c0fe3, type: 2} # TrapCatalogConfig asset GUID
+  catalog: {fileID: 11400000, guid: c90bc068e2fe4c3590caa69fad6c0fe3, type: 2}
 --- !u!1 &800400000
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,10 +493,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 800400000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3314a465626f40b58fa4d100009dff41, type: 3} # RaceFinishAuthority script GUID
+  m_Script: {fileID: 11500000, guid: 3314a465626f40b58fa4d100009dff41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2} # RaceFinishConfig asset GUID
+  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2}
 --- !u!1 &800500000
 GameObject:
   m_ObjectHideFlags: 0
@@ -545,7 +545,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d5e06851ce94b7baeb52ed864e9d62f, type: 3} # SaveManager script GUID
+  m_Script: {fileID: 11500000, guid: 9d5e06851ce94b7baeb52ed864e9d62f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &800500003
@@ -557,7 +557,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35f96d5dec1941d49304512e41199222, type: 3} # EconomyManager script GUID
+  m_Script: {fileID: 11500000, guid: 35f96d5dec1941d49304512e41199222, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   startingGems: 500
@@ -570,11 +570,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 800500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a06314f87fc4d9cbfac205d3a19abc8, type: 3} # PlayerLoadoutManager script GUID
+  m_Script: {fileID: 11500000, guid: 1a06314f87fc4d9cbfac205d3a19abc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterCatalog: {fileID: 11400000, guid: 1348b27833d9419c9b2f3e665e9d090d, type: 2} # CharacterCatalogConfig asset GUID
-  cosmeticCatalog: {fileID: 11400000, guid: 48663bc9c26a4a59bb315f3ed9aa51a5, type: 2} # CosmeticCatalogConfig asset GUID
+  characterCatalog: {fileID: 11400000, guid: 1348b27833d9419c9b2f3e665e9d090d, type: 2}
+  cosmeticCatalog: {fileID: 11400000, guid: 48663bc9c26a4a59bb315f3ed9aa51a5, type: 2}
 --- !u!114 &800500005
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -584,10 +584,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 800500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d6f9b5e2253435da4c35e3ed02e337f, type: 3} # AccountCreationView script GUID
+  m_Script: {fileID: 11500000, guid: 7d6f9b5e2253435da4c35e3ed02e337f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  countryCatalog: {fileID: 11400000, guid: 0fd957ab9fbe4b5a9946008fcc60ffaa, type: 2} # CountryCatalogConfig asset GUID
+  countryCatalog: {fileID: 11400000, guid: 0fd957ab9fbe4b5a9946008fcc60ffaa, type: 2}
 --- !u!114 &800500006
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -597,10 +597,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 800500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72dc9808894c426f980ab673eba76c6a, type: 3} # CharacterMenuView script GUID
+  m_Script: {fileID: 11500000, guid: 72dc9808894c426f980ab673eba76c6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  countryCatalog: {fileID: 11400000, guid: 0fd957ab9fbe4b5a9946008fcc60ffaa, type: 2} # CountryCatalogConfig asset GUID
+  countryCatalog: {fileID: 11400000, guid: 0fd957ab9fbe4b5a9946008fcc60ffaa, type: 2}
 --- !u!114 &800500007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -610,7 +610,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0babfeb45a444b7bb2ce22afe276717, type: 3} # CharacterDebugView script GUID
+  m_Script: {fileID: 11500000, guid: e0babfeb45a444b7bb2ce22afe276717, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   showOnScreenDebug: 1
@@ -625,11 +625,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 800500000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb2a9b40db1d43f2afd0bcaac2e14778, type: 3} # LockerView script GUID
+  m_Script: {fileID: 11500000, guid: eb2a9b40db1d43f2afd0bcaac2e14778, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  countryCatalog: {fileID: 11400000, guid: 0fd957ab9fbe4b5a9946008fcc60ffaa, type: 2} # CountryCatalogConfig asset GUID
-  uiConfig: {fileID: 11400000, guid: 24fac032448044ca963a8029c3948877, type: 2} # LockerUiConfig asset GUID
+  countryCatalog: {fileID: 11400000, guid: 0fd957ab9fbe4b5a9946008fcc60ffaa, type: 2}
+  uiConfig: {fileID: 11400000, guid: 24fac032448044ca963a8029c3948877, type: 2}
   dressingRoomMusic: {fileID: 0}
   buttonClickSound: {fileID: 0}
   equipSound: {fileID: 0}
@@ -683,10 +683,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 800600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 21c61a82bd264e62981bfacc2bc512f2, type: 3} # LeagueManager script GUID
+  m_Script: {fileID: 11500000, guid: 21c61a82bd264e62981bfacc2bc512f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  catalog: {fileID: 11400000, guid: 7d532d3015de484b9140757928070920, type: 2} # LeagueCatalogConfig asset GUID
+  catalog: {fileID: 11400000, guid: 7d532d3015de484b9140757928070920, type: 2}
   startingSeasonNumber: 1
 --- !u!114 &800600003
 MonoBehaviour:
@@ -697,11 +697,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 800600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f8c67b0e779e4474ab8c3dd9391fc276, type: 3} # ChampionshipManager script GUID
+  m_Script: {fileID: 11500000, guid: f8c67b0e779e4474ab8c3dd9391fc276, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  championshipCatalog: {fileID: 11400000, guid: dc109974d0aa412f99d5b4c0c934e37e, type: 2} # ChampionshipCatalogConfig asset GUID
-  countryEventCatalog: {fileID: 11400000, guid: 785d0f5bac4a44c18c6903a25bec17dc, type: 2} # CountryEventCatalogConfig asset GUID
+  championshipCatalog: {fileID: 11400000, guid: dc109974d0aa412f99d5b4c0c934e37e, type: 2}
+  countryEventCatalog: {fileID: 11400000, guid: 785d0f5bac4a44c18c6903a25bec17dc, type: 2}
 --- !u!114 &800600004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -711,7 +711,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 716981ca61fd4f1d975e62d47b0b90fa, type: 3} # LeaderboardManager script GUID
+  m_Script: {fileID: 11500000, guid: 716981ca61fd4f1d975e62d47b0b90fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   cacheDurationSeconds: 5
@@ -724,7 +724,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4a76ffb262e46afa80927cc3e056d78, type: 3} # FriendManager script GUID
+  m_Script: {fileID: 11500000, guid: f4a76ffb262e46afa80927cc3e056d78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &800600006
@@ -736,7 +736,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2220da4d617140239ed6ed6f743f16f4, type: 3} # HallOfFameManager script GUID
+  m_Script: {fileID: 11500000, guid: 2220da4d617140239ed6ed6f743f16f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &800600007
@@ -748,7 +748,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6408a6556b6948b7a407fffe6766a316, type: 3} # PlayerStatisticsTracker script GUID
+  m_Script: {fileID: 11500000, guid: 6408a6556b6948b7a407fffe6766a316, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &800600008
@@ -760,7 +760,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3733eadfb730412f9258ca5e0eeb7cd5, type: 3} # NotificationManager script GUID
+  m_Script: {fileID: 11500000, guid: 3733eadfb730412f9258ca5e0eeb7cd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &800600009
@@ -772,7 +772,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800600000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2111f1cb49a048048f2ec1fd03356306, type: 3} # ProfileManager script GUID
+  m_Script: {fileID: 11500000, guid: 2111f1cb49a048048f2ec1fd03356306, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   refreshIntervalSeconds: 1
@@ -820,13 +820,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 800700000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae61983ce5d8471b863c0c3fdc8d42a7, type: 3} # StoreManager script GUID
+  m_Script: {fileID: 11500000, guid: ae61983ce5d8471b863c0c3fdc8d42a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gemPackageCatalog: {fileID: 11400000, guid: 3eadef5603c447d3be137f3a0a6d06eb, type: 2} # GemPackageCatalogConfig asset GUID
-  coinPackCatalog: {fileID: 11400000, guid: a5e2903dfc4849fba354dd783a8dd949, type: 2} # CoinPackCatalogConfig asset GUID
-  storeItemCatalog: {fileID: 11400000, guid: e86d30f7609a4b039d915401ea74830c, type: 2} # StoreItemCatalogConfig asset GUID
-  specialOfferCatalog: {fileID: 11400000, guid: 297686316afe4116af2a4cca7da1437d, type: 2} # SpecialOfferCatalogConfig asset GUID
+  gemPackageCatalog: {fileID: 11400000, guid: 3eadef5603c447d3be137f3a0a6d06eb, type: 2}
+  coinPackCatalog: {fileID: 11400000, guid: a5e2903dfc4849fba354dd783a8dd949, type: 2}
+  storeItemCatalog: {fileID: 11400000, guid: e86d30f7609a4b039d915401ea74830c, type: 2}
+  specialOfferCatalog: {fileID: 11400000, guid: 297686316afe4116af2a4cca7da1437d, type: 2}
 --- !u!114 &800700003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -836,10 +836,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 800700000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d32d6b31ecc240c795c3a36c90650996, type: 3} # BattlePassManager script GUID
+  m_Script: {fileID: 11500000, guid: d32d6b31ecc240c795c3a36c90650996, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  season: {fileID: 11400000, guid: d02067ce57e0410f942a3c33e7d5ca95, type: 2} # BattlePassSeasonConfig asset GUID
+  season: {fileID: 11400000, guid: d02067ce57e0410f942a3c33e7d5ca95, type: 2}
 --- !u!114 &800700004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -849,7 +849,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800700000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc39e799a4584501bcf55dcdc2f78b5a, type: 3} # InventoryManager script GUID
+  m_Script: {fileID: 11500000, guid: dc39e799a4584501bcf55dcdc2f78b5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   totalLaunchCharacterCount: 12
@@ -897,10 +897,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 800800000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 569224e8b5dc4bb8a1217694b57107ee, type: 3} # MissionManager script GUID
+  m_Script: {fileID: 11500000, guid: 569224e8b5dc4bb8a1217694b57107ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pool: {fileID: 11400000, guid: a8e411e5088044e5a2b1b7c0cae8f0e0, type: 2} # MissionPoolCatalogConfig asset GUID
+  pool: {fileID: 11400000, guid: a8e411e5088044e5a2b1b7c0cae8f0e0, type: 2}
 --- !u!114 &800800003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -910,16 +910,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 800800000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc735fcbb0024c3eb6b16b928ec7ca4e, type: 3} # LoginRewardManager script GUID
+  m_Script: {fileID: 11500000, guid: bc735fcbb0024c3eb6b16b928ec7ca4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  standardCalendar: {fileID: 11400000, guid: cc14e5fa2f804af38ac78327265ed6d8, type: 2} # LoginRewardCalendarConfig_Standard asset GUID
+  standardCalendar: {fileID: 11400000, guid: cc14e5fa2f804af38ac78327265ed6d8, type: 2}
   specialEventCalendars:
-  - {fileID: 11400000, guid: eee3d3b8f24e40d69cf7c58878abd73b, type: 2} # LoginRewardCalendarConfig_Ramadan asset GUID
-  - {fileID: 11400000, guid: 201ad3ede14b4a089d7deca7f4f1a785, type: 2} # LoginRewardCalendarConfig_Eid asset GUID
-  - {fileID: 11400000, guid: 1ee84c395b5a4640952d036bb10c7e02, type: 2} # LoginRewardCalendarConfig_NationalDay asset GUID
-  - {fileID: 11400000, guid: 064e7b7805e9498caa4f5a9785890063, type: 2} # LoginRewardCalendarConfig_Summer asset GUID
-  - {fileID: 11400000, guid: 2e920cf9e4544fe6b32b59baea3caca5, type: 2} # LoginRewardCalendarConfig_Winter asset GUID
+  - {fileID: 11400000, guid: eee3d3b8f24e40d69cf7c58878abd73b, type: 2}
+  - {fileID: 11400000, guid: 201ad3ede14b4a089d7deca7f4f1a785, type: 2}
+  - {fileID: 11400000, guid: 1ee84c395b5a4640952d036bb10c7e02, type: 2}
+  - {fileID: 11400000, guid: 064e7b7805e9498caa4f5a9785890063, type: 2}
+  - {fileID: 11400000, guid: 2e920cf9e4544fe6b32b59baea3caca5, type: 2}
 --- !u!114 &800800004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -929,7 +929,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 800800000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4d92c44de68440d9234e1374cdda38f, type: 3} # TemporaryCosmeticExpiryWatcher script GUID
+  m_Script: {fileID: 11500000, guid: e4d92c44de68440d9234e1374cdda38f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   expiringSoonThresholdSeconds: 21600
@@ -976,12 +976,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 800900000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b3179c4e5d34a30a53e14b6e67f5faa, type: 3} # MapEnvironmentManager script GUID
+  m_Script: {fileID: 11500000, guid: 6b3179c4e5d34a30a53e14b6e67f5faa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapCatalog: {fileID: 11400000, guid: 2617fd5b7da545fa94fb0a1d2f531424, type: 2} # MapCatalogConfig asset GUID
-  weatherCatalog: {fileID: 11400000, guid: 41828805eb0d4e87a525a781aa4d608c, type: 2} # WeatherCatalogConfig asset GUID
-  timeOfDayCatalog: {fileID: 11400000, guid: 4ef84539086745eeb36a6a8e237802d3, type: 2} # TimeOfDayCatalogConfig asset GUID
+  mapCatalog: {fileID: 11400000, guid: 2617fd5b7da545fa94fb0a1d2f531424, type: 2}
+  weatherCatalog: {fileID: 11400000, guid: 41828805eb0d4e87a525a781aa4d608c, type: 2}
+  timeOfDayCatalog: {fileID: 11400000, guid: 4ef84539086745eeb36a6a8e237802d3, type: 2}
 --- !u!1 &801000000
 GameObject:
   m_ObjectHideFlags: 0
@@ -1028,7 +1028,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 801000000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df4cf894be8247e99e54eb76993eadb9, type: 3} # AudioManager script GUID
+  m_Script: {fileID: 11500000, guid: df4cf894be8247e99e54eb76993eadb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &801000003
@@ -1040,7 +1040,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 801000000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6228f2ff82cd4984aacfe7049155c27f, type: 3} # GameManager script GUID
+  m_Script: {fileID: 11500000, guid: 6228f2ff82cd4984aacfe7049155c27f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _targetFrameRate: 60
@@ -1053,7 +1053,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 801000000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93c903a9830c4efd98c219f02ef837f8, type: 3} # UIManager script GUID
+  m_Script: {fileID: 11500000, guid: 93c903a9830c4efd98c219f02ef837f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &801000005
@@ -1065,7 +1065,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 801000000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3fc8bfcfdec4d0db2db993f442674ab, type: 3} # SceneManager script GUID
+  m_Script: {fileID: 11500000, guid: a3fc8bfcfdec4d0db2db993f442674ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &801000006
@@ -1077,7 +1077,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 801000000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 879036623e50482691403318b4b2aeea, type: 3} # SettingsManager script GUID
+  m_Script: {fileID: 11500000, guid: 879036623e50482691403318b4b2aeea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 
