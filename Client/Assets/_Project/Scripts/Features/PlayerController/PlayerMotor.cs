@@ -51,7 +51,7 @@ namespace GulfRun.Features.PlayerController
         private void FixedUpdate()
         {
             Vector2 velocity = _rigidbody2D.velocity;
-            velocity.x = _isRunEnabled ? config.AutoRunSpeed : 0f;
+            velocity.x = _isRunEnabled ? ResolveAutoRunSpeed() : 0f;
             _rigidbody2D.velocity = velocity;
 
             if (_groundDetector.IsGrounded)
@@ -93,6 +93,21 @@ namespace GulfRun.Features.PlayerController
         private void HandleLanded()
         {
             _justLanded = true;
+        }
+
+        /// <summary>
+        /// Resolves the current auto-run speed. When an endless-runner Game
+        /// Speed Controller is present in the scene it drives the speed
+        /// (base speed, progressive increase, temporary modifiers); otherwise
+        /// falls back to the static config value, so this component behaves
+        /// identically to Sprint 2 when used stand-alone. Decoupled via
+        /// <see cref="GulfRun.Core.Services.RunSpeedService"/> — PlayerController
+        /// never references the EndlessRunner feature directly.
+        /// </summary>
+        private float ResolveAutoRunSpeed()
+        {
+            GulfRun.Core.Services.IRunSpeedProvider provider = GulfRun.Core.Services.RunSpeedService.Current;
+            return provider != null ? provider.CurrentSpeed : config.AutoRunSpeed;
         }
 
         private void SetState(PlayerMovementState newState)

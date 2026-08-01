@@ -1,3 +1,4 @@
+using GulfRun.Core.Save;
 using UnityEngine;
 
 namespace GulfRun.Core.Managers
@@ -8,14 +9,47 @@ namespace GulfRun.Core.Managers
     /// backend, which remains the source of truth.
     /// References: P034 (Settings System), P039 (Backend Architecture),
     /// P040 (Database Architecture).
+    ///
+    /// Sprint 3 note: implements <see cref="IProgressRepository"/> with a
+    /// simple in-memory store so gameplay (Game Loop, Scoring) has a working
+    /// default to read/write best-distance, best-score, and coins-collected
+    /// against today. This is intentionally NOT platform-specific and does
+    /// NOT persist across application restarts — it exists purely so the
+    /// interface has a real, swappable implementation. Replace the storage
+    /// inside this class (PlayerPrefs / local file / Cloud Save) once the
+    /// Backend/Database systems land, with zero changes required to any
+    /// caller since they only depend on <see cref="IProgressRepository"/>.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class SaveManager : Singleton<SaveManager>
+    public sealed class SaveManager : Singleton<SaveManager>, IProgressRepository
     {
+        private float _bestDistanceMeters;
+        private float _bestScore;
+        private int _coinsCollected;
+
         protected override void OnInitialize()
         {
-            // TODO(Sprint 2+): Implement local persistence and cloud save
-            // synchronization once the Backend/Database systems are online.
+            // TODO(Sprint 4+): Replace in-memory fields below with real local
+            // persistence and cloud save synchronization once the
+            // Backend/Database systems are online.
+        }
+
+        public float GetBestDistance() => _bestDistanceMeters;
+
+        public float GetBestScore() => _bestScore;
+
+        public int GetCoinsCollected() => _coinsCollected;
+
+        public void SaveBestDistance(float distanceMeters) => _bestDistanceMeters = distanceMeters;
+
+        public void SaveBestScore(float score) => _bestScore = score;
+
+        public void AddCoinsCollected(int amount)
+        {
+            if (amount > 0)
+            {
+                _coinsCollected += amount;
+            }
         }
     }
 }
