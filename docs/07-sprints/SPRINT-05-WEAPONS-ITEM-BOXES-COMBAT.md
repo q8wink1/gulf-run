@@ -164,9 +164,9 @@ As with every prior sprint, a networked `Player.prefab` instance is still **not*
 
 | Item | Value |
 |---|---|
-| Commit hash | *(see command output below — filled in after commit)* |
+| Commit hash | `739f756` (`739f75607e380b6b9069167e99546afe337ffc29`) |
 | Commit message | `Sprint 5 - Weapons, Item Boxes & Gulf Combat System` |
 | Branch | `main` |
-| Push status | *(filled in after push — verified via `git fetch` + `git log origin/main -1`)* |
+| Push status | Pushed to `origin/main` (`f5dc719..739f756 main -> main`); verified via `git fetch origin main` + `git log origin/main -1` matching the local hash, and `git status` reporting "up to date with 'origin/main'" / "nothing to commit, working tree clean" |
 
-Sprint 5 is complete within the constraints above.
+Sprint 5 is complete within the constraints above. Stopping here. Waiting for Sprint 6.
