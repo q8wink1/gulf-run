@@ -91,10 +91,10 @@ Clean offline compile of all project `.cs` files against the UnityEngine shim (i
 
 | Item | Value |
 |---|---|
-| Commit hash | *(filled after commit)* |
+| Commit hash | `8bd8460` |
 | Commit message | `Sprint 14 - Matchmaking, Room & Pre-Race Lobby` |
 | Branch | `main` |
-| Push status | *(filled after push)* |
+| Push status | Pushed to `origin/main` (verified after push) |
 
 ## 11. Remaining TODOs
 
