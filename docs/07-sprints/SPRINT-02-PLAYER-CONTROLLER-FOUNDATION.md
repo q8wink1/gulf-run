@@ -103,9 +103,9 @@ Same constraint as Sprint 1 (§0): no licensed Unity Editor on this machine, so 
 
 | Item | Value |
 |---|---|
-| Commit hash | *(see commit output below)* |
-| Commit message | *(see commit output below)* |
+| Commit hash | `e0bef9447cf38829f9b7f941fccc46327ede8512` |
+| Commit message | `Sprint 2 - Player Controller Foundation` |
 | Branch | `main` |
-| Push status | *(see commit output below)* |
+| Push status | Pushed to `origin/main` (`70cad9b..e0bef94`); verified `git status` shows "up to date with 'origin/main'" and a clean working tree |
 
 Sprint 2 is complete within the constraints above. Stopping here. Waiting for Sprint 3.
