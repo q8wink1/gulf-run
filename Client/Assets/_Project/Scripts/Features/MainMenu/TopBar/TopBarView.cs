@@ -1,3 +1,4 @@
+using GulfRun.Core.Branding;
 using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.MainMenu.UI;
@@ -15,10 +16,15 @@ namespace GulfRun.Features.MainMenu.TopBar
     /// so Features.MainMenu never references Features.Online/Progression
     /// directly — the same composition-root seam shape every other Sprint
     /// 13 view in this assembly uses.
+    /// Sprint 14 "BRANDING: Use this official logo everywhere ... Main
+    /// Lobby": a small <see cref="GulfRunBrandMark"/> badge sits to the
+    /// left of the player identity — the one spot in the bar with no
+    /// existing content to collide with at any screen width.
     /// </summary>
     public sealed class TopBarView : MonoBehaviour
     {
         private const float BarHeight = 56f;
+        private const float BrandBadgeSize = 34f;
 
         private ButtonPressAnimator _settingsAnim;
         private ButtonPressAnimator _notificationsAnim;
@@ -26,11 +32,12 @@ namespace GulfRun.Features.MainMenu.TopBar
         private void OnGUI()
         {
             MainMenuTheme.DrawPanel(new Rect(0f, 0f, Screen.width, BarHeight));
+            DrawBrandBadge();
 
             ILocalProfileProvider profileProvider = LocalProfileProviderService.Current;
             if (profileProvider == null || !profileProvider.HasProfile)
             {
-                GUI.Label(new Rect(16f, 0f, 400f, BarHeight), "Loading profile...", MainMenuTheme.MutedLabel);
+                GUI.Label(new Rect(16f + BrandBadgeSize + 8f, 0f, 400f, BarHeight), "Loading profile...", MainMenuTheme.MutedLabel);
                 DrawTopRightButtons();
                 return;
             }
@@ -42,9 +49,15 @@ namespace GulfRun.Features.MainMenu.TopBar
             DrawTopRightButtons();
         }
 
+        private static void DrawBrandBadge()
+        {
+            Rect rect = new Rect(12f, (BarHeight - BrandBadgeSize) * 0.5f, BrandBadgeSize, BrandBadgeSize);
+            GulfRunBrandMark.Draw(rect);
+        }
+
         private static void DrawIdentityBlock(PlayerProfileSummary summary)
         {
-            const float x = 16f;
+            float x = 16f + BrandBadgeSize + 8f;
             GUI.Label(new Rect(x, 4f, 260f, 24f), summary.Nickname, MainMenuTheme.Title);
 
             string levelLine = "Lv." + summary.Level + "  (" + summary.CurrentXp + "/" + summary.XpRequiredForNextLevel + " XP)";

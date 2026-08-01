@@ -1,0 +1,17 @@
+{
+    "name": "GulfRun.Features.Intro",
+    "rootNamespace": "GulfRun.Features.Intro",
+    "references": [
+        "GulfRun.Core",
+        "GulfRun.Domain"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -28,6 +28,18 @@ namespace GulfRun.Core.Managers
         private float _musicRequestedVolume = 1f;
         private float _ambientRequestedVolume = 1f;
 
+        // Sprint 14 (Brand Intro "Music fades naturally into the Lobby
+        // music"): a lightweight per-frame lerp of the MUSIC source's
+        // requested volume — no coroutine needed, and it keeps interacting
+        // correctly with SetMusicVolume/SetMasterVolume mid-fade since it
+        // only ever animates _musicRequestedVolume, then reuses the exact
+        // same EffectiveVolume math every other music call already uses.
+        private bool _isFadingMusic;
+        private float _musicFadeFromRequested;
+        private float _musicFadeToRequested;
+        private double _musicFadeStartSeconds;
+        private float _musicFadeDurationSeconds;
+
         public float MasterVolume => _masterVolume;
         public float MusicVolume => _musicVolume;
         public float SfxVolume => _sfxVolume;
@@ -104,6 +116,10 @@ namespace GulfRun.Core.Managers
                 return;
             }
 
+            // A fresh PlayMusic call always wins over an in-flight fade
+            // (e.g. MainMenu's own lobby-music fade-in starting right after
+            // the Brand Intro's fade-out finishes queuing).
+            _isFadingMusic = false;
             _musicRequestedVolume = volume;
             _musicSource.clip = clip;
             _musicSource.volume = EffectiveVolume(volume, _musicVolume);
@@ -114,7 +130,50 @@ namespace GulfRun.Core.Managers
         /// <summary>Stops any currently playing music. A no-op if nothing is playing.</summary>
         public void StopMusic()
         {
+            _isFadingMusic = false;
             _musicSource?.Stop();
+        }
+
+        /// <summary>
+        /// Sprint 14 (Brand Intro / Main Menu "Music fades naturally into
+        /// the Lobby music"): smoothly ramps the MUSIC source's requested
+        /// volume to <paramref name="targetVolume01"/> over
+        /// <paramref name="durationSeconds"/> instead of snapping — the
+        /// Brand Intro fades its own music OUT with this right before
+        /// handing off to the Main Menu scene, and <c>MainMenuBootstrapper</c>
+        /// fades the lobby music IN with it on arrival, so the same
+        /// persistent <see cref="AudioSource"/> (this Singleton survives
+        /// the scene load) never hard-cuts across the transition.
+        /// </summary>
+        public void FadeMusicTo(float targetVolume01, float durationSeconds)
+        {
+            if (_musicSource == null)
+            {
+                return;
+            }
+
+            _musicFadeFromRequested = _musicRequestedVolume;
+            _musicFadeToRequested = Clamp01(targetVolume01);
+            _musicFadeStartSeconds = Time.timeAsDouble;
+            _musicFadeDurationSeconds = Mathf.Max(0.01f, durationSeconds);
+            _isFadingMusic = true;
+        }
+
+        private void Update()
+        {
+            if (!_isFadingMusic || _musicSource == null)
+            {
+                return;
+            }
+
+            float t = Mathf.Clamp01((float)((Time.timeAsDouble - _musicFadeStartSeconds) / _musicFadeDurationSeconds));
+            _musicRequestedVolume = Mathf.Lerp(_musicFadeFromRequested, _musicFadeToRequested, t);
+            _musicSource.volume = EffectiveVolume(_musicRequestedVolume, _musicVolume);
+
+            if (t >= 1f)
+            {
+                _isFadingMusic = false;
+            }
         }
 
         /// <summary>

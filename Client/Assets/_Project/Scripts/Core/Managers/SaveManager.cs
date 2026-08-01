@@ -28,10 +28,22 @@ namespace GulfRun.Core.Managers
     /// (<see cref="CreateAccount"/> silently refuses to overwrite an
     /// existing account), so every consumer (Character system, Multiplayer's
     /// <c>SessionManager</c>) reads the same locked value.
+    ///
+    /// Sprint 14 note: <see cref="HasSeenIntro"/>/<see cref="MarkIntroSeen"/>
+    /// are the ONE deliberate exception to this class's in-memory posture —
+    /// the Brand Intro's "player may skip it after the first launch" needs
+    /// something that genuinely survives an app restart, and a single
+    /// device-local boolean is exactly the narrow use case
+    /// <see cref="UnityEngine.PlayerPrefs"/> is designed for (no
+    /// backend/account coupling, unlike the rest of this class). Every
+    /// other field here remains an honest placeholder per the remarks
+    /// above until real local/cloud persistence lands.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class SaveManager : Singleton<SaveManager>, IProgressRepository, IAccountRepository
     {
+        private const string HasSeenIntroPrefKey = "GulfRun.HasSeenIntro";
+
         private float _bestDistanceMeters;
         private float _bestScore;
         private int _coinsCollected;
@@ -82,6 +94,16 @@ namespace GulfRun.Core.Managers
             _account = new PlayerAccount(safeDisplayName, country, GenerateNewPlayerId());
             HasAccount = true;
             return _account;
+        }
+
+        /// <summary>Sprint 14 (Brand Intro): true once <see cref="MarkIntroSeen"/> has ever been called on this device, across app restarts.</summary>
+        public bool HasSeenIntro => PlayerPrefs.GetInt(HasSeenIntroPrefKey, 0) == 1;
+
+        /// <summary>Sprint 14 (Brand Intro): records that the intro has played at least once. Idempotent — safe to call every time the intro finishes/is skipped.</summary>
+        public void MarkIntroSeen()
+        {
+            PlayerPrefs.SetInt(HasSeenIntroPrefKey, 1);
+            PlayerPrefs.Save();
         }
 
         /// <summary>

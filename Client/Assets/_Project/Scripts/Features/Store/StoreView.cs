@@ -1,6 +1,7 @@
 using System;
 using GulfRun.Core;
 using GulfRun.Core.Backend;
+using GulfRun.Core.Branding;
 using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.Store.BattlePass;
@@ -79,7 +80,9 @@ namespace GulfRun.Features.Store
             float y = 90f;
 
             GUI.Box(new Rect(x, y, panelWidth, panelHeight), string.Empty);
-            GUI.Label(new Rect(x + 14f, y + 8f, panelWidth - 28f, 26f), "STORE", _titleStyle);
+            // Sprint 14 "BRANDING: Use this official logo everywhere ... Store" — the same shared mark as the Brand Intro/Main Menu/Battle Pass, next to the screen title.
+            GulfRunBrandMark.Draw(new Rect(x + 14f, y + 6f, 28f, 28f));
+            GUI.Label(new Rect(x + 48f, y + 8f, panelWidth - 62f, 26f), "STORE", _titleStyle);
 
             if (GUI.Button(new Rect(x + panelWidth - 150f, y + 6f, 136f, 24f), _showHistory ? "Back to Store" : "My Purchases"))
             {

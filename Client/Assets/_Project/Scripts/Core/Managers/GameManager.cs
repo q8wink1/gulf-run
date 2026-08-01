@@ -29,9 +29,12 @@ namespace GulfRun.Core.Managers
             // CoreSystems singleton on this GameObject has finished its own Awake
             // before SceneManager.Instance is dereferenced. Only ever runs once:
             // duplicate GameManager instances self-destroy in Awake before Start.
+            // Sprint 14: Boot now always hands off to the Brand Intro first —
+            // the Intro scene itself is responsible for loading MainMenu once
+            // it finishes or is skipped (see IntroSequenceController).
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == BootSceneName)
             {
-                SceneManager.Instance?.LoadMainMenu();
+                SceneManager.Instance?.LoadIntro();
             }
         }
 

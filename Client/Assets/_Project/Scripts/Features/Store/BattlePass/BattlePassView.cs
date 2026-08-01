@@ -1,4 +1,5 @@
 using GulfRun.Core;
+using GulfRun.Core.Branding;
 using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.Store.Configuration;
@@ -62,10 +63,13 @@ namespace GulfRun.Features.Store.BattlePass
                 return;
             }
 
+            // Sprint 14 "BRANDING: Use this official logo everywhere ... Battle Pass" — the same shared mark as the Brand Intro/Main Menu/Store.
+            GulfRunBrandMark.Draw(new Rect(x + 14f, y + 6f, 28f, 28f));
+
             BattlePassManager manager = BattlePassManager.Instance;
             if (manager == null || manager.Season == null)
             {
-                GUI.Label(new Rect(x + 14f, y + 8f, panelWidth - 28f, 26f), "BATTLE PASS", _titleStyle);
+                GUI.Label(new Rect(x + 48f, y + 8f, panelWidth - 62f, 26f), "BATTLE PASS", _titleStyle);
                 GUI.Label(new Rect(x + 14f, y + 40f, panelWidth - 28f, 22f), "No active season.", _labelStyle);
                 return;
             }
@@ -73,7 +77,7 @@ namespace GulfRun.Features.Store.BattlePass
             BattlePassSeasonConfig season = manager.Season;
             var status = manager.Status;
 
-            GUI.Label(new Rect(x + 14f, y + 8f, panelWidth - 60f, 26f), season.SeasonDisplayName.ToUpperInvariant(), _titleStyle);
+            GUI.Label(new Rect(x + 48f, y + 8f, panelWidth - 94f, 26f), season.SeasonDisplayName.ToUpperInvariant(), _titleStyle);
 
             float rowY = y + 40f;
             string premiumLine = status.IsPremiumUnlocked ? "Premium: Unlocked" : "Premium: Locked (" + season.PremiumPrice.DisplayString + ")";

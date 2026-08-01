@@ -14,6 +14,12 @@ namespace GulfRun.Features.MainMenu
     /// the Inspector (no audio assets exist in this repo yet — see Sprint
     /// 13 report Remaining TODOs), so this safely no-ops until clips are
     /// authored.
+    /// Sprint 14 "TRANSITION"/"SOUND: Music fades naturally into the Lobby
+    /// music": starts the lobby music silent and fades it in with
+    /// <see cref="AudioManager.FadeMusicTo"/> instead of snapping to full
+    /// volume, so arriving from the Brand Intro (which fades its own music
+    /// OUT on the very same persistent <see cref="AudioManager"/> music
+    /// source) reads as one continuous crossfade rather than two hard cuts.
     /// </summary>
     public sealed class MainMenuBootstrapper : MonoBehaviour
     {
@@ -21,6 +27,7 @@ namespace GulfRun.Features.MainMenu
         [SerializeField] private AudioClip ambientCitySound;
         [SerializeField, Range(0f, 1f)] private float lobbyMusicVolume = 0.6f;
         [SerializeField, Range(0f, 1f)] private float ambientVolume = 0.5f;
+        [SerializeField, Range(0f, 3f)] private float lobbyMusicFadeInSeconds = 0.8f;
 
         private void Start()
         {
@@ -31,7 +38,8 @@ namespace GulfRun.Features.MainMenu
 
             if (lobbyMusic != null)
             {
-                AudioManager.Instance.PlayMusic(lobbyMusic, lobbyMusicVolume);
+                AudioManager.Instance.PlayMusic(lobbyMusic, 0f);
+                AudioManager.Instance.FadeMusicTo(lobbyMusicVolume, lobbyMusicFadeInSeconds);
             }
 
             if (ambientCitySound != null)
