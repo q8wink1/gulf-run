@@ -113,9 +113,9 @@ Equip/unequip is instant (no loading). Every select/equip/unequip/unlock/grant/e
 
 | Item | Value |
 |---|---|
-| Commit hash | _(filled after commit)_ |
+| Commit hash | `18c9477` |
 | Commit message | `Sprint 16 - Character Selection, Locker & Customization` |
 | Branch | `main` |
-| Push status | _(filled after push)_ |
+| Push status | Pushed to `origin/main` (see follow-up report commit for verification) |
 
 Sprint 16 is complete within the constraints above.
