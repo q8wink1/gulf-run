@@ -23,5 +23,17 @@ namespace GulfRun.Core.Services
 
         /// <summary>Raised every time a new match's environment has just been resolved (Sprint 12: "before every race").</summary>
         event Action<MatchEnvironmentSelection> EnvironmentResolved;
+
+        /// <summary>
+        /// Sprint 13: resolves <paramref name="mapId"/>'s presentation
+        /// display name (e.g. "Kuwait City") for the Main Menu's "Current
+        /// selected map" readout, without the caller ever needing
+        /// <c>Features.Maps.Configuration.MapCatalogConfig</c> directly.
+        /// Falls back to the raw <see cref="MapId.Value"/> if unresolved.
+        /// </summary>
+        string ResolveMapDisplayName(MapId mapId);
+
+        /// <summary>Sprint 13: resolves a match's random environment right now, for a menu/lobby context with no Countdown to react to. A no-op if catalogs are unassigned.</summary>
+        void ResolveNewEnvironment();
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GulfRun.Core;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using UnityEngine;
 
@@ -12,12 +13,21 @@ namespace GulfRun.Features.Store.Inventory
     /// exclusively through <see cref="InventoryManager"/> — never a second
     /// copy of ownership state.
     /// </summary>
-    public sealed class InventoryView : SceneSingleton<InventoryView>
+    public sealed class InventoryView : SceneSingleton<InventoryView>, IMenuScreenOpener
     {
         private bool _open;
         private Vector2 _scroll;
         private GUIStyle _titleStyle;
         private GUIStyle _labelStyle;
+
+        private void OnEnable() => MenuScreenRouter.Register(MenuScreen.Inventory, this);
+
+        private void OnDisable() => MenuScreenRouter.Unregister(MenuScreen.Inventory, this);
+
+        /// <summary>Sprint 13 (Main Menu Right Menu "Inventory" button) — <see cref="IMenuScreenOpener"/>.</summary>
+        public void OpenScreen(MenuScreen screen) => _open = true;
+
+        public void Close() => _open = false;
 
         private void OnGUI()
         {

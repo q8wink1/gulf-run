@@ -137,5 +137,16 @@ namespace GulfRun.Features.Maps
         {
             return new Color(color.r * intensity, color.g * intensity, color.b * intensity, color.a);
         }
+
+        /// <summary>Sprint 13 (Main Menu "Current selected map"): looks up <paramref name="mapId"/>'s display name in <see cref="mapCatalog"/>, falling back to the raw id.</summary>
+        public string ResolveMapDisplayName(MapId mapId)
+        {
+            if (mapCatalog != null && mapCatalog.TryGetEntry(mapId, out MapCatalogConfig.MapEntry entry))
+            {
+                return entry.DisplayName;
+            }
+
+            return mapId.Value;
+        }
     }
 }

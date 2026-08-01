@@ -1,5 +1,6 @@
 using GulfRun.Core.Countries;
 using GulfRun.Core.Managers;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.Character.Configuration;
 using GulfRun.Features.Character.Loadout;
@@ -13,9 +14,13 @@ namespace GulfRun.Features.Character.Menu
     /// Price), and a Character Preview. Toggled with a corner button since
     /// no main-menu scene/UI exists yet in this project (same "OnGUI
     /// placeholder, real UI Toolkit screen later" posture as every prior
-    /// sprint's UI — see docs/02-architecture/TECHNICAL_STACK.md).
+    /// sprint's UI — see docs/02-architecture/TECHNICAL_STACK.md). Sprint
+    /// 13 registers under both <see cref="MenuScreen.Characters"/> and (no
+    /// dedicated outfit-only screen exists) doubles as the Main Menu's
+    /// Right Menu "Customize" entry too, since outfit selection already
+    /// lives in this same panel.
     /// </summary>
-    public sealed class CharacterMenuView : MonoBehaviour
+    public sealed class CharacterMenuView : MonoBehaviour, IMenuScreenOpener
     {
         [SerializeField] private CountryCatalogConfig countryCatalog;
 
@@ -23,6 +28,15 @@ namespace GulfRun.Features.Character.Menu
         private GUIStyle _titleStyle;
         private GUIStyle _headerStyle;
         private GUIStyle _labelStyle;
+
+        private void OnEnable() => MenuScreenRouter.Register(MenuScreen.Characters, this);
+
+        private void OnDisable() => MenuScreenRouter.Unregister(MenuScreen.Characters, this);
+
+        /// <summary>Sprint 13 (Main Menu Right Menu "Characters"/"Customize" buttons) — <see cref="IMenuScreenOpener"/>.</summary>
+        public void OpenScreen(MenuScreen screen) => _open = true;
+
+        public void Close() => _open = false;
 
         private void OnGUI()
         {

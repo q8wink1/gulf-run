@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using GulfRun.Core;
 using GulfRun.Core.Backend;
 using GulfRun.Core.Managers;
@@ -28,7 +29,7 @@ namespace GulfRun.Features.Store.BattlePass
     /// </para>
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class BattlePassManager : Singleton<BattlePassManager>, IBattlePassXpGrantService
+    public sealed class BattlePassManager : Singleton<BattlePassManager>, IBattlePassXpGrantService, IEventBannerSource
     {
         [SerializeField] private BattlePassSeasonConfig season;
 
@@ -38,6 +39,7 @@ namespace GulfRun.Features.Store.BattlePass
 
         protected override void OnInitialize()
         {
+            EventBannerRegistry.Register(this);
         }
 
         private void OnEnable()
@@ -54,6 +56,25 @@ namespace GulfRun.Features.Store.BattlePass
             {
                 BattlePassXpGrantService.Current = null;
             }
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            EventBannerRegistry.Unregister(this);
+        }
+
+        /// <summary>Sprint 13 (Main Menu Event Banner): the current season, promoting the Premium upgrade while it is not yet unlocked.</summary>
+        public IReadOnlyList<string> GetActiveBannerMessages()
+        {
+            if (season == null)
+            {
+                return System.Array.Empty<string>();
+            }
+
+            return Status.IsPremiumUnlocked
+                ? new[] { season.SeasonDisplayName + " Battle Pass — Tier " + CurrentTier() }
+                : new[] { season.SeasonDisplayName + " Battle Pass is live — unlock Premium now!" };
         }
 
         /// <summary>IBattlePassXpGrantService — see class remarks.</summary>

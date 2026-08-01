@@ -6,6 +6,12 @@ namespace GulfRun.Core.Managers
     /// Central entry point for playback of UI, gameplay, character, environment,
     /// weapon and voice audio, and for music playback coordination.
     /// References: P035 (Audio System), P036 (Music System), P034 (Settings).
+    /// Sprint 13 (Main Menu Settings panel) adds Master/Music/SFX/Ambient
+    /// category volumes — every source's live <c>.volume</c> is always
+    /// <c>requestedVolume * categoryVolume * masterVolume</c>, so a Settings
+    /// slider change takes effect immediately on whatever is already
+    /// playing, with zero per-call volume math for the many existing
+    /// <see cref="PlayOneShot"/>/<see cref="PlayMusic"/>/<see cref="PlayAmbient"/> call sites.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class AudioManager : Singleton<AudioManager>
@@ -14,10 +20,21 @@ namespace GulfRun.Core.Managers
         private AudioSource _musicSource;
         private AudioSource _ambientSource;
 
+        private float _masterVolume = 1f;
+        private float _musicVolume = 1f;
+        private float _sfxVolume = 1f;
+        private float _ambientVolume = 1f;
+
+        private float _musicRequestedVolume = 1f;
+        private float _ambientRequestedVolume = 1f;
+
+        public float MasterVolume => _masterVolume;
+        public float MusicVolume => _musicVolume;
+        public float SfxVolume => _sfxVolume;
+        public float AmbientVolume => _ambientVolume;
+
         protected override void OnInitialize()
         {
-            // TODO(Sprint 2+): Wire up AudioMixer groups and category volumes
-            // (Master, Music, SFX, Voice Chat) per the Settings System (P034).
             _sfxSource = gameObject.AddComponent<AudioSource>();
             _sfxSource.playOnAwake = false;
 
@@ -36,6 +53,33 @@ namespace GulfRun.Core.Managers
             _ambientSource.playOnAwake = false;
         }
 
+        /// <summary>Sprint 13 (Settings panel "Master Volume"). Scales every category's already-playing audio immediately.</summary>
+        public void SetMasterVolume(float volume01)
+        {
+            _masterVolume = Clamp01(volume01);
+            ApplyLoopingVolumes();
+        }
+
+        /// <summary>Sprint 13 (Settings panel "Music Volume").</summary>
+        public void SetMusicVolume(float volume01)
+        {
+            _musicVolume = Clamp01(volume01);
+            ApplyLoopingVolumes();
+        }
+
+        /// <summary>Sprint 13 (Settings panel "SFX Volume"). Affects only future <see cref="PlayOneShot"/> calls — one-shots already playing are short-lived by design.</summary>
+        public void SetSfxVolume(float volume01)
+        {
+            _sfxVolume = Clamp01(volume01);
+        }
+
+        /// <summary>Sprint 13 (Settings panel "Ambient Volume").</summary>
+        public void SetAmbientVolume(float volume01)
+        {
+            _ambientVolume = Clamp01(volume01);
+            ApplyLoopingVolumes();
+        }
+
         /// <summary>
         /// Minimal one-shot SFX playback (e.g. weapon pickup/activation/
         /// impact/cooldown sounds — see Sprint 5). A no-op if
@@ -49,7 +93,7 @@ namespace GulfRun.Core.Managers
                 return;
             }
 
-            _sfxSource.PlayOneShot(clip, volume);
+            _sfxSource.PlayOneShot(clip, volume * _sfxVolume * _masterVolume);
         }
 
         /// <summary>Starts (or restarts) looping music playback — e.g. the Victory Ceremony track (Sprint 7). A no-op if <paramref name="clip"/> is null.</summary>
@@ -60,8 +104,9 @@ namespace GulfRun.Core.Managers
                 return;
             }
 
+            _musicRequestedVolume = volume;
             _musicSource.clip = clip;
-            _musicSource.volume = volume;
+            _musicSource.volume = EffectiveVolume(volume, _musicVolume);
             _musicSource.loop = loop;
             _musicSource.Play();
         }
@@ -92,8 +137,9 @@ namespace GulfRun.Core.Managers
                 return;
             }
 
+            _ambientRequestedVolume = volume;
             _ambientSource.clip = clip;
-            _ambientSource.volume = volume;
+            _ambientSource.volume = EffectiveVolume(volume, _ambientVolume);
             _ambientSource.loop = loop;
             _ambientSource.Play();
         }
@@ -103,5 +149,22 @@ namespace GulfRun.Core.Managers
         {
             _ambientSource?.Stop();
         }
+
+        private void ApplyLoopingVolumes()
+        {
+            if (_musicSource != null)
+            {
+                _musicSource.volume = EffectiveVolume(_musicRequestedVolume, _musicVolume);
+            }
+
+            if (_ambientSource != null)
+            {
+                _ambientSource.volume = EffectiveVolume(_ambientRequestedVolume, _ambientVolume);
+            }
+        }
+
+        private float EffectiveVolume(float requestedVolume, float categoryVolume) => requestedVolume * categoryVolume * _masterVolume;
+
+        private static float Clamp01(float value) => value < 0f ? 0f : value > 1f ? 1f : value;
     }
 }

@@ -19,6 +19,12 @@ namespace GulfRun.Domain
         public GulfCountry Country { get; set; }
         public string CurrentCharacterDisplayName { get; set; } = string.Empty;
         public string CurrentOutfitDisplayName { get; set; } = string.Empty;
+
+        /// <summary>Sprint 13 (P024 Level System) — see <see cref="PlayerLevelRules"/>.</summary>
+        public int Level { get; set; } = 1;
+        public int CurrentXp { get; set; }
+        public int XpRequiredForNextLevel { get; set; } = PlayerLevelRules.XpRequiredForLevel(1);
+
         public SeasonProgress Season { get; set; }
         public int WorldRank { get; set; } = -1;
         public int GulfRank { get; set; } = -1;

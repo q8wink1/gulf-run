@@ -1,6 +1,7 @@
 using System;
 using GulfRun.Core;
 using GulfRun.Core.Backend;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.Store.BattlePass;
 using GulfRun.Features.Store.Configuration;
@@ -19,7 +20,7 @@ namespace GulfRun.Features.Store
     /// (Purchase Confirmation) — never mutates a wallet or inventory
     /// directly.
     /// </summary>
-    public sealed class StoreView : SceneSingleton<StoreView>
+    public sealed class StoreView : SceneSingleton<StoreView>, IMenuScreenOpener
     {
         private static readonly StoreSection[] AllTabs =
         {
@@ -38,6 +39,20 @@ namespace GulfRun.Features.Store
         private GUIStyle _rowStyle;
         private GUIStyle _labelStyle;
         private GUIStyle _feedbackStyle;
+
+        private void OnEnable() => MenuScreenRouter.Register(MenuScreen.Store, this);
+
+        private void OnDisable() => MenuScreenRouter.Unregister(MenuScreen.Store, this);
+
+        /// <summary>Sprint 13 (Main Menu Right Menu "Store" button) — <see cref="IMenuScreenOpener"/>. Opens on the Special Offers tab.</summary>
+        public void OpenScreen(MenuScreen screen)
+        {
+            _open = true;
+            _showHistory = false;
+            _section = StoreSection.SpecialOffers;
+        }
+
+        public void Close() => _open = false;
 
         private void OnGUI()
         {

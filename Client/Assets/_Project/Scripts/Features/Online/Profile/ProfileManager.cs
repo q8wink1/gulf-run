@@ -24,10 +24,13 @@ namespace GulfRun.Features.Online.Profile
     /// <see cref="EconomyManager"/>) on a throttled timer (never every
     /// frame — see <see cref="refreshIntervalSeconds"/>) and publishes it
     /// to <see cref="OnlineBackendService"/> so Search/Leaderboard/Friends
-    /// screens all see up-to-date data for this player too.
+    /// screens all see up-to-date data for this player too. Implements
+    /// <see cref="ILocalProfileProvider"/> (Sprint 13) so the Main Menu's
+    /// Top Bar/Player Preview can read it without Features.MainMenu ever
+    /// referencing Features.Online.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class ProfileManager : Singleton<ProfileManager>
+    public sealed class ProfileManager : Singleton<ProfileManager>, ILocalProfileProvider
     {
         [SerializeField] private float refreshIntervalSeconds = 1f;
 
@@ -37,6 +40,8 @@ namespace GulfRun.Features.Online.Profile
 
         public PlayerProfileSummary LocalProfile { get; private set; }
 
+        public bool HasProfile => LocalProfile != null;
+
         public event Action LocalProfileChanged;
 
         public PlayerId LocalPlayerId =>
@@ -44,6 +49,7 @@ namespace GulfRun.Features.Online.Profile
 
         protected override void OnInitialize()
         {
+            LocalProfileProviderService.Current = this;
         }
 
         private void OnEnable()
@@ -61,6 +67,11 @@ namespace GulfRun.Features.Online.Profile
             if (transport != null)
             {
                 transport.MatchStateChanged -= HandleMatchStateChanged;
+            }
+
+            if (ReferenceEquals(LocalProfileProviderService.Current, this))
+            {
+                LocalProfileProviderService.Current = null;
             }
         }
 
@@ -97,6 +108,7 @@ namespace GulfRun.Features.Online.Profile
             ILocalLoadoutProvider loadout = LocalLoadoutProviderService.Current;
             PlayerMatchStatistics stats = PlayerStatisticsTracker.Instance != null ? PlayerStatisticsTracker.Instance.Statistics : null;
             SeasonProgress season = LeagueManager.Instance != null ? LeagueManager.Instance.Progress : SeasonProgress.Initial(1);
+            PlayerLevelProgress levelProgress = PlayerLevelRules.ResolveFromMatchesPlayed(stats != null ? stats.MatchesPlayed : 0);
 
             var profile = new PlayerProfileSummary
             {
@@ -105,6 +117,9 @@ namespace GulfRun.Features.Online.Profile
                 Country = account.Country,
                 CurrentCharacterDisplayName = loadout != null ? loadout.CurrentCharacterDisplayName : string.Empty,
                 CurrentOutfitDisplayName = loadout != null ? loadout.CurrentOutfitDisplayName : string.Empty,
+                Level = levelProgress.Level,
+                CurrentXp = levelProgress.CurrentXp,
+                XpRequiredForNextLevel = levelProgress.XpRequiredForNextLevel,
                 Season = season,
                 WorldRank = ResolveRank(RankingScope.World, null, localId),
                 GulfRank = ResolveRank(RankingScope.Gulf, null, localId),

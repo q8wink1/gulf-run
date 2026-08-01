@@ -1,5 +1,6 @@
 using System;
 using GulfRun.Core;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ namespace GulfRun.Features.Progression.Missions
     /// Gameplay.unity's next free toggle-button slot after Sprint 10's
     /// InventoryView at <c>x: 1230</c>.
     /// </summary>
-    public sealed class MissionsView : SceneSingleton<MissionsView>
+    public sealed class MissionsView : SceneSingleton<MissionsView>, IMenuScreenOpener
     {
         private bool _open;
         private string _lastFeedback = string.Empty;
@@ -23,6 +24,15 @@ namespace GulfRun.Features.Progression.Missions
         private GUIStyle _labelStyle;
         private GUIStyle _rowStyle;
         private GUIStyle _feedbackStyle;
+
+        private void OnEnable() => MenuScreenRouter.Register(MenuScreen.Missions, this);
+
+        private void OnDisable() => MenuScreenRouter.Unregister(MenuScreen.Missions, this);
+
+        /// <summary>Sprint 13 (Main Menu Left Menu "Missions" button) — <see cref="IMenuScreenOpener"/>.</summary>
+        public void OpenScreen(MenuScreen screen) => _open = true;
+
+        public void Close() => _open = false;
 
         private void OnGUI()
         {

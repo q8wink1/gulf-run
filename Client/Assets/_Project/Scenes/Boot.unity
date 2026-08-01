@@ -604,6 +604,7 @@ GameObject:
   - component: {fileID: 800600006}
   - component: {fileID: 800600007}
   - component: {fileID: 800600008}
+  - component: {fileID: 800600009}
   m_Layer: 0
   m_Name: OnlineSystems
   m_TagString: Untagged
@@ -716,6 +717,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3733eadfb730412f9258ca5e0eeb7cd5, type: 3} # NotificationManager script GUID
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &800600009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800600000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2111f1cb49a048048f2ec1fd03356306, type: 3} # ProfileManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  refreshIntervalSeconds: 1
 --- !u!1 &800700000
 GameObject:
   m_ObjectHideFlags: 0
@@ -922,3 +936,102 @@ MonoBehaviour:
   mapCatalog: {fileID: 11400000, guid: 2617fd5b7da545fa94fb0a1d2f531424, type: 2} # MapCatalogConfig asset GUID
   weatherCatalog: {fileID: 11400000, guid: 41828805eb0d4e87a525a781aa4d608c, type: 2} # WeatherCatalogConfig asset GUID
   timeOfDayCatalog: {fileID: 11400000, guid: 4ef84539086745eeb36a6a8e237802d3, type: 2} # TimeOfDayCatalogConfig asset GUID
+--- !u!1 &801000000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 801000001}
+  - component: {fileID: 801000002}
+  - component: {fileID: 801000003}
+  - component: {fileID: 801000004}
+  - component: {fileID: 801000005}
+  - component: {fileID: 801000006}
+  m_Layer: 0
+  m_Name: CoreSystems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &801000001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 801000000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &801000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 801000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df4cf894be8247e99e54eb76993eadb9, type: 3} # AudioManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &801000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 801000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6228f2ff82cd4984aacfe7049155c27f, type: 3} # GameManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _targetFrameRate: 60
+--- !u!114 &801000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 801000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93c903a9830c4efd98c219f02ef837f8, type: 3} # UIManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &801000005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 801000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3fc8bfcfdec4d0db2db993f442674ab, type: 3} # SceneManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &801000006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 801000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 879036623e50482691403318b4b2aeea, type: 3} # SettingsManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+

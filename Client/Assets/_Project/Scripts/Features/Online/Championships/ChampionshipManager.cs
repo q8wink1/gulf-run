@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GulfRun.Core;
 using GulfRun.Core.Managers;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.Online.Configuration;
 using GulfRun.Features.Online.HallOfFame;
@@ -25,7 +26,7 @@ namespace GulfRun.Features.Online.Championships
     /// Event notifications the brief requires along the way.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class ChampionshipManager : Singleton<ChampionshipManager>
+    public sealed class ChampionshipManager : Singleton<ChampionshipManager>, IEventBannerSource
     {
         [SerializeField] private ChampionshipCatalogConfig championshipCatalog;
         [SerializeField] private CountryEventCatalogConfig countryEventCatalog;
@@ -52,6 +53,30 @@ namespace GulfRun.Features.Online.Championships
 
         protected override void OnInitialize()
         {
+            EventBannerRegistry.Register(this);
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            EventBannerRegistry.Unregister(this);
+        }
+
+        /// <summary>Sprint 13 (Main Menu Event Banner): the active Championship + Country Event (Ramadan/National Days/Special Events), if any.</summary>
+        public IReadOnlyList<string> GetActiveBannerMessages()
+        {
+            var messages = new List<string>(2);
+            if (HasActiveChampionship)
+            {
+                messages.Add(ActiveChampionship.DisplayName + " — Championship Live Now!");
+            }
+
+            if (HasActiveCountryEvent)
+            {
+                messages.Add(ActiveCountryEvent.DisplayName);
+            }
+
+            return messages;
         }
 
         private void Start()

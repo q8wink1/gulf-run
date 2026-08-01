@@ -29,7 +29,7 @@ namespace GulfRun.Features.Store
     /// in Sprint 9.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class StoreManager : Singleton<StoreManager>
+    public sealed class StoreManager : Singleton<StoreManager>, IEventBannerSource
     {
         [SerializeField] private GemPackageCatalogConfig gemPackageCatalog;
         [SerializeField] private CoinPackCatalogConfig coinPackCatalog;
@@ -50,6 +50,33 @@ namespace GulfRun.Features.Store
 
         protected override void OnInitialize()
         {
+            EventBannerRegistry.Register(this);
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            EventBannerRegistry.Unregister(this);
+        }
+
+        /// <summary>Sprint 13 (Main Menu Event Banner "Limited Offers"): any currently-active Special Offer.</summary>
+        public IReadOnlyList<string> GetActiveBannerMessages()
+        {
+            if (specialOfferCatalog == null)
+            {
+                return Array.Empty<string>();
+            }
+
+            var messages = new List<string>();
+            foreach (SpecialOfferCatalogConfig.SpecialOfferEntry offer in specialOfferCatalog.Offers)
+            {
+                if (offer != null && offer.IsActive)
+                {
+                    messages.Add("Limited Offer: " + offer.DisplayName + "!");
+                }
+            }
+
+            return messages;
         }
 
         // --- Gem Packages ---

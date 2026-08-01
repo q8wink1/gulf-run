@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using GulfRun.Core.Backend;
 using GulfRun.Core.Networking;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.Online.Profile;
 using UnityEngine;
@@ -24,7 +25,7 @@ namespace GulfRun.Features.Online.Friends
     /// Remaining TODOs for adding dedicated buttons directly inside those
     /// features' own screens later).
     /// </summary>
-    public sealed class FriendListView : MonoBehaviour
+    public sealed class FriendListView : MonoBehaviour, IMenuScreenOpener
     {
         private enum Tab
         {
@@ -40,6 +41,19 @@ namespace GulfRun.Features.Online.Friends
         private GUIStyle _titleStyle;
         private GUIStyle _tabStyle;
         private GUIStyle _labelStyle;
+
+        private void OnEnable() => MenuScreenRouter.Register(MenuScreen.Friends, this);
+
+        private void OnDisable() => MenuScreenRouter.Unregister(MenuScreen.Friends, this);
+
+        /// <summary>Sprint 13 (Main Menu Left Menu "Friends" button) — <see cref="IMenuScreenOpener"/>.</summary>
+        public void OpenScreen(MenuScreen screen) => Open();
+
+        public void Open() => _open = true;
+
+        public void Close() => _open = false;
+
+        public void Toggle() => _open = !_open;
 
         private void OnGUI()
         {

@@ -36,6 +36,9 @@ namespace GulfRun.Domain
         DailyRewardAvailable,
 
         /// <summary>Sprint 11: a temporary (mission/login-reward) cosmetic is about to expire.</summary>
-        TemporaryItemExpiringSoon
+        TemporaryItemExpiringSoon,
+
+        /// <summary>Sprint 13 (P024 Level System §6: "Display a Level Up notification").</summary>
+        LevelUp
     }
 }

@@ -25,7 +25,7 @@ namespace GulfRun.Features.Online.Friends
     /// without referencing this class directly.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class FriendManager : Singleton<FriendManager>
+    public sealed class FriendManager : Singleton<FriendManager>, IFriendsSummaryProvider
     {
         private IOnlineBackendService _backend;
         private int _lastKnownIncomingCount;
@@ -37,6 +37,7 @@ namespace GulfRun.Features.Online.Friends
 
         protected override void OnInitialize()
         {
+            FriendsSummaryService.Current = this;
         }
 
         private void OnEnable()
@@ -54,6 +55,33 @@ namespace GulfRun.Features.Online.Friends
             }
 
             FriendRequestBridge.AddFriendRequested -= HandleAddFriendRequested;
+
+            if (ReferenceEquals(FriendsSummaryService.Current, this))
+            {
+                FriendsSummaryService.Current = null;
+            }
+        }
+
+        /// <summary>Sprint 13 (Main Menu "SOCIAL: Friends Online"). Total friends currently known to the local player.</summary>
+        public int TotalFriendsCount => GetFriends().Count;
+
+        /// <summary>Sprint 13 (Main Menu "SOCIAL: Friends Online"). Counts every friend whose last published <see cref="PlayerProfileSummary.Status"/> is not <see cref="OnlineStatus.Offline"/>.</summary>
+        public int OnlineFriendsCount
+        {
+            get
+            {
+                IReadOnlyList<PlayerId> friends = GetFriends();
+                int online = 0;
+                for (int i = 0; i < friends.Count; i++)
+                {
+                    if (TryGetFriendProfile(friends[i], out PlayerProfileSummary profile) && profile.Status != OnlineStatus.Offline)
+                    {
+                        online++;
+                    }
+                }
+
+                return online;
+            }
         }
 
         public IReadOnlyList<PlayerId> GetFriends() => OnlineBackendService.Current.GetFriends(LocalPlayerId);

@@ -23,7 +23,7 @@ namespace GulfRun.Features.Online.Notifications
     /// <see cref="MaxNotifications"/> for "Minimal Memory Usage".
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class NotificationManager : Singleton<NotificationManager>
+    public sealed class NotificationManager : Singleton<NotificationManager>, INotificationSummaryProvider
     {
         private const int MaxNotifications = 50;
 
@@ -52,6 +52,7 @@ namespace GulfRun.Features.Online.Notifications
 
         protected override void OnInitialize()
         {
+            NotificationSummaryService.Current = this;
         }
 
         private void OnEnable()
@@ -64,6 +65,11 @@ namespace GulfRun.Features.Online.Notifications
         {
             StoreNotificationBridge.NotificationRequested -= Raise;
             ProgressionNotificationBridge.NotificationRequested -= Raise;
+
+            if (ReferenceEquals(NotificationSummaryService.Current, this))
+            {
+                NotificationSummaryService.Current = null;
+            }
         }
 
         public void Raise(NotificationType type, string message)

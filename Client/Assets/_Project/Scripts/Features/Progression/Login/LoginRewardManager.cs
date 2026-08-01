@@ -18,7 +18,7 @@ namespace GulfRun.Features.Progression.Login
     /// + <see cref="RewardApplication"/>. Persistent (Boot-scene).
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class LoginRewardManager : Singleton<LoginRewardManager>
+    public sealed class LoginRewardManager : Singleton<LoginRewardManager>, ILoginRewardStatusProvider, IEventBannerSource
     {
         [SerializeField] private LoginRewardCalendarConfig standardCalendar;
         [SerializeField] private List<LoginRewardCalendarConfig> specialEventCalendars = new List<LoginRewardCalendarConfig>();
@@ -40,7 +40,27 @@ namespace GulfRun.Features.Progression.Login
         {
             _random = SeededRandom.FromTime();
             _activeSpecialEvent = null;
+            LoginRewardStatusService.Current = this;
+            EventBannerRegistry.Register(this);
         }
+
+        private void OnDisable()
+        {
+            if (ReferenceEquals(LoginRewardStatusService.Current, this))
+            {
+                LoginRewardStatusService.Current = null;
+            }
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            EventBannerRegistry.Unregister(this);
+        }
+
+        /// <summary>Sprint 13 (Main Menu Event Banner): the active Special Login Event calendar (e.g. Ramadan/National Day), if one is set.</summary>
+        public IReadOnlyList<string> GetActiveBannerMessages() =>
+            _activeSpecialEvent != null ? new[] { ActiveSpecialEventLabel + " Login Rewards are live!" } : System.Array.Empty<string>();
 
         private void Update()
         {

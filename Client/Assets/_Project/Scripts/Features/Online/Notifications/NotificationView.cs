@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using UnityEngine;
 
@@ -10,13 +11,26 @@ namespace GulfRun.Features.Online.Notifications
     /// Relegation, New Event), newest first, with an unread badge on the
     /// toggle button and a Dismiss button per row.
     /// </summary>
-    public sealed class NotificationView : MonoBehaviour
+    public sealed class NotificationView : MonoBehaviour, IMenuScreenOpener
     {
         private bool _open;
         private Vector2 _scroll;
         private GUIStyle _titleStyle;
         private GUIStyle _labelStyle;
         private GUIStyle _unreadLabelStyle;
+
+        private void OnEnable() => MenuScreenRouter.Register(MenuScreen.Notifications, this);
+
+        private void OnDisable() => MenuScreenRouter.Unregister(MenuScreen.Notifications, this);
+
+        /// <summary>Sprint 13 (Main Menu Top Bar bell icon) — <see cref="IMenuScreenOpener"/>.</summary>
+        public void OpenScreen(MenuScreen screen)
+        {
+            _open = true;
+            NotificationManager.Instance?.MarkAllRead();
+        }
+
+        public void Close() => _open = false;
 
         private void OnGUI()
         {

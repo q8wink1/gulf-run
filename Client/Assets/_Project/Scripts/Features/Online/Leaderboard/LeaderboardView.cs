@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GulfRun.Core;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.Online.Friends;
 using GulfRun.Features.Online.Profile;
@@ -19,7 +20,7 @@ namespace GulfRun.Features.Online.Leaderboard
     /// the brief describes. Also one of the brief's required "Add Friends
     /// from: Leaderboard" entry points (a per-row Add Friend button).
     /// </summary>
-    public sealed class LeaderboardView : SceneSingleton<LeaderboardView>
+    public sealed class LeaderboardView : SceneSingleton<LeaderboardView>, IMenuScreenOpener
     {
         private const float RowHeight = 24f;
         private static readonly GulfCountry[] AllCountries = (GulfCountry[])Enum.GetValues(typeof(GulfCountry));
@@ -35,6 +36,15 @@ namespace GulfRun.Features.Online.Leaderboard
         private GUIStyle _rowStyle;
         private GUIStyle _highlightRowStyle;
         private GUIStyle _labelStyle;
+
+        private void OnEnable() => MenuScreenRouter.Register(MenuScreen.Leaderboard, this);
+
+        private void OnDisable() => MenuScreenRouter.Unregister(MenuScreen.Leaderboard, this);
+
+        /// <summary>Sprint 13 (Main Menu Left Menu "Leaderboard" button) — <see cref="IMenuScreenOpener"/>. Opens on the default World scope with no player focused.</summary>
+        public void OpenScreen(MenuScreen screen) => OpenAndFocus(RankingScope.World, null, PlayerId.None);
+
+        public void Close() => _open = false;
 
         /// <summary>Opens the leaderboard on <paramref name="scope"/> (and <paramref name="country"/> for Country scope), scrolled to and highlighting <paramref name="focusPlayer"/>.</summary>
         public void OpenAndFocus(RankingScope scope, GulfCountry? country, PlayerId focusPlayer)

@@ -23,6 +23,20 @@ namespace GulfRun.Core.Managers
             // manager startup order once gameplay systems are specified.
         }
 
+        private void Start()
+        {
+            // Deferred to Start() (rather than OnInitialize/Awake) so every other
+            // CoreSystems singleton on this GameObject has finished its own Awake
+            // before SceneManager.Instance is dereferenced. Only ever runs once:
+            // duplicate GameManager instances self-destroy in Awake before Start.
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == BootSceneName)
+            {
+                SceneManager.Instance?.LoadMainMenu();
+            }
+        }
+
+        private const string BootSceneName = "Boot";
+
         private void ApplyPerformanceTargets()
         {
             // Uncapped by vSync so Application.targetFrameRate can govern pacing;

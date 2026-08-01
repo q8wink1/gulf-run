@@ -21,7 +21,7 @@ namespace GulfRun.Features.Progression.Missions
     /// the other Sprint 7-10 progression-adjacent managers).
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class MissionManager : Singleton<MissionManager>
+    public sealed class MissionManager : Singleton<MissionManager>, IDailyMissionsPreviewProvider
     {
         private const int DailyMissionCount = 3;
 
@@ -38,6 +38,7 @@ namespace GulfRun.Features.Progression.Missions
         protected override void OnInitialize()
         {
             _random = SeededRandom.FromTime();
+            DailyMissionsPreviewService.Current = this;
         }
 
         private void OnEnable()
@@ -56,6 +57,11 @@ namespace GulfRun.Features.Progression.Missions
             PlayerStatEventService.LocalTrapAvoided -= HandleLocalTrapAvoided;
             PlayerStatEventService.LocalJumpPerformed -= HandleLocalJumpPerformed;
             PlayerStatEventService.LocalItemBoxOpened -= HandleLocalItemBoxOpened;
+
+            if (ReferenceEquals(DailyMissionsPreviewService.Current, this))
+            {
+                DailyMissionsPreviewService.Current = null;
+            }
         }
 
         private void Update()
