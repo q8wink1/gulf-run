@@ -171,9 +171,10 @@ Every operation the brief lists is a thin `FriendManager` wrapper over `IOnlineB
 
 | Item | Value |
 |---|---|
-| Commit hash | _(recorded after commit — see below)_ |
+| Commit hash | `fe76c13` |
 | Commit message | `Sprint 9 - Online Ecosystem, Rankings, Friends & Championships` |
 | Branch | `main` |
-| Push status | _(recorded after push — see below)_ |
+| Files changed | 120 files changed, 5072 insertions(+), 6 deletions(-) |
+| Push status | ✅ Pushed to `origin/main` (`https://github.com/q8wink1/gulf-run.git`). Verified via `git status` ("Your branch is up to date with 'origin/main'.") and `git log origin/main` matching the local `fe76c13` tip after push. |
 
 Sprint 9 is complete within the constraints above. Stopping here.
