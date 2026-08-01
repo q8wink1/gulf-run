@@ -101,9 +101,9 @@ All five `AudioClip` fields are intentionally unassigned in the scene — no aud
 
 | Item | Value |
 |---|---|
-| Commit hash | _see final push verification below_ |
+| Commit hash | `c10bb28` |
 | Commit message | `Sprint 14 - GulfRun Brand Intro` |
 | Branch | `main` |
-| Push status | _see final push verification below_ |
+| Push status | Pushed to `origin/main` (`fad2dc0..c10bb28`); `git status` confirms `main` up to date with `origin/main`, working tree clean |
 
 Sprint 14 is complete within the constraints above.
