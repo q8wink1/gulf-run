@@ -233,7 +233,7 @@ No mechanic-specific code was added for Dash/Slide/Wall Jump/Flying Carpet/Mount
 
 | Item | Value |
 |---|---|
-| Commit hash | `e947768fdf6831d3b1f4cc6527421f4d905967f0` (Endless Runner Core) then `7ead9c268f411d57186e9e0c63e546edd5d0b151` (Race Start / Double Jump addendum) |
+| Commit hash | `e947768fdf6831d3b1f4cc6527421f4d905967f0` (Endless Runner Core) then `29b86cc2561ad93c3981926e0b4632ca7afe06cb` (Race Start / Double Jump addendum) |
 | Commit message | `Sprint 3 - Endless Runner Core` then `Sprint 3 addendum - Race start, auto run, strict double jump, player state machine` |
 | Branch | `main` |
 | Push status | Pushed to `origin/main` |
