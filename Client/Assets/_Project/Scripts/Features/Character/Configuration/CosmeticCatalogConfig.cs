@@ -7,17 +7,9 @@ namespace GulfRun.Features.Character.Configuration
 {
     /// <summary>
     /// The single source of truth for every cosmetic item across every
-    /// <see cref="CosmeticSlot"/> — the eight free Traditional Outfits plus
-    /// a handful of example Premium Cosmetics (Football Club Kit, National
-    /// Team Kit, Ramadan Collection, ...) per the Sprint 8 brief. Entries
-    /// are plain serializable data (not one <c>ScriptableObject</c> asset
-    /// each, unlike <c>WeaponDefinition</c>/<c>TrapDefinition</c>) —
-    /// deliberately, since "prepare support for unlimited future
-    /// characters/cosmetics" means this list is expected to grow into the
-    /// hundreds; one asset file per item would not scale for content
-    /// authors the way <c>Features.RaceFinish.Configuration.
-    /// FlagCatalogConfig</c>'s nested-entry approach already proved out in
-    /// Sprint 7.
+    /// <see cref="CosmeticSlot"/>. Sprint 8 authored Traditional + premium
+    /// Outfits; Sprint 16 adds rarity, catalog index (Newest sort), and
+    /// Locker-category content (Headwear/Glasses/Effects/Frames/Titles).
     /// </summary>
     [CreateAssetMenu(fileName = "CosmeticCatalogConfig", menuName = "GulfRun/Character/Cosmetic Catalog Config")]
     public sealed class CosmeticCatalogConfig : ScriptableObject
@@ -29,17 +21,28 @@ namespace GulfRun.Features.Character.Configuration
             [SerializeField] private CosmeticSlot slot;
             [SerializeField] private string displayName = string.Empty;
 
-            [Tooltip("Gems required to unlock. Ignored (always free/owned) when isTraditionalOutfit is true.")]
+            [Tooltip("Gems required to unlock permanently. Ignored (always free/owned) when isTraditionalOutfit is true.")]
             [SerializeField] private int gemPrice;
 
             [Tooltip("True for exactly one Outfit-slot entry per country — every country's official traditional clothing is FREE and auto-granted/auto-equipped the moment that country is locked in at Account Creation.")]
             [SerializeField] private bool isTraditionalOutfit;
 
-            [Tooltip("Only meaningful when isTraditionalOutfit is true: which country this Traditional Outfit belongs to.")]
+            [Tooltip("Only meaningful when isTraditionalOutfit is true: which country this Traditional Outfit belongs to. Also used by the Locker Country filter for national cosmetics.")]
             [SerializeField] private GulfCountry requiredCountry;
 
-            [Tooltip("Free-form grouping for future Shop/Inventory filtering (e.g. 'Ramadan Collection', 'National Team Kits'). Cosmetic only — never affects gameplay.")]
+            [Tooltip("When true, Country filter matches this entry against requiredCountry even if it is not a Traditional Outfit (e.g. National Day kit).")]
+            [SerializeField] private bool countryTagged;
+
+            [Tooltip("Free-form grouping for Shop/Inventory filtering (e.g. 'Ramadan Collection'). Cosmetic only — never affects gameplay.")]
             [SerializeField] private string collectionTag = string.Empty;
+
+            [SerializeField] private CosmeticRarity rarity = CosmeticRarity.Common;
+
+            [Tooltip("Higher = newer. Used by Locker Sort = Newest.")]
+            [SerializeField] private int catalogIndex;
+
+            [Tooltip("When true, Daily Missions / Login Rewards / Events may grant this as a 2/3/7-day temporary cosmetic.")]
+            [SerializeField] private bool allowTemporaryGrant = true;
 
             [Header("Presentation (final art TODO — same 'no final art yet' status as prior sprints)")]
             [SerializeField] private Sprite icon;
@@ -51,7 +54,11 @@ namespace GulfRun.Features.Character.Configuration
             public int GemPrice => isTraditionalOutfit ? 0 : (gemPrice > 0 ? gemPrice : 0);
             public bool IsTraditionalOutfit => isTraditionalOutfit;
             public GulfCountry RequiredCountry => requiredCountry;
+            public bool CountryTagged => countryTagged || isTraditionalOutfit;
             public string CollectionTag => collectionTag;
+            public CosmeticRarity Rarity => rarity;
+            public int CatalogIndex => catalogIndex;
+            public bool AllowTemporaryGrant => allowTemporaryGrant;
             public Sprite Icon => icon;
             public Color PlaceholderColor => placeholderColor;
         }

@@ -7,10 +7,9 @@ namespace GulfRun.Features.MainMenu.SideMenu
     /// <summary>
     /// Sprint 13 "RIGHT MENU": Store, Characters, Customize, Inventory,
     /// Events, Championships — every button routes through
-    /// <see cref="MenuScreenRouter"/>. "Customize" opens the exact same
-    /// screen as "Characters" (<c>CharacterMenuView</c> already covers
-    /// outfit selection too — no separate Customize screen exists, see
-    /// that view's remarks) rather than a second near-duplicate panel.
+    /// <see cref="MenuScreenRouter"/>. Sprint 16: "Characters" opens the
+    /// Locker on the Characters tab; "Customize" opens the Locker on Outfits
+    /// (<see cref="MenuScreen.Locker"/>).
     /// </summary>
     public sealed class RightMenuView : MonoBehaviour
     {
@@ -27,7 +26,7 @@ namespace GulfRun.Features.MainMenu.SideMenu
 
             DrawMenuButton(0, x, ref y, "Store", () => MenuScreenRouter.TryOpen(MenuScreen.Store));
             DrawMenuButton(1, x, ref y, "Characters", () => MenuScreenRouter.TryOpen(MenuScreen.Characters));
-            DrawMenuButton(2, x, ref y, "Customize", () => MenuScreenRouter.TryOpen(MenuScreen.Characters));
+            DrawMenuButton(2, x, ref y, "Customize", () => MenuScreenRouter.TryOpen(MenuScreen.Locker));
             DrawMenuButton(3, x, ref y, "Inventory", () => MenuScreenRouter.TryOpen(MenuScreen.Inventory));
             DrawMenuButton(4, x, ref y, "Events", () => MenuScreenRouter.TryOpen(MenuScreen.Events));
             DrawMenuButton(5, x, ref y, "Championships", () => MenuScreenRouter.TryOpen(MenuScreen.Championships));

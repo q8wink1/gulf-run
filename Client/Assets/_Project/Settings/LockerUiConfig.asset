@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8598ff9895f74585b75a2fdcd8475113, type: 3}
+  m_Name: LockerUiConfig
+  m_EditorClassIdentifier: 
+  referenceWidth: 1080
+  referenceHeight: 1920
+  phoneScaleFloor: 0.85
+  tabletScaleCeiling: 1.25
+  rotateDegreesPerSecond: 45
+  zoomMin: 0.75
+  zoomMax: 1.45
+  zoomStep: 0.08
+  autoFocusLerpSpeed: 4
+  cameraTransitionSeconds: 0.35
+  breathAmplitude: 3
+  breathHz: 0.35
+  blinkClosedSeconds: 0.12
+  blinkOpenMinSeconds: 2.2
+  blinkOpenMaxSeconds: 4.5
+  animationTransitionSeconds: 0.28
+  idleSwayDegrees: 2.5
+  rarityGlowPulseHz: 1.2
+  rarityRewardFlashSeconds: 0.55
+  temporaryTimerRefreshSeconds: 1

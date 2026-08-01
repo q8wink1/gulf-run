@@ -36,6 +36,9 @@ namespace GulfRun.Features.Character.Loadout
         private PlayerLoadout _localLoadout;
         private bool _localInitialized;
 
+        /// <summary>Sprint 16 Locker preview animation — read by <c>CharacterDebugView</c>.</summary>
+        public CharacterAnimationState PreviewAnimationState { get; set; } = CharacterAnimationState.Idle;
+
         public CharacterCatalogConfig CharacterCatalog => characterCatalog;
         public CosmeticCatalogConfig CosmeticCatalog => cosmeticCatalog;
 
@@ -113,10 +116,20 @@ namespace GulfRun.Features.Character.Loadout
             }
 
             _localInventory.Grant(id);
+            PersistLocalLoadout();
             return true;
         }
 
-        bool ICosmeticGrantService.GrantTemporaryCosmetic(CosmeticId id, double expiresAtSeconds) => _localInventory.GrantTemporary(id, expiresAtSeconds);
+        bool ICosmeticGrantService.GrantTemporaryCosmetic(CosmeticId id, double expiresAtSeconds)
+        {
+            bool granted = _localInventory.GrantTemporary(id, expiresAtSeconds);
+            if (granted)
+            {
+                PersistLocalLoadout();
+            }
+
+            return granted;
+        }
 
         IReadOnlyList<CosmeticId> ICosmeticGrantService.GetOwnedCosmetics()
         {
@@ -234,6 +247,7 @@ namespace GulfRun.Features.Character.Loadout
             if (anyUnequipped)
             {
                 BroadcastLocalLoadoutIfActive();
+                PersistLocalLoadout();
             }
         }
 
@@ -267,7 +281,11 @@ namespace GulfRun.Features.Character.Loadout
             }
 
             _localLoadout.SetCharacter(characterId);
+            // Sprint 16: selecting a character re-applies the official national outfit
+            // if the Outfit slot is empty (default national clothing after character select).
+            EnsureTraditionalOutfitEquipped();
             BroadcastLocalLoadoutIfActive();
+            PersistLocalLoadout();
             return true;
         }
 
@@ -279,7 +297,7 @@ namespace GulfRun.Features.Character.Loadout
                 return false;
             }
 
-            if (_localInventory.Owns(cosmeticId))
+            if (_localInventory.OwnsPermanently(cosmeticId))
             {
                 return true;
             }
@@ -290,10 +308,11 @@ namespace GulfRun.Features.Character.Loadout
             }
 
             _localInventory.Grant(cosmeticId);
+            PersistLocalLoadout();
             return true;
         }
 
-        /// <summary>Equips an owned cosmetic into a slot; refuses anything not owned (COS-OWN-001 — unlocked cosmetics are permanently owned, and only owned cosmetics may ever be equipped).</summary>
+        /// <summary>Equips an owned cosmetic into a slot instantly; refuses anything not owned (COS-OWN-001).</summary>
         public bool EquipCosmetic(CosmeticSlot slot, CosmeticId cosmeticId)
         {
             if (_localLoadout == null || (!cosmeticId.IsNone && !_localInventory.Owns(cosmeticId)))
@@ -303,6 +322,31 @@ namespace GulfRun.Features.Character.Loadout
 
             _localLoadout.Equip(slot, cosmeticId);
             BroadcastLocalLoadoutIfActive();
+            PersistLocalLoadout();
+            return true;
+        }
+
+        /// <summary>Sprint 16: unequip instantly (no loading) and auto-save.</summary>
+        public bool UnequipCosmetic(CosmeticSlot slot)
+        {
+            if (_localLoadout == null)
+            {
+                return false;
+            }
+
+            if (_localLoadout.GetEquipped(slot).IsNone)
+            {
+                return true;
+            }
+
+            _localLoadout.Equip(slot, CosmeticId.None);
+            if (slot == CosmeticSlot.Outfit)
+            {
+                EnsureTraditionalOutfitEquipped();
+            }
+
+            BroadcastLocalLoadoutIfActive();
+            PersistLocalLoadout();
             return true;
         }
 
@@ -329,8 +373,109 @@ namespace GulfRun.Features.Character.Loadout
                 _localLoadout.Equip(CosmeticSlot.Outfit, traditionalOutfit);
             }
 
+            // Sprint 16: restore Locker selections / ownership across restarts
+            // (PlayerPrefs via SaveManager). Traditional outfit grant above
+            // still runs first so a brand-new account always has national clothing.
+            TryRestorePersistedLoadout();
+
             _localInitialized = true;
             BroadcastLocalLoadoutIfActive();
+            PersistLocalLoadout();
+        }
+
+        private void EnsureTraditionalOutfitEquipped()
+        {
+            if (_localLoadout == null || cosmeticCatalog == null)
+            {
+                return;
+            }
+
+            if (!_localLoadout.GetEquipped(CosmeticSlot.Outfit).IsNone)
+            {
+                return;
+            }
+
+            CosmeticId traditionalOutfit = cosmeticCatalog.GetTraditionalOutfitId(_localLoadout.Country);
+            if (traditionalOutfit.IsNone)
+            {
+                return;
+            }
+
+            _localInventory.Grant(traditionalOutfit);
+            _localLoadout.Equip(CosmeticSlot.Outfit, traditionalOutfit);
+        }
+
+        private void TryRestorePersistedLoadout()
+        {
+            if (SaveManager.Instance == null || !SaveManager.Instance.TryLoadLoadout(out LoadoutSaveData saved) || saved == null)
+            {
+                return;
+            }
+
+            if (characterCatalog != null && characterCatalog.GetDefinition(saved.CharacterId) != null)
+            {
+                _localLoadout.SetCharacter(saved.CharacterId);
+            }
+
+            for (int i = 0; i < saved.PermanentOwnedIds.Count; i++)
+            {
+                _localInventory.Grant(new CosmeticId(saved.PermanentOwnedIds[i]));
+            }
+
+            double now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            for (int i = 0; i < saved.TemporaryOwned.Count; i++)
+            {
+                TemporaryCosmeticOwnership temp = saved.TemporaryOwned[i];
+                if (temp.ExpiresAtSeconds > now)
+                {
+                    _localInventory.GrantTemporary(temp.Id, temp.ExpiresAtSeconds);
+                }
+            }
+
+            foreach (KeyValuePair<CosmeticSlot, CosmeticId> pair in saved.Equipped)
+            {
+                if (!pair.Value.IsNone && _localInventory.Owns(pair.Value))
+                {
+                    _localLoadout.Equip(pair.Key, pair.Value);
+                }
+            }
+
+            EnsureTraditionalOutfitEquipped();
+        }
+
+        private void PersistLocalLoadout()
+        {
+            if (_localLoadout == null || SaveManager.Instance == null)
+            {
+                return;
+            }
+
+            var data = new LoadoutSaveData { CharacterId = _localLoadout.Character };
+            for (int i = 0; i < AllCosmeticSlots.Length; i++)
+            {
+                CosmeticSlot slot = AllCosmeticSlots[i];
+                CosmeticId equipped = _localLoadout.GetEquipped(slot);
+                if (!equipped.IsNone)
+                {
+                    data.Equipped[slot] = equipped;
+                }
+            }
+
+            foreach (string id in _localInventory.OwnedIds)
+            {
+                data.PermanentOwnedIds.Add(id);
+            }
+
+            foreach (string idValue in _localInventory.TemporaryOwnedIds)
+            {
+                var id = new CosmeticId(idValue);
+                if (_localInventory.TryGetTemporaryExpiry(id, out double expiresAtSeconds))
+                {
+                    data.TemporaryOwned.Add(new TemporaryCosmeticOwnership(id, 0d, expiresAtSeconds));
+                }
+            }
+
+            SaveManager.Instance.SaveLoadout(data);
         }
 
         private void HandleParticipantJoined(MatchParticipant participant)

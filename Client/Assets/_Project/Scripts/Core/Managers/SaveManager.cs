@@ -30,19 +30,23 @@ namespace GulfRun.Core.Managers
     /// <c>SessionManager</c>) reads the same locked value.
     ///
     /// Sprint 14 note: <see cref="HasSeenIntro"/>/<see cref="MarkIntroSeen"/>
-    /// are the ONE deliberate exception to this class's in-memory posture —
+    /// are a deliberate exception to this class's in-memory posture —
     /// the Brand Intro's "player may skip it after the first launch" needs
     /// something that genuinely survives an app restart, and a single
     /// device-local boolean is exactly the narrow use case
     /// <see cref="UnityEngine.PlayerPrefs"/> is designed for (no
-    /// backend/account coupling, unlike the rest of this class). Every
-    /// other field here remains an honest placeholder per the remarks
-    /// above until real local/cloud persistence lands.
+    /// backend/account coupling, unlike the rest of this class).
+    ///
+    /// Sprint 16 note: <see cref="ILoadoutRepository"/> is the second
+    /// PlayerPrefs-backed exception — Locker equip/character/ownership must
+    /// "save automatically" across restarts per the brief. Account progress
+    /// (best distance/score/coins) remains in-memory until cloud save lands.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class SaveManager : Singleton<SaveManager>, IProgressRepository, IAccountRepository
+    public sealed class SaveManager : Singleton<SaveManager>, IProgressRepository, IAccountRepository, ILoadoutRepository
     {
         private const string HasSeenIntroPrefKey = "GulfRun.HasSeenIntro";
+        private const string LoadoutPrefKey = "GulfRun.Loadout.v1";
 
         private float _bestDistanceMeters;
         private float _bestScore;
@@ -103,6 +107,21 @@ namespace GulfRun.Core.Managers
         public void MarkIntroSeen()
         {
             PlayerPrefs.SetInt(HasSeenIntroPrefKey, 1);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>Sprint 16 (Locker): restores the last saved Character/equipped cosmetics/ownership, or false if nothing was ever saved.</summary>
+        public bool TryLoadLoadout(out LoadoutSaveData data) => LoadoutSaveData.TryDecode(PlayerPrefs.GetString(LoadoutPrefKey, string.Empty), out data);
+
+        /// <summary>Sprint 16 (Locker): persists Character + equipped slots + permanent/temporary ownership immediately (brief: equip saves automatically).</summary>
+        public void SaveLoadout(LoadoutSaveData data)
+        {
+            if (data == null)
+            {
+                return;
+            }
+
+            PlayerPrefs.SetString(LoadoutPrefKey, data.Encode());
             PlayerPrefs.Save();
         }
 

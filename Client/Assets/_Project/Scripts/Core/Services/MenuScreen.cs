@@ -9,6 +9,7 @@ namespace GulfRun.Core.Services
         BattlePass,
         Store,
         Characters,
+        Locker,
         Inventory,
         Events,
         Championships,

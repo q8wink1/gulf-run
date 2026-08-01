@@ -1,27 +1,27 @@
 namespace GulfRun.Domain
 {
     /// <summary>
-    /// Every equip slot the Customization system supports. Only
-    /// <see cref="Outfit"/> ships with real, ownable content in Sprint 8
-    /// (the free Traditional Outfits plus a handful of example premium
-    /// items); every other member exists purely so the "Future Support"
-    /// architecture (Hats, Glasses, Shoes, Accessories, Victory Poses,
-    /// Emotes, Back Items, Trails, Pets — brief §"FUTURE SUPPORT") is real,
-    /// compiled, and network-synced today, with zero code changes required
-    /// to light up new items in any of these slots later — only new
-    /// <c>Features.Character.Configuration.CosmeticCatalogConfig</c> entries.
+    /// Every equip slot the Customization system supports. Sprint 8 shipped
+    /// Outfit (+ example Hat/VictoryPose/Emote). Sprint 16 appends Locker
+    /// categories that need real equip slots (Footstep/Running Effects,
+    /// Profile Frame, Title) — new members are always appended so existing
+    /// <c>CosmeticCatalogConfig.asset</c> ordinals stay valid.
     /// </summary>
     public enum CosmeticSlot
     {
-        Outfit,
-        Hat,
-        Glasses,
-        Shoes,
-        Accessory,
-        BackItem,
-        Trail,
-        Pet,
-        VictoryPose,
-        Emote
+        Outfit = 0,
+        Hat = 1,
+        Glasses = 2,
+        Shoes = 3,
+        Accessory = 4,
+        BackItem = 5,
+        Trail = 6,
+        Pet = 7,
+        VictoryPose = 8,
+        Emote = 9,
+        FootstepEffect = 10,
+        RunningEffect = 11,
+        ProfileFrame = 12,
+        Title = 13
     }
 }

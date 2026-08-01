@@ -19,7 +19,11 @@ MonoBehaviour:
     gemPrice: 0
     isTraditionalOutfit: 1
     requiredCountry: 0
+    countryTagged: 1
     collectionTag: Traditional Outfits
+    rarity: 0
+    catalogIndex: 1
+    allowTemporaryGrant: 0
     icon: {fileID: 0}
     placeholderColor: {r: 0.004, g: 0.322, b: 0.192, a: 1}
   - id: outfit_traditional_kwt
@@ -28,7 +32,11 @@ MonoBehaviour:
     gemPrice: 0
     isTraditionalOutfit: 1
     requiredCountry: 1
+    countryTagged: 1
     collectionTag: Traditional Outfits
+    rarity: 0
+    catalogIndex: 2
+    allowTemporaryGrant: 0
     icon: {fileID: 0}
     placeholderColor: {r: 0.6, g: 0.047, b: 0.086, a: 1}
   - id: outfit_traditional_uae
@@ -37,7 +45,11 @@ MonoBehaviour:
     gemPrice: 0
     isTraditionalOutfit: 1
     requiredCountry: 2
+    countryTagged: 1
     collectionTag: Traditional Outfits
+    rarity: 0
+    catalogIndex: 3
+    allowTemporaryGrant: 0
     icon: {fileID: 0}
     placeholderColor: {r: 0.043, g: 0.043, b: 0.043, a: 1}
   - id: outfit_traditional_qat
@@ -46,7 +58,11 @@ MonoBehaviour:
     gemPrice: 0
     isTraditionalOutfit: 1
     requiredCountry: 3
+    countryTagged: 1
     collectionTag: Traditional Outfits
+    rarity: 0
+    catalogIndex: 4
+    allowTemporaryGrant: 0
     icon: {fileID: 0}
     placeholderColor: {r: 0.365, g: 0.031, b: 0.184, a: 1}
   - id: outfit_traditional_bhr
@@ -55,7 +71,11 @@ MonoBehaviour:
     gemPrice: 0
     isTraditionalOutfit: 1
     requiredCountry: 4
+    countryTagged: 1
     collectionTag: Traditional Outfits
+    rarity: 0
+    catalogIndex: 5
+    allowTemporaryGrant: 0
     icon: {fileID: 0}
     placeholderColor: {r: 0.816, g: 0.024, b: 0.125, a: 1}
   - id: outfit_traditional_omn
@@ -64,7 +84,11 @@ MonoBehaviour:
     gemPrice: 0
     isTraditionalOutfit: 1
     requiredCountry: 5
+    countryTagged: 1
     collectionTag: Traditional Outfits
+    rarity: 0
+    catalogIndex: 6
+    allowTemporaryGrant: 0
     icon: {fileID: 0}
     placeholderColor: {r: 0.816, g: 0.412, b: 0.114, a: 1}
   - id: outfit_traditional_irq
@@ -73,7 +97,11 @@ MonoBehaviour:
     gemPrice: 0
     isTraditionalOutfit: 1
     requiredCountry: 6
+    countryTagged: 1
     collectionTag: Traditional Outfits
+    rarity: 0
+    catalogIndex: 7
+    allowTemporaryGrant: 0
     icon: {fileID: 0}
     placeholderColor: {r: 0.8, g: 0.024, b: 0.086, a: 1}
   - id: outfit_traditional_egy
@@ -82,7 +110,11 @@ MonoBehaviour:
     gemPrice: 0
     isTraditionalOutfit: 1
     requiredCountry: 7
+    countryTagged: 1
     collectionTag: Traditional Outfits
+    rarity: 0
+    catalogIndex: 8
+    allowTemporaryGrant: 0
     icon: {fileID: 0}
     placeholderColor: {r: 0.706, g: 0.043, b: 0.043, a: 1}
   - id: outfit_football_club_kit_01
@@ -91,7 +123,11 @@ MonoBehaviour:
     gemPrice: 150
     isTraditionalOutfit: 0
     requiredCountry: 0
+    countryTagged: 0
     collectionTag: Football Club Kits
+    rarity: 1
+    catalogIndex: 20
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
   - id: outfit_national_team_kit_01
@@ -100,7 +136,11 @@ MonoBehaviour:
     gemPrice: 150
     isTraditionalOutfit: 0
     requiredCountry: 0
+    countryTagged: 1
     collectionTag: National Team Kits
+    rarity: 2
+    catalogIndex: 21
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.1, g: 0.4, b: 0.2, a: 1}
   - id: outfit_sportswear_01
@@ -109,7 +149,11 @@ MonoBehaviour:
     gemPrice: 100
     isTraditionalOutfit: 0
     requiredCountry: 0
+    countryTagged: 0
     collectionTag: Sportswear
+    rarity: 0
+    catalogIndex: 22
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.2, g: 0.2, b: 0.8, a: 1}
   - id: outfit_casual_01
@@ -118,7 +162,11 @@ MonoBehaviour:
     gemPrice: 80
     isTraditionalOutfit: 0
     requiredCountry: 0
+    countryTagged: 0
     collectionTag: Casual Clothing
+    rarity: 0
+    catalogIndex: 23
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   - id: outfit_ramadan_01
@@ -127,7 +175,11 @@ MonoBehaviour:
     gemPrice: 200
     isTraditionalOutfit: 0
     requiredCountry: 0
+    countryTagged: 0
     collectionTag: Ramadan Collection
+    rarity: 2
+    catalogIndex: 24
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.3, g: 0.15, b: 0.55, a: 1}
   - id: outfit_eid_01
@@ -136,7 +188,11 @@ MonoBehaviour:
     gemPrice: 200
     isTraditionalOutfit: 0
     requiredCountry: 0
+    countryTagged: 0
     collectionTag: Eid Collection
+    rarity: 2
+    catalogIndex: 25
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.9, g: 0.8, b: 0.3, a: 1}
   - id: outfit_national_day_01
@@ -144,8 +200,12 @@ MonoBehaviour:
     displayName: National Day Collection Outfit
     gemPrice: 175
     isTraditionalOutfit: 0
-    requiredCountry: 0
+    requiredCountry: 1
+    countryTagged: 1
     collectionTag: National Day Collections
+    rarity: 1
+    catalogIndex: 26
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.0, g: 0.5, b: 0.3, a: 1}
   - id: outfit_seasonal_event_01
@@ -154,7 +214,11 @@ MonoBehaviour:
     gemPrice: 250
     isTraditionalOutfit: 0
     requiredCountry: 0
+    countryTagged: 0
     collectionTag: Seasonal Events
+    rarity: 3
+    catalogIndex: 27
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.9, g: 0.55, b: 0.1, a: 1}
   - id: outfit_limited_edition_01
@@ -163,7 +227,11 @@ MonoBehaviour:
     gemPrice: 500
     isTraditionalOutfit: 0
     requiredCountry: 0
+    countryTagged: 0
     collectionTag: Limited Edition Skins
+    rarity: 4
+    catalogIndex: 28
+    allowTemporaryGrant: 0
     icon: {fileID: 0}
     placeholderColor: {r: 0.85, g: 0.65, b: 0.13, a: 1}
   - id: hat_desert_cap_01
@@ -172,24 +240,205 @@ MonoBehaviour:
     gemPrice: 60
     isTraditionalOutfit: 0
     requiredCountry: 0
-    collectionTag: Accessories
+    countryTagged: 0
+    collectionTag: Headwear
+    rarity: 0
+    catalogIndex: 30
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.76, g: 0.7, b: 0.5, a: 1}
+  - id: hat_ghutra_white_01
+    slot: 1
+    displayName: White Ghutra
+    gemPrice: 90
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 1
+    collectionTag: Headwear
+    rarity: 1
+    catalogIndex: 31
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.95, g: 0.95, b: 0.95, a: 1}
+  - id: glasses_aviator_01
+    slot: 2
+    displayName: Desert Aviator Glasses
+    gemPrice: 75
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Glasses
+    rarity: 1
+    catalogIndex: 40
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.2, g: 0.2, b: 0.25, a: 1}
+  - id: glasses_sport_01
+    slot: 2
+    displayName: Sport Wrap Glasses
+    gemPrice: 110
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Glasses
+    rarity: 2
+    catalogIndex: 41
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.1, g: 0.55, b: 0.7, a: 1}
   - id: victorypose_falcon_01
     slot: 8
     displayName: Falcon Salute
     gemPrice: 120
     isTraditionalOutfit: 0
     requiredCountry: 0
+    countryTagged: 0
     collectionTag: Victory Poses
+    rarity: 2
+    catalogIndex: 50
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.6, g: 0.4, b: 0.1, a: 1}
+  - id: victorypose_podium_01
+    slot: 8
+    displayName: Podium Raise
+    gemPrice: 180
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Victory Poses
+    rarity: 3
+    catalogIndex: 51
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.9, g: 0.75, b: 0.2, a: 1}
   - id: emote_dance_01
     slot: 9
     displayName: Khaleeji Dance Emote
     gemPrice: 90
     isTraditionalOutfit: 0
     requiredCountry: 0
+    countryTagged: 0
     collectionTag: Emotes
+    rarity: 1
+    catalogIndex: 60
+    allowTemporaryGrant: 1
     icon: {fileID: 0}
     placeholderColor: {r: 0.7, g: 0.3, b: 0.5, a: 1}
+  - id: emote_wave_01
+    slot: 9
+    displayName: Majlis Wave Emote
+    gemPrice: 70
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Emotes
+    rarity: 0
+    catalogIndex: 61
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.4, g: 0.6, b: 0.8, a: 1}
+  - id: footstep_sand_01
+    slot: 10
+    displayName: Soft Sand Footsteps
+    gemPrice: 80
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Footstep Effects
+    rarity: 0
+    catalogIndex: 70
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.85, g: 0.75, b: 0.45, a: 1}
+  - id: footstep_gold_01
+    slot: 10
+    displayName: Golden Dust Footsteps
+    gemPrice: 220
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Footstep Effects
+    rarity: 3
+    catalogIndex: 71
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.95, g: 0.8, b: 0.2, a: 1}
+  - id: running_trail_falcon_01
+    slot: 11
+    displayName: Falcon Running Trail
+    gemPrice: 200
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Running Effects
+    rarity: 2
+    catalogIndex: 80
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.8, g: 0.55, b: 0.15, a: 1}
+  - id: running_trail_aurora_01
+    slot: 11
+    displayName: Desert Aurora Trail
+    gemPrice: 350
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Running Effects
+    rarity: 4
+    catalogIndex: 81
+    allowTemporaryGrant: 0
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.4, g: 0.85, b: 0.95, a: 1}
+  - id: profileframe_gold_01
+    slot: 12
+    displayName: Gold Majlis Frame
+    gemPrice: 140
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Profile Frames
+    rarity: 2
+    catalogIndex: 90
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.9, g: 0.72, b: 0.25, a: 1}
+  - id: profileframe_pearl_01
+    slot: 12
+    displayName: Pearl Coast Frame
+    gemPrice: 260
+    isTraditionalOutfit: 0
+    requiredCountry: 3
+    countryTagged: 1
+    collectionTag: Profile Frames
+    rarity: 3
+    catalogIndex: 91
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.85, g: 0.85, b: 0.95, a: 1}
+  - id: title_desert_runner_01
+    slot: 13
+    displayName: Title — Desert Runner
+    gemPrice: 100
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Titles
+    rarity: 1
+    catalogIndex: 100
+    allowTemporaryGrant: 1
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.7, g: 0.55, b: 0.2, a: 1}
+  - id: title_gulf_champion_01
+    slot: 13
+    displayName: Title — Gulf Champion
+    gemPrice: 400
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    countryTagged: 0
+    collectionTag: Titles
+    rarity: 4
+    catalogIndex: 101
+    allowTemporaryGrant: 0
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.95, g: 0.35, b: 0.45, a: 1}

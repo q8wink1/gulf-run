@@ -8,9 +8,10 @@ using UnityEngine;
 namespace GulfRun.Features.Character
 {
     /// <summary>
-    /// Debug panel required by the Sprint 8 brief: Character ID, Country ID,
-    /// Current Outfit, Loaded Cosmetics. Same on-screen, dev-build-only
-    /// placeholder style as <c>RaceFinishDebugView</c>/<c>TrapsDebugView</c>.
+    /// Debug panel: Character ID, Outfit ID, Animation State, Country ID,
+    /// Temporary Timer. Sprint 16 keeps the Character feature panel at its
+    /// established <c>panelX: 10</c> (first slot); the next free slot after
+    /// MainMenu's 4060 is 4510 for any future non-Character panel.
     /// </summary>
     public sealed class CharacterDebugView : MonoBehaviour
     {
@@ -41,7 +42,7 @@ namespace GulfRun.Features.Character
             PlayerLoadoutManager manager = PlayerLoadoutManager.Instance;
             bool hasAccount = SaveManager.Instance != null && SaveManager.Instance.HasAccount;
 
-            Line($"[Character] Has Account: {hasAccount}");
+            Line($"[Character/Locker] Has Account: {hasAccount}");
 
             if (manager == null || manager.LocalLoadout == null)
             {
@@ -54,18 +55,37 @@ namespace GulfRun.Features.Character
 
             Line($"Character ID: {loadout.Character} ({(character != null ? character.DisplayName : "unknown")})");
             Line($"Country ID: {loadout.Country}");
+            Line($"Animation State: {manager.PreviewAnimationState}");
 
             CosmeticId outfit = loadout.GetEquipped(CosmeticSlot.Outfit);
-            Line($"Current Outfit: {ResolveName(manager, outfit)}");
+            Line($"Outfit ID: {(outfit.IsNone ? "(none)" : outfit.Value)} — {ResolveName(manager, outfit)}");
 
-            Line("Loaded Cosmetics:");
+            Line("Equipped Cosmetics:");
             for (int i = 0; i < AllSlots.Length; i++)
             {
                 CosmeticId equipped = loadout.GetEquipped(AllSlots[i]);
-                Line($"  {AllSlots[i]}: {(equipped.IsNone ? "(none)" : ResolveName(manager, equipped))}");
+                if (equipped.IsNone)
+                {
+                    continue;
+                }
+
+                Line($"  {AllSlots[i]}: {equipped.Value}");
             }
 
-            Line($"Gems: {(EconomyManager.Instance != null ? EconomyManager.Instance.Gems : 0)}  Owned Cosmetics: {manager.LocalInventory.OwnedIds.Count}");
+            Line($"Gems: {(EconomyManager.Instance != null ? EconomyManager.Instance.Gems : 0)}  Permanent: {manager.LocalInventory.OwnedIds.Count}  Temporary: {manager.LocalInventory.TemporaryOwnedIds.Count}");
+
+            double now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            foreach (string idValue in manager.LocalInventory.TemporaryOwnedIds)
+            {
+                var id = new CosmeticId(idValue);
+                if (manager.LocalInventory.TryGetTemporaryExpiry(id, out double expires))
+                {
+                    double remaining = expires - now;
+                    int total = remaining > 0 ? (int)remaining : 0;
+                    Line($"Temp Timer [{idValue}]: {total / 86400}d {(total % 86400) / 3600}h {(total % 3600) / 60}m");
+                }
+            }
+
             Line($"Remote Loadouts Tracked: {manager.RemoteLoadouts.Count}");
         }
 
