@@ -1,5 +1,6 @@
 using System;
 using GulfRun.Core;
+using GulfRun.Core.Services;
 using GulfRun.Features.EndlessRunner.Configuration;
 using UnityEngine;
 
@@ -10,13 +11,12 @@ namespace GulfRun.Features.EndlessRunner.GameLoop
     /// display-state producer — it does not touch the player, world, or any
     /// other gameplay system directly; <see cref="GameLoopController"/> ticks
     /// it while in <see cref="Domain.GameLoopState.Countdown"/> and transitions
-    /// to Running when <see cref="Finished"/> fires. Any future UI (Canvas /
-    /// TextMeshPro) can bind to <see cref="DisplayText"/>/<see cref="SecondsChanged"/>
-    /// without any gameplay-code changes — see <see cref="CountdownView"/> for
-    /// the current OnGUI placeholder presentation.
+    /// to Running when <see cref="Finished"/> fires. Sprint 15 Race HUD binds
+    /// via <see cref="ICountdownHudProvider"/>; <see cref="CountdownView"/>
+    /// remains as a legacy fallback when RaceHud is not present.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class CountdownController : SceneSingleton<CountdownController>
+    public sealed class CountdownController : SceneSingleton<CountdownController>, ICountdownHudProvider
     {
         [SerializeField] private CountdownConfig config;
 
@@ -26,6 +26,9 @@ namespace GulfRun.Features.EndlessRunner.GameLoop
         /// <summary>Current display value: "3", "2", "1", or "GO!".</summary>
         public string DisplayText { get; private set; } = string.Empty;
 
+        bool ICountdownHudProvider.IsActive => !IsFinished || DisplayText == "GO!";
+        bool ICountdownHudProvider.IsGo => DisplayText == "GO!";
+
         /// <summary>Raised whenever the whole-seconds countdown value changes.</summary>
         public event Action<int> SecondsChanged;
 
@@ -33,6 +36,16 @@ namespace GulfRun.Features.EndlessRunner.GameLoop
         public event Action Finished;
 
         private float _elapsedSeconds;
+
+        private void OnEnable() => CountdownHudService.Current = this;
+
+        private void OnDisable()
+        {
+            if (ReferenceEquals(CountdownHudService.Current, this))
+            {
+                CountdownHudService.Current = null;
+            }
+        }
 
         /// <summary>Resets and starts a fresh countdown from <see cref="CountdownConfig.DurationSeconds"/>.</summary>
         public void BeginCountdown()

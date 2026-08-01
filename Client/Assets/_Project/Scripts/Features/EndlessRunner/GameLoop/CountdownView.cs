@@ -4,14 +4,10 @@ using UnityEngine;
 namespace GulfRun.Features.EndlessRunner.GameLoop
 {
     /// <summary>
-    /// Minimal OnGUI presentation of the race-start countdown ("3", "2",
-    /// "1", "GO!"), large and centered on screen. This is a functional
-    /// placeholder — it works in real builds, not just the Editor — until a
-    /// Canvas + TextMeshPro HUD is authored once the Unity Editor is
-    /// available (see Sprint 3 report open items). Contains no gameplay
-    /// logic: it only reads <see cref="CountdownController"/>'s public
-    /// display state, keeping UI cleanly separated from simulation per the
-    /// project's code-quality requirements.
+    /// Legacy OnGUI countdown placeholder. Sprint 15's
+    /// <c>Features.RaceHud.UI.CountdownHudView</c> owns the production
+    /// presentation; this component stays for scenes that have not yet
+    /// wired RaceHud (disabled on <c>Gameplay.unity</c>'s RunnerHUD).
     /// </summary>
     public sealed class CountdownView : MonoBehaviour
     {

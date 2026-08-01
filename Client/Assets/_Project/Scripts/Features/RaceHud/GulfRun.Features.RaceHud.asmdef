@@ -1,0 +1,17 @@
+{
+    "name": "GulfRun.Features.RaceHud",
+    "rootNamespace": "GulfRun.Features.RaceHud",
+    "references": [
+        "GulfRun.Core",
+        "GulfRun.Domain"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

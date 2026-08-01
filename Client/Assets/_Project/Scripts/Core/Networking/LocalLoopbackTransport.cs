@@ -62,6 +62,9 @@ namespace GulfRun.Core.Networking
 
         public event Action<PlayerLoadout> LoadoutChanged;
 
+        public event Action<int, QuickChatMessage> QuickChatReceived;
+        public event Action<int, RaceEmoteId> RaceEmoteReceived;
+
         public void StartHost(PlayerIdentity hostIdentity, int maxParticipants)
         {
             if (IsActive)
@@ -176,6 +179,24 @@ namespace GulfRun.Core.Networking
         // lives entirely in Features.Character.Loadout.PlayerLoadoutManager. ---
 
         public void SetLocalLoadout(PlayerLoadout loadout) => LoadoutChanged?.Invoke(loadout);
+
+        // --- Sprint 15: Matchmaking, Room & Pre-Race Lobby. Same "this
+        // transport only relays" role as every block above — Kick Player
+        // authority/Bot Fill decisions live entirely in
+        // Features.Multiplayer.Session.SessionManager /
+        // Features.Multiplayer.Bots.BotFillController. ---
+
+        public void KickParticipant(int connectionId, DisconnectReason reason)
+        {
+            if (_participants.Remove(connectionId))
+            {
+                ParticipantLeft?.Invoke(connectionId, reason);
+            }
+        }
+
+        public void SendQuickChat(QuickChatMessage message) => QuickChatReceived?.Invoke(LocalConnectionId, message);
+
+        public void SendRaceEmote(RaceEmoteId emote) => RaceEmoteReceived?.Invoke(LocalConnectionId, emote);
 
         // --- Local-only test/demo hooks; not part of IMatchTransport ---
 

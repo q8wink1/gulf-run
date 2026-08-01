@@ -6,6 +6,9 @@ namespace GulfRun.Domain
         PlayerLeft,
         HostLeft,
         Timeout,
-        Unknown
+        Unknown,
+
+        /// <summary>Sprint 15 (Owner Feature "Kick Player"). Appended rather than inserted so no existing ordinal shifts.</summary>
+        Kicked
     }
 }

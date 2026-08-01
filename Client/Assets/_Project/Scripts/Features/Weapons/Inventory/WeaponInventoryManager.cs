@@ -23,17 +23,35 @@ namespace GulfRun.Features.Weapons.Inventory
     /// cooldown, since both are the same "local inventory" responsibility.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class WeaponInventoryManager : Singleton<WeaponInventoryManager>
+    public sealed class WeaponInventoryManager : Singleton<WeaponInventoryManager>, IWeaponHudProvider
     {
         [SerializeField] private WeaponCatalogConfig catalog;
 
         private readonly Dictionary<int, WeaponInventory> _inventories = new Dictionary<int, WeaponInventory>();
         private readonly Dictionary<int, double> _lastUseTimeSeconds = new Dictionary<int, double>();
+        private readonly List<WeaponHudSlotSnapshot> _hudSlots = new List<WeaponHudSlotSnapshot>(2);
 
         private IMatchTransport _transport;
 
         /// <summary>Raised after a connection's inventory changes (pickup granted or a weapon consumed).</summary>
         public event Action<int> InventoryChanged;
+
+        event Action IWeaponHudProvider.InventoryChanged
+        {
+            add => _hudInventoryChanged += value;
+            remove => _hudInventoryChanged -= value;
+        }
+
+        private event Action _hudInventoryChanged;
+
+        IReadOnlyList<WeaponHudSlotSnapshot> IWeaponHudProvider.LocalSlots
+        {
+            get
+            {
+                RebuildHudSlots();
+                return _hudSlots;
+            }
+        }
 
         protected override void OnInitialize()
         {
@@ -41,6 +59,7 @@ namespace GulfRun.Features.Weapons.Inventory
 
         private void OnEnable()
         {
+            WeaponHudService.Current = this;
             _transport = MatchTransportService.Current;
             _transport.WeaponPickupConfirmed += HandlePickupConfirmed;
             _transport.WeaponUseConfirmed += HandleUseConfirmed;
@@ -49,6 +68,11 @@ namespace GulfRun.Features.Weapons.Inventory
 
         private void OnDisable()
         {
+            if (ReferenceEquals(WeaponHudService.Current, this))
+            {
+                WeaponHudService.Current = null;
+            }
+
             if (_transport == null)
             {
                 return;
@@ -57,6 +81,28 @@ namespace GulfRun.Features.Weapons.Inventory
             _transport.WeaponPickupConfirmed -= HandlePickupConfirmed;
             _transport.WeaponUseConfirmed -= HandleUseConfirmed;
             _transport.ParticipantLeft -= HandleParticipantLeft;
+        }
+
+        private void RebuildHudSlots()
+        {
+            _hudSlots.Clear();
+            int localId = _transport != null ? _transport.LocalConnectionId : 0;
+            IReadOnlyList<WeaponId?> slots = GetSlots(localId);
+            float cooldown01 = 0f;
+            if (IsOnCooldown(localId))
+            {
+                float cooldown = CooldownSecondsFor(localId);
+                if (cooldown > 0f && _lastUseTimeSeconds.TryGetValue(localId, out double last))
+                {
+                    cooldown01 = Mathf.Clamp01(1f - (float)((Time.timeAsDouble - last) / cooldown));
+                }
+            }
+
+            for (int i = 0; i < slots.Count; i++)
+            {
+                WeaponId? weapon = slots[i];
+                _hudSlots.Add(new WeaponHudSlotSnapshot(weapon, weapon.HasValue ? 1 : 0, cooldown01, false));
+            }
         }
 
         public bool IsFull(int connectionId) => GetOrCreate(connectionId).IsFull;
@@ -192,6 +238,7 @@ namespace GulfRun.Features.Weapons.Inventory
             if (inventory.TryCollect(confirmed.Weapon, out _))
             {
                 InventoryChanged?.Invoke(confirmed.CollectorConnectionId);
+                _hudInventoryChanged?.Invoke();
             }
         }
 
@@ -201,6 +248,7 @@ namespace GulfRun.Features.Weapons.Inventory
             if (inventory.TryConsume(confirmed.Weapon, out _))
             {
                 InventoryChanged?.Invoke(confirmed.UserConnectionId);
+                _hudInventoryChanged?.Invoke();
 
                 // Sprint 9 "Player Statistics: Weapons Used" hook — only for
                 // the local player's own confirmed activation, never a

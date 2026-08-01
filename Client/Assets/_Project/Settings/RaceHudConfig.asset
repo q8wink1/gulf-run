@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9d51268e5e04aa5930a7bb146661c77, type: 3}
+  m_Name: RaceHudConfig
+  m_EditorClassIdentifier: 
+  maxLaps: 1
+  showGemCounter: 1
+  edgePadding: 12
+  goHoldSeconds: 0.75
+  countdownTickClip: {fileID: 0}
+  countdownGoClip: {fileID: 0}
+  positionChangePunchSeconds: 0.4
+  weaponPickupGlowSeconds: 0.8
+  trapWarningRadiusMeters: 8
+  emoteDisplaySeconds: 1.6
+  emoteCooldownSeconds: 1.2
+  finishBannerSeconds: 3.5
+  fireworkParticleCount: 36
+  fireworkBurstSpeed: 0.9
+  finishConfettiCount: 48
+  finishConfettiFallSpeed: 0.35
+  finishCrowdClip: {fileID: 0}
+  finishFanfareClip: {fileID: 0}
+  runningLoopClip: {fileID: 0}
+  jumpClip: {fileID: 0}
+  landingClip: {fileID: 0}
+  weaponUseClip: {fileID: 0}
+  trapWarningClip: {fileID: 0}
+  dustParticleCount: 18
+  dustSpawnRate: 14
+  speedTrailMinSpeed: 8

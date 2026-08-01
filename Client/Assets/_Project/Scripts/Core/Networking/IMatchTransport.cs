@@ -166,5 +166,28 @@ namespace GulfRun.Core.Networking
 
         /// <summary>Sends this frame's local player snapshot for network sync/interpolation.</summary>
         void SendSnapshot(NetworkPlayerSnapshot snapshot);
+
+        // --- Sprint 15: Matchmaking, Room & Pre-Race Lobby. "Kick Player" is
+        // host-only, same authority posture as every Broadcast* call above;
+        // Quick Chat has no authority step at all (mirrors LoadoutChanged —
+        // every client just broadcasts its own action and every other
+        // client's UI reacts to the event, no server validation needed for
+        // four fixed, harmless preset messages). ---
+
+        /// <summary>Host-authoritative: forcibly removes a participant from the match (Owner "Kick Player", or Bot Fill removing a bot it added).</summary>
+        void KickParticipant(int connectionId, DisconnectReason reason);
+
+        event Action<int, QuickChatMessage> QuickChatReceived;
+
+        /// <summary>Broadcasts one of the fixed Quick Chat presets from the local player to every other participant.</summary>
+        void SendQuickChat(QuickChatMessage message);
+
+        // --- Sprint 15: Race HUD in-race emotes. Same fire-and-forget shape
+        // as Quick Chat — fixed presets, no authority validation. ---
+
+        event Action<int, RaceEmoteId> RaceEmoteReceived;
+
+        /// <summary>Broadcasts one fixed in-race emote from the local player.</summary>
+        void SendRaceEmote(RaceEmoteId emote);
     }
 }

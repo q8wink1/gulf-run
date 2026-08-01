@@ -20,13 +20,55 @@ namespace GulfRun.Features.PlayerController
     /// documented; this component is ready to attach the moment that changes.
     /// </summary>
     [RequireComponent(typeof(PlayerMotor))]
-    public sealed class PlayerStatusEffectController : MonoBehaviour, IPlayerStatusEffectReceiver
+    public sealed class PlayerStatusEffectController : MonoBehaviour, IPlayerStatusEffectReceiver, IActiveEffectsHudProvider
     {
         private readonly List<ActiveEffect> _active = new List<ActiveEffect>();
+        private readonly List<ActiveHudEffectSnapshot> _hudEffects = new List<ActiveHudEffectSnapshot>(8);
         private PlayerMotor _motor;
         private int _connectionId = -1;
 
         public bool IsMarked { get; private set; }
+
+        bool IActiveEffectsHudProvider.HasShield
+        {
+            get
+            {
+                for (int i = 0; i < _active.Count; i++)
+                {
+                    if (_active[i].Has(WeaponEffectFlags.Shield))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        bool IActiveEffectsHudProvider.HasSpeedBoost
+        {
+            get
+            {
+                for (int i = 0; i < _active.Count; i++)
+                {
+                    if (_active[i].Has(WeaponEffectFlags.SpeedBoost))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        IReadOnlyList<ActiveHudEffectSnapshot> IActiveEffectsHudProvider.ActiveEffects
+        {
+            get
+            {
+                RebuildHudEffects();
+                return _hudEffects;
+            }
+        }
 
         private void Awake()
         {
@@ -37,11 +79,34 @@ namespace GulfRun.Features.PlayerController
         {
             _connectionId = MatchTransportService.Current != null ? MatchTransportService.Current.LocalConnectionId : -1;
             PlayerStatusEffectRegistry.Register(_connectionId, this);
+            ActiveEffectsHudService.Current = this;
         }
 
         private void OnDisable()
         {
             PlayerStatusEffectRegistry.Unregister(_connectionId, this);
+            if (ReferenceEquals(ActiveEffectsHudService.Current, this))
+            {
+                ActiveEffectsHudService.Current = null;
+            }
+        }
+
+        private void RebuildHudEffects()
+        {
+            _hudEffects.Clear();
+            for (int i = 0; i < _active.Count; i++)
+            {
+                ActiveEffect effect = _active[i];
+                if (!HudEffectKindResolver.TryResolve(effect.Flags, out HudEffectKind kind))
+                {
+                    continue;
+                }
+
+                float total = effect.TotalSeconds > 0f && effect.TotalSeconds < float.MaxValue * 0.5f
+                    ? effect.TotalSeconds
+                    : Mathf.Max(effect.RemainingSeconds, 1f);
+                _hudEffects.Add(new ActiveHudEffectSnapshot(kind, effect.RemainingSeconds, total));
+            }
         }
 
         private void Update()
@@ -72,7 +137,7 @@ namespace GulfRun.Features.PlayerController
         {
             if (effect.Has(WeaponEffectFlags.Shield))
             {
-                _active.Add(new ActiveEffect(WeaponEffectFlags.Shield, float.MaxValue));
+                _active.Add(new ActiveEffect(WeaponEffectFlags.Shield, float.MaxValue, 1f, float.MaxValue));
                 Recompute();
                 return true;
             }
@@ -104,7 +169,8 @@ namespace GulfRun.Features.PlayerController
             WeaponEffectFlags movementFlags = effect.Flags & ~(WeaponEffectFlags.Cleanse | WeaponEffectFlags.Mark | WeaponEffectFlags.Shield | WeaponEffectFlags.LateralPush);
             if (movementFlags != WeaponEffectFlags.None)
             {
-                _active.Add(new ActiveEffect(movementFlags, (float)effect.DurationSeconds, effect.Magnitude));
+                float duration = (float)effect.DurationSeconds;
+                _active.Add(new ActiveEffect(movementFlags, duration, effect.Magnitude, duration));
             }
 
             if (effect.Has(WeaponEffectFlags.Mark))
@@ -183,12 +249,14 @@ namespace GulfRun.Features.PlayerController
             public WeaponEffectFlags Flags;
             public float RemainingSeconds;
             public float Magnitude;
+            public float TotalSeconds;
 
-            public ActiveEffect(WeaponEffectFlags flags, float remainingSeconds, float magnitude = 1f)
+            public ActiveEffect(WeaponEffectFlags flags, float remainingSeconds, float magnitude = 1f, float totalSeconds = 0f)
             {
                 Flags = flags;
                 RemainingSeconds = remainingSeconds;
                 Magnitude = magnitude;
+                TotalSeconds = totalSeconds > 0f ? totalSeconds : remainingSeconds;
             }
 
             public bool Has(WeaponEffectFlags flag) => (Flags & flag) != 0;

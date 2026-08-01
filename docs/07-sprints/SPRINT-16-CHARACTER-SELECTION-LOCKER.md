@@ -113,9 +113,9 @@ Equip/unequip is instant (no loading). Every select/equip/unequip/unlock/grant/e
 
 | Item | Value |
 |---|---|
-| Commit hash | `18c9477` |
+| Commit hash | `18c9477` (feature) / `cf458af` (report hash confirmation) |
 | Commit message | `Sprint 16 - Character Selection, Locker & Customization` |
 | Branch | `main` |
-| Push status | Pushed to `origin/main` (see follow-up report commit for verification) |
+| Push status | Pushed to `origin/main` (`1e67310..cf458af`); `git rev-parse HEAD` matches `origin/main` at `cf458af` |
 
 Sprint 16 is complete within the constraints above.

@@ -586,6 +586,14 @@ GameObject:
   m_Component:
   - component: {fileID: 500300001}
   - component: {fileID: 500300002}
+  - component: {fileID: 500300010}
+  - component: {fileID: 500300011}
+  - component: {fileID: 500300012}
+  - component: {fileID: 500300013}
+  - component: {fileID: 500300014}
+  - component: {fileID: 500300015}
+  - component: {fileID: 500300016}
+  - component: {fileID: 500300017}
   m_Layer: 0
   m_Name: RunnerHUD
   m_TagString: Untagged
@@ -615,12 +623,117 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 500300000}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e48c49457154da68c75f780a0abcb55, type: 3}
+  m_Script: {fileID: 11500000, guid: 4e48c49457154da68c75f780a0abcb55, type: 3} # CountdownView (legacy, disabled — RaceHud owns countdown)
   m_Name: 
   m_EditorClassIdentifier: 
   fontSize: 96
+--- !u!114 &500300010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500300000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1a89285ed1a46ec880d050eb7b993cf, type: 3} # RaceHudController
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2} # RaceHudConfig
+--- !u!114 &500300011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500300000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf86eb15c41644b39574a0d3f2406a5d, type: 3} # RaceHudView
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
+--- !u!114 &500300012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500300000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a471519dba9a42b3adb5263c58ef998a, type: 3} # CountdownHudView
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
+--- !u!114 &500300013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500300000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8342e7683e574f34a39fabd0c9230a06, type: 3} # FinishBannerView
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
+--- !u!114 &500300014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500300000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fde1066f46aa4be4b674cd62fb48542e, type: 3} # EmoteBarView
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
+--- !u!114 &500300015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500300000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceba3ff5189a43a49adf10f5e1267d30, type: 3} # RaceAudioDirector
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
+--- !u!114 &500300016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500300000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41f83740ca5a4ce98bd95b4a356c1898, type: 3} # RaceVfxPresenter
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: ab7468a1976a4dd7b0ec4d6f8600772a, type: 2}
+--- !u!114 &500300017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500300000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccaf8f0c6d2a4084b729bbc04e13a48f, type: 3} # RaceHudDebugView
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showOnScreenDebug: 1
+  panelX: 4510
 --- !u!1 &500400000
 GameObject:
   m_ObjectHideFlags: 0
@@ -632,6 +745,7 @@ GameObject:
   - component: {fileID: 500400001}
   - component: {fileID: 500400002}
   - component: {fileID: 500400003}
+  - component: {fileID: 500400004}
   m_Layer: 0
   m_Name: MultiplayerSpawning
   m_TagString: Untagged
@@ -680,6 +794,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 8740dd1ecbab4e83a73843fef7305e89, type: 2}
+--- !u!114 &500400004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500400000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a5ed9e4593941749de5bf6139b6d838, type: 3} # NetworkDiagnosticsBridge
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &500500000
 GameObject:
   m_ObjectHideFlags: 0
@@ -693,6 +819,7 @@ GameObject:
   - component: {fileID: 500500004}
   - component: {fileID: 500500006}
   - component: {fileID: 500500008}
+  - component: {fileID: 500500010}
   m_Layer: 0
   m_Name: TrapSystems
   m_TagString: Untagged
@@ -769,6 +896,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52e4772db65043f09b961ad156f1b4b4, type: 3} # TrapAvoidanceTracker script GUID
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &500500010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500500000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58214c1957144601828b2f1df94de637, type: 3} # TrapProximityWatcher
+  m_Name: 
+  m_EditorClassIdentifier: 
+  warningRadiusMeters: 8
 --- !u!1 &500600000
 GameObject:
   m_ObjectHideFlags: 0
@@ -832,6 +972,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ce8849a62a649988af0de06f438bb5a, type: 3} # RaceStandingsTracker script GUID
   m_Name: 
   m_EditorClassIdentifier: 
+  config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2} # RaceFinishConfig asset GUID
 --- !u!114 &500600006
 MonoBehaviour:
   m_ObjectHideFlags: 0
