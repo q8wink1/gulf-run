@@ -164,9 +164,9 @@ All five are Persistent/Singleton or SceneSingleton per the existing convention 
 
 | Item | Value |
 |---|---|
-| Commit hash | _(recorded after commit — see below)_ |
+| Commit hash | `6945798` (`69457980062a92d5f45030581c38a8b00f24245d`) |
 | Commit message | `Sprint 4 - Multiplayer Foundation` |
 | Branch | `main` |
-| Push status | _(recorded after push — see below)_ |
+| Push status | Pushed to `origin/main`; verified via `git fetch` + `git log origin/main -1` matching the local hash |
 
 Sprint 4 is complete within the constraints above. Stopping here. Waiting for Sprint 5.
