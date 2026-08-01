@@ -49,6 +49,7 @@ namespace GulfRun.Features.Traps.Authority
         {
             _transport = MatchTransportService.Current;
             _transport.TrapTriggerReported += HandleTrapTriggerReported;
+            _transport.MatchStateChanged += HandleMatchStateChanged;
         }
 
         private void OnDisable()
@@ -56,6 +57,16 @@ namespace GulfRun.Features.Traps.Authority
             if (_transport != null)
             {
                 _transport.TrapTriggerReported -= HandleTrapTriggerReported;
+                _transport.MatchStateChanged -= HandleMatchStateChanged;
+            }
+        }
+
+        /// <summary>Sprint 12: the same "Countdown resolves the environment, Running re-seeds every match-scoped system" ordering MapEnvironmentManager/ChunkContentSpawner use — Countdown always broadcasts strictly before Running, so MapContextService.Current is guaranteed populated here.</summary>
+        private void HandleMatchStateChanged(MatchState newState)
+        {
+            if (newState == MatchState.Running)
+            {
+                ResetForNewMatch();
             }
         }
 
@@ -82,11 +93,28 @@ namespace GulfRun.Features.Traps.Authority
             }
         }
 
-        /// <summary>Resets all host-side spawn bookkeeping for a fresh match. Safe to call any time (e.g. on Create/Leave Match) — same documented seam as WeaponAuthority.ResetForNewMatch.</summary>
+        /// <summary>
+        /// Resets all host-side spawn bookkeeping for a fresh match. Safe to
+        /// call any time (e.g. on Create/Leave Match) — same documented seam
+        /// as WeaponAuthority.ResetForNewMatch. Sprint 12: also re-seeds
+        /// <see cref="_random"/> from this match's <see cref="Core.Services.IMapContextProvider"/>-resolved
+        /// Trap Seed, when one has been resolved, so "Trap locations change
+        /// every match" is a real per-match reseed rather than one
+        /// time-seeded sequence for the whole session. Falls back to the
+        /// existing time-seeded <see cref="_random"/> when no environment
+        /// has been resolved yet (e.g. Features.Maps not present in a given
+        /// scene/test), so behavior is unchanged if that seam is absent.
+        /// </summary>
         public void ResetForNewMatch()
         {
             _active.Clear();
             _spawnTimerSeconds = 0f;
+
+            IMapContextProvider mapContext = MapContextService.Current;
+            if (mapContext != null && mapContext.HasResolvedEnvironment)
+            {
+                _random = new SeededRandom(mapContext.Current.Seeds.TrapSeed);
+            }
         }
 
         private void TrySpawnTrap()

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using GulfRun.Core;
+using GulfRun.Core.Networking;
 using GulfRun.Core.Pooling;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.EndlessRunner.Configuration;
 using GulfRun.Features.EndlessRunner.WorldGeneration;
@@ -32,6 +34,7 @@ namespace GulfRun.Features.EndlessRunner.Spawning
         [SerializeField] private int randomSeed;
 
         private IRandomSource _random;
+        private IMatchTransport _transport;
         private readonly Dictionary<SpawnCategory, int> _spawnCounts = new Dictionary<SpawnCategory, int>();
 
         /// <summary>Lifetime count of items spawned per category this run (debug tool).</summary>
@@ -55,6 +58,48 @@ namespace GulfRun.Features.EndlessRunner.Spawning
             PreloadCategory(powerUpConfig);
             PreloadCategory(decorationConfig);
             PreloadCategory(itemBoxConfig);
+        }
+
+        private void OnEnable()
+        {
+            _transport = MatchTransportService.Current;
+            if (_transport != null)
+            {
+                _transport.MatchStateChanged += HandleMatchStateChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_transport != null)
+            {
+                _transport.MatchStateChanged -= HandleMatchStateChanged;
+            }
+        }
+
+        /// <summary>
+        /// Sprint 12: re-seeds this chunk's shared content RNG — which
+        /// includes <see cref="SpawnCategory.ItemBox"/> placement — from the
+        /// match's resolved Item Box Seed the instant the race starts
+        /// ("Running" always follows the "Countdown" broadcast that
+        /// MapEnvironmentManager reacts to, so the seed is guaranteed to
+        /// already be resolved here). A no-op fallback to the existing
+        /// config-seeded/time-seeded <see cref="_random"/> when no
+        /// environment has been resolved (Features.Maps absent from a given
+        /// scene/test).
+        /// </summary>
+        private void HandleMatchStateChanged(MatchState newState)
+        {
+            if (newState != MatchState.Running)
+            {
+                return;
+            }
+
+            IMapContextProvider mapContext = MapContextService.Current;
+            if (mapContext != null && mapContext.HasResolvedEnvironment)
+            {
+                _random = new SeededRandom(mapContext.Current.Seeds.ItemBoxSeed);
+            }
         }
 
         public void PopulateChunk(Chunk chunk, float difficulty01)

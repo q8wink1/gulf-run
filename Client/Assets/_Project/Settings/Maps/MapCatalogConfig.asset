@@ -1,0 +1,126 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adb1656333aa43818b5e3045bd08fda7, type: 3} # MapCatalogConfig script GUID
+  m_Name: MapCatalogConfig
+  m_EditorClassIdentifier:
+  maps:
+  - mapId: kuwait_city
+    displayName: Kuwait City
+    country: 1
+    selectionWeight: 1
+    paletteColor: {r: 0.004, g: 0.322, b: 0.192, a: 1}
+    backgroundElements: 127
+    landmarks:
+    - entryName: Kuwait Towers
+      placeholderColor: {r: 0.043, g: 0.478, b: 0.678, a: 1}
+      parallaxDepth: 0.15
+    - entryName: Corniche
+      placeholderColor: {r: 0.11, g: 0.42, b: 0.55, a: 1}
+      parallaxDepth: 0.35
+    - entryName: Modern Skyline
+      placeholderColor: {r: 0.3, g: 0.32, b: 0.36, a: 1}
+      parallaxDepth: 0.1
+    - entryName: Palm Trees
+      placeholderColor: {r: 0.18, g: 0.42, b: 0.2, a: 1}
+      parallaxDepth: 0.6
+    dayAmbientClip: {fileID: 0}
+    nightAmbientClip: {fileID: 0}
+  - mapId: riyadh
+    displayName: Riyadh
+    country: 0
+    selectionWeight: 1
+    paletteColor: {r: 0.6, g: 0.44, b: 0.2, a: 1}
+    backgroundElements: 59
+    landmarks:
+    - entryName: Kingdom Tower
+      placeholderColor: {r: 0.5, g: 0.5, b: 0.55, a: 1}
+      parallaxDepth: 0.15
+    - entryName: Al Faisaliah
+      placeholderColor: {r: 0.55, g: 0.5, b: 0.4, a: 1}
+      parallaxDepth: 0.2
+    - entryName: Modern Riyadh Skyline
+      placeholderColor: {r: 0.35, g: 0.32, b: 0.28, a: 1}
+      parallaxDepth: 0.1
+    dayAmbientClip: {fileID: 0}
+    nightAmbientClip: {fileID: 0}
+  - mapId: dubai
+    displayName: Dubai
+    country: 2
+    selectionWeight: 1
+    paletteColor: {r: 0.85, g: 0.65, b: 0.13, a: 1}
+    backgroundElements: 127
+    landmarks:
+    - entryName: Burj Khalifa
+      placeholderColor: {r: 0.6, g: 0.68, b: 0.75, a: 1}
+      parallaxDepth: 0.12
+    - entryName: Museum of the Future
+      placeholderColor: {r: 0.75, g: 0.7, b: 0.55, a: 1}
+      parallaxDepth: 0.2
+    - entryName: Modern Dubai Skyline
+      placeholderColor: {r: 0.4, g: 0.42, b: 0.46, a: 1}
+      parallaxDepth: 0.1
+    dayAmbientClip: {fileID: 0}
+    nightAmbientClip: {fileID: 0}
+  - mapId: doha
+    displayName: Doha
+    country: 3
+    selectionWeight: 1
+    paletteColor: {r: 0.365, g: 0.031, b: 0.184, a: 1}
+    backgroundElements: 127
+    landmarks:
+    - entryName: Doha Corniche
+      placeholderColor: {r: 0.13, g: 0.44, b: 0.58, a: 1}
+      parallaxDepth: 0.35
+    - entryName: Pearl Qatar
+      placeholderColor: {r: 0.7, g: 0.66, b: 0.5, a: 1}
+      parallaxDepth: 0.2
+    - entryName: Modern Skyline
+      placeholderColor: {r: 0.34, g: 0.3, b: 0.32, a: 1}
+      parallaxDepth: 0.1
+    dayAmbientClip: {fileID: 0}
+    nightAmbientClip: {fileID: 0}
+  - mapId: manama
+    displayName: Manama
+    country: 4
+    selectionWeight: 1
+    paletteColor: {r: 0.816, g: 0.024, b: 0.125, a: 1}
+    backgroundElements: 123
+    landmarks:
+    - entryName: Bahrain World Trade Center
+      placeholderColor: {r: 0.55, g: 0.6, b: 0.65, a: 1}
+      parallaxDepth: 0.15
+    - entryName: Historic Architecture
+      placeholderColor: {r: 0.6, g: 0.5, b: 0.36, a: 1}
+      parallaxDepth: 0.3
+    - entryName: Modern Skyline
+      placeholderColor: {r: 0.32, g: 0.3, b: 0.34, a: 1}
+      parallaxDepth: 0.1
+    dayAmbientClip: {fileID: 0}
+    nightAmbientClip: {fileID: 0}
+  - mapId: muscat
+    displayName: Muscat
+    country: 5
+    selectionWeight: 1
+    paletteColor: {r: 0.816, g: 0.412, b: 0.114, a: 1}
+    backgroundElements: 127
+    landmarks:
+    - entryName: Sultan Qaboos Grand Mosque
+      placeholderColor: {r: 0.85, g: 0.83, b: 0.75, a: 1}
+      parallaxDepth: 0.2
+    - entryName: Mountains
+      placeholderColor: {r: 0.42, g: 0.36, b: 0.32, a: 1}
+      parallaxDepth: 0.08
+    - entryName: Palm Trees
+      placeholderColor: {r: 0.18, g: 0.42, b: 0.2, a: 1}
+      parallaxDepth: 0.6
+    dayAmbientClip: {fileID: 0}
+    nightAmbientClip: {fileID: 0}

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 852f449012a24654b401ef36eab2b425, type: 3} # WeatherCatalogConfig script GUID
+  m_Name: WeatherCatalogConfig
+  m_EditorClassIdentifier:
+  weathers:
+  - weather: 0
+    selectionWeight: 4
+    tintColor: {r: 1, g: 0.98, b: 0.9, a: 1}
+    fogDensity01: 0
+  - weather: 1
+    selectionWeight: 2
+    tintColor: {r: 0.82, g: 0.84, b: 0.86, a: 1}
+    fogDensity01: 0.1
+  - weather: 2
+    selectionWeight: 2
+    tintColor: {r: 0.9, g: 0.92, b: 0.92, a: 1}
+    fogDensity01: 0.05
+  - weather: 3
+    selectionWeight: 1
+    tintColor: {r: 0.82, g: 0.72, b: 0.55, a: 1}
+    fogDensity01: 0.35
+  - weather: 4
+    selectionWeight: 0
+    tintColor: {r: 0.55, g: 0.6, b: 0.68, a: 1}
+    fogDensity01: 0.2
+  - weather: 5
+    selectionWeight: 0
+    tintColor: {r: 0.75, g: 0.75, b: 0.78, a: 1}
+    fogDensity01: 0.5
+  - weather: 6
+    selectionWeight: 0
+    tintColor: {r: 0.76, g: 0.62, b: 0.42, a: 1}
+    fogDensity01: 0.8

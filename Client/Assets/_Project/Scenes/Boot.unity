@@ -874,3 +874,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   expiringSoonThresholdSeconds: 21600
   checkIntervalSeconds: 30
+--- !u!1 &800900000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 800900001}
+  - component: {fileID: 800900002}
+  m_Layer: 0
+  m_Name: MapSystems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &800900001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800900000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &800900002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800900000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3179c4e5d34a30a53e14b6e67f5faa, type: 3} # MapEnvironmentManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapCatalog: {fileID: 11400000, guid: 2617fd5b7da545fa94fb0a1d2f531424, type: 2} # MapCatalogConfig asset GUID
+  weatherCatalog: {fileID: 11400000, guid: 41828805eb0d4e87a525a781aa4d608c, type: 2} # WeatherCatalogConfig asset GUID
+  timeOfDayCatalog: {fileID: 11400000, guid: 4ef84539086745eeb36a6a8e237802d3, type: 2} # TimeOfDayCatalogConfig asset GUID

@@ -12,6 +12,7 @@ namespace GulfRun.Core.Managers
     {
         private AudioSource _sfxSource;
         private AudioSource _musicSource;
+        private AudioSource _ambientSource;
 
         protected override void OnInitialize()
         {
@@ -25,6 +26,14 @@ namespace GulfRun.Core.Managers
             // short by an unrelated PlayOneShot call.
             _musicSource = gameObject.AddComponent<AudioSource>();
             _musicSource.playOnAwake = false;
+
+            // Sprint 12: separate looping source for per-city ambient audio
+            // (birds/wind/sea/city ambience, day and night variations) —
+            // independent of Music so a city ambience swap never interrupts
+            // a Victory Ceremony track, and independent of SFX so it is
+            // never cut short by a one-shot pickup/impact sound.
+            _ambientSource = gameObject.AddComponent<AudioSource>();
+            _ambientSource.playOnAwake = false;
         }
 
         /// <summary>
@@ -61,6 +70,38 @@ namespace GulfRun.Core.Managers
         public void StopMusic()
         {
             _musicSource?.Stop();
+        }
+
+        /// <summary>
+        /// Starts (or restarts) looping ambient environment audio — e.g. the
+        /// active map's day/night city ambience (Sprint 12). Passing a null
+        /// clip stops the current ambience instead of no-op'ing, so swapping
+        /// maps/time-of-day can cleanly silence ambience with no clip
+        /// authored yet.
+        /// </summary>
+        public void PlayAmbient(AudioClip clip, float volume = 1f, bool loop = true)
+        {
+            if (_ambientSource == null)
+            {
+                return;
+            }
+
+            if (clip == null)
+            {
+                _ambientSource.Stop();
+                return;
+            }
+
+            _ambientSource.clip = clip;
+            _ambientSource.volume = volume;
+            _ambientSource.loop = loop;
+            _ambientSource.Play();
+        }
+
+        /// <summary>Stops any currently playing ambient audio. A no-op if nothing is playing.</summary>
+        public void StopAmbient()
+        {
+            _ambientSource?.Stop();
         }
     }
 }
