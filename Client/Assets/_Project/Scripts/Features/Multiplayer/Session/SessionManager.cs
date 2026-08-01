@@ -41,7 +41,7 @@ namespace GulfRun.Features.Multiplayer.Session
         private LobbyManager _lobby;
         private MatchManager _match;
         private BotFillController _bots;
-        private readonly Random _roomCodeRandom = new Random();
+        private readonly System.Random _roomCodeRandom = new System.Random();
         private static readonly MatchParticipant[] EmptyParticipants = Array.Empty<MatchParticipant>();
 
         /// <summary>Sprint 14 Matchmaking: simulated public-queue search duration under the offline loopback (no real matchmaking service exists yet — see <see cref="MatchmakingEtaEstimator"/>).</summary>
