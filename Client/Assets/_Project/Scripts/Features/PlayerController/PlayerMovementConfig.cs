@@ -22,6 +22,10 @@ namespace GulfRun.Features.PlayerController
 
         [Header("Ground Detection")]
         [SerializeField] private float groundCheckRadius = 0.15f;
+        [Tooltip("How far below the ground-check origin to cast for ground, in meters.")]
+        [SerializeField] private float groundCheckDistance = 0.12f;
+        [Tooltip("Minimum upward-facing surface normal (0-1) to count as standable ground, filtering out walls.")]
+        [Range(0f, 1f)] [SerializeField] private float minGroundNormalY = 0.5f;
         [SerializeField] private LayerMask groundLayerMask;
 
         [Header("Physics")]
@@ -32,6 +36,8 @@ namespace GulfRun.Features.PlayerController
         public float DoubleJumpForce => doubleJumpForce;
         public int MaxJumpCount => maxJumpCount;
         public float GroundCheckRadius => groundCheckRadius;
+        public float GroundCheckDistance => groundCheckDistance;
+        public float MinGroundNormalY => minGroundNormalY;
         public LayerMask GroundLayerMask => groundLayerMask;
         public float GravityScale => gravityScale;
     }

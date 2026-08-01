@@ -8,6 +8,10 @@ namespace GulfRun.Domain
     public enum GameLoopState
     {
         Ready,
+
+        /// <summary>3-2-1-GO race-start countdown; automatic, no player input required.</summary>
+        Countdown,
+
         Running,
         Paused,
         GameOver,

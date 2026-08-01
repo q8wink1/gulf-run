@@ -11,6 +11,15 @@ namespace GulfRun.Domain
         Running,
         Jumping,
         Falling,
-        Landing
+        Landing,
+
+        /// <summary>Race-start countdown (3-2-1-GO) is active; the player is held in place.</summary>
+        Countdown,
+
+        /// <summary>Airborne on the second (final) jump, as distinct from the first <see cref="Jumping"/>.</summary>
+        DoubleJumping,
+
+        /// <summary>The run has ended; the player no longer responds to input.</summary>
+        GameOver
     }
 }

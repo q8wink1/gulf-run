@@ -36,6 +36,7 @@ namespace GulfRun.Features.PlayerController
             GUI.Label(new Rect(10, 28, 320, 20), $"Grounded: {_groundDetector.IsGrounded}");
             GUI.Label(new Rect(10, 46, 320, 20), $"Speed: {_motor.CurrentSpeed:F2} m/s");
             GUI.Label(new Rect(10, 64, 320, 20), $"Vertical Velocity: {_motor.VerticalVelocity:F2} m/s");
+            GUI.Label(new Rect(10, 82, 320, 20), $"Jumps Used: {_motor.JumpsUsed}/{_motor.MaxJumpCount}");
         }
 #endif
     }

@@ -1,4 +1,5 @@
 using GulfRun.Core.Pooling;
+using GulfRun.Domain;
 using GulfRun.Features.EndlessRunner.Difficulty;
 using GulfRun.Features.EndlessRunner.Distance;
 using GulfRun.Features.EndlessRunner.GameLoop;
@@ -45,6 +46,14 @@ namespace GulfRun.Features.EndlessRunner
             }
 
             Line($"[Runner] State: {(GameLoopController.Instance != null ? GameLoopController.Instance.State.ToString() : "n/a")}");
+
+            if (GameLoopController.Instance != null
+                && GameLoopController.Instance.State == GameLoopState.Countdown
+                && CountdownController.Instance != null)
+            {
+                Line($"Countdown: {CountdownController.Instance.DisplayText}");
+            }
+
             Line($"Distance: {(DistanceTracker.Instance != null ? DistanceTracker.Instance.DistanceMeters : 0):F1} m");
             Line($"Speed: {(GameSpeedController.Instance != null ? GameSpeedController.Instance.CurrentSpeed : 0f):F2} m/s");
             Line($"Difficulty: {(DifficultyController.Instance != null ? DifficultyController.Instance.Current01 : 0f):F2}");

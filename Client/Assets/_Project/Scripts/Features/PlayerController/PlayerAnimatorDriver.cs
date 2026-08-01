@@ -7,7 +7,10 @@ namespace GulfRun.Features.PlayerController
     /// Translates <see cref="PlayerMotor"/> state into Animator parameters.
     /// Matches the parameters declared on
     /// Assets/_Project/Animations/PlayerAnimatorController.controller:
-    /// IsGrounded (bool), Speed (float), VerticalVelocity (float), JumpTrigger (trigger).
+    /// IsGrounded (bool), Speed (float), VerticalVelocity (float),
+    /// JumpTrigger (trigger), DoubleJumpTrigger (trigger). The controller
+    /// currently uses placeholder (empty) motions for every state — see the
+    /// Sprint 3 report for the "swap in real clips" follow-up.
     /// </summary>
     [RequireComponent(typeof(Animator))]
     public sealed class PlayerAnimatorDriver : MonoBehaviour
@@ -16,6 +19,7 @@ namespace GulfRun.Features.PlayerController
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
         private static readonly int VerticalVelocityHash = Animator.StringToHash("VerticalVelocity");
         private static readonly int JumpTriggerHash = Animator.StringToHash("JumpTrigger");
+        private static readonly int DoubleJumpTriggerHash = Animator.StringToHash("DoubleJumpTrigger");
 
         private Animator _animator;
         private PlayerMotor _motor;
@@ -48,6 +52,7 @@ namespace GulfRun.Features.PlayerController
             }
 
             _animator.SetBool(IsGroundedHash, _motor.CurrentState != PlayerMovementState.Jumping
+                                               && _motor.CurrentState != PlayerMovementState.DoubleJumping
                                                && _motor.CurrentState != PlayerMovementState.Falling);
             _animator.SetFloat(SpeedHash, _motor.CurrentSpeed);
             _animator.SetFloat(VerticalVelocityHash, _motor.VerticalVelocity);
@@ -58,6 +63,10 @@ namespace GulfRun.Features.PlayerController
             if (newState == PlayerMovementState.Jumping)
             {
                 _animator.SetTrigger(JumpTriggerHash);
+            }
+            else if (newState == PlayerMovementState.DoubleJumping)
+            {
+                _animator.SetTrigger(DoubleJumpTriggerHash);
             }
         }
     }

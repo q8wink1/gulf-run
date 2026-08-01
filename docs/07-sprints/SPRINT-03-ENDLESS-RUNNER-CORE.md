@@ -1,7 +1,7 @@
 # Sprint 3 — Endless Runner Core — Sprint Report
 
 **Role:** Lead Unity Engineer
-**Scope:** Infinite world generation, modular object spawning, generic object pooling, global game speed, distance tracking, scoring, game loop state machine, save-progress interfaces, and runner debug tooling.
+**Scope:** Infinite world generation, modular object spawning, generic object pooling, global game speed, distance tracking, scoring, game loop state machine, save-progress interfaces, runner debug tooling, plus the Race Start countdown, strict double-jump player controller, and player state machine addendum (§14).
 **Status:** Complete, under the same environment constraint documented in [SPRINT-01-PROJECT-FOUNDATION.md](SPRINT-01-PROJECT-FOUNDATION.md) §0 (no licensed Unity Editor on this machine — Unity Hub is installed but no Editor version is downloaded).
 
 ---
@@ -153,13 +153,89 @@ Same constraint as Sprints 1–2: no licensed Unity Editor on this machine (Unit
 
 ---
 
-## 13. Git Workflow
+## 14. Gameplay Addendum — Race Start, Auto Run, Double Jump & Player State Machine
+
+Added after the initial Sprint 3 implementation/commit above, per an additional gameplay requirement. Extends the existing architecture only; no Sprint 1/2/3 system was rewritten (see the per-file breakdown below — every existing file listed was **extended**, not replaced, except where noted).
+
+### 14.1 Race Start (Countdown System)
+
+New `Features/EndlessRunner/GameLoop/CountdownController.cs` (a `SceneSingleton`) is a pure timer/display-state producer driven by a new `Configuration/CountdownConfig.cs` ScriptableObject (`durationSeconds`, default `3`, no hardcoded value in code). `GameLoopController` now has a `GameLoopState.Countdown` step (new Domain enum member) between `Ready` and `Running`:
+
+```
+(scene loads) --Start()--> Ready --RequestStart()--> Countdown --(3,2,1,GO! auto)--> Running
+```
+
+- **No button required:** `GameLoopController.Start()` calls `RequestStart()` itself the moment the scene loads — nothing else has to trigger it.
+- **3, 2, 1, GO!:** `CountdownController.Tick()` counts down whole seconds and fires `SecondsChanged`/`Finished`; `DisplayText` is `"3"`, `"2"`, `"1"`, then `"GO!"` for one frame before the state flips.
+- **Automatic transition to Running:** `GameLoopController` subscribes to `CountdownController.Finished` and calls `SetState(GameLoopState.Running)` the instant it fires — the player begins running with zero additional input.
+- **Restart also auto-counts-down:** `RequestRestart()` now chains straight back into `RequestStart()` after resetting every session system, so a new attempt after Game Over also needs no button.
+- **Presentation:** new `GameLoop/CountdownView.cs`, an `OnGUI`-based large centered "3/2/1/GO!" readout — a **functional placeholder** (works in real builds, not just the Editor/dev-builds) until a Canvas + TextMeshPro HUD is authored once the Editor is available. It reads only `CountdownController`'s public state — no gameplay logic lives in it. Wired onto a new, presentation-only `RunnerHUD` GameObject in `Gameplay.unity`, deliberately separate from the `GameplaySystems` GameObject. `RunnerDebugView` also prints the countdown value while it's active.
+
+### 14.2 Auto Run (right-only, no manual control)
+
+Unchanged in mechanism from Sprint 2 (`PlayerMotor.FixedUpdate` always sets `velocity.x` from the Game Speed system, never reads horizontal input — there never was a left/back/stop control to remove), but now **gated by session state**: `PlayerMotor` computes `_isRunEnabled` every fixed step from a new `Core.Services.IGameStateProvider`/`GameStateService` pair (same decoupling pattern as the existing `IRunSpeedProvider`/`RunSpeedService`). The player only auto-runs while `GameLoopState.Running`; during `Countdown`/`Paused`/`GameOver` velocity.x is forced to `0`. When no `IGameStateProvider` is registered (Sprint 2 stand-alone use), the player always runs — **zero behavior change** for that use case.
+
+### 14.3 Double Jump (strict)
+
+Sprint 2's jump-count logic (`_jumpsUsed` reset only on ground contact, capped at `config.MaxJumpCount = 2`) already satisfied "one jump grounded, one more airborne, then hard-ignore" — that logic is unchanged. What was added:
+
+- `RequestJump()` now explicitly sets `PlayerMovementState.Jumping` for the first jump and the new `PlayerMovementState.DoubleJumping` for the second, and both are gated by the same `_isRunEnabled` check from §14.2 (jump input is ignored during Countdown/Paused/GameOver — "Otherwise: Ignore Jump Input").
+- `Domain.PlayerMovementStateResolver.Resolve` gained a `jumpsUsed` parameter purely to keep reporting `DoubleJumping` correctly on every subsequent `FixedUpdate` while still rising after the second jump (not just on the input frame).
+- Jump availability resets **only** via `PlayerGroundDetector.IsGrounded` becoming true again (§14.4) — landing on ground, a static platform, or a moving platform all count identically, since they're all just colliders on the configured ground layer.
+
+### 14.4 Ground Detection (stable, no false positives, moving-platform-ready)
+
+`PlayerGroundDetector` was rewritten from a static `Physics2D.OverlapCircle` to a downward `Physics2D.CircleCast` (`config.GroundCheckDistance`, new field) that additionally rejects any hit whose surface normal isn't sufficiently upward-facing (`hit.normal.y >= config.MinGroundNormalY`, new field, default `0.5`) — this is what prevents a wall or the underside of a platform from ever being reported as "ground". The detector now also exposes `GroundCollider` (the specific collider supporting the player), consumed by `PlayerMotor` to look for a new optional capability, `Core.Platforms.IMovingPlatform` (`FrameDelta` per frame), and carry the player along with it via `Rigidbody2D.position += platform.FrameDelta`. A concrete `Core.Platforms.MovingPlatform` reference implementation (ping-pong between two local offsets) is included and ready to drop onto any Collider2D on the ground layer — **no player-code changes needed** to support it, but no such prefab has been added to `WorldGenerationConfig`/chunk content yet (no platform art exists this sprint; tracked in §15).
+
+### 14.5 Input
+
+No changes — `PlayerInputReader` already implemented exactly the requested device support (Touchscreen primary touch, Mouse left button, Keyboard Space compiled only for `UNITY_EDITOR || DEVELOPMENT_BUILD`) and the "grounded → first jump / airborne + second available → second jump / otherwise ignore" logic already lived correctly in `PlayerMotor.RequestJump()`, separate from input polling. Only the new run/jump gating (§14.2/14.3) was layered on top of the existing `RequestJump()` entry point.
+
+### 14.6 Animation
+
+`PlayerAnimatorController.controller` gained one parameter (`DoubleJumpTrigger`, trigger) and one state (`DoubleJump`), wired with the same shape as the existing `Jump` state: `AnyState --DoubleJumpTrigger--> DoubleJump --(VerticalVelocity < 0)--> Fall`. Combined with the pre-existing `Idle`/`Run`/`Jump`/`Fall`/`Land` states, all five requested animation states (Run, Jump, Double Jump, Fall, Land) now exist. Every state still uses an empty placeholder `Motion` (per Sprint 2's "no final art/animations yet" note) — swapping in real clips is a data-only change in-Editor, no controller-graph rework needed. `PlayerAnimatorDriver` now fires `DoubleJumpTrigger` on the `DoubleJumping` state and excludes it from the "grounded" bool alongside `Jumping`/`Falling`.
+
+### 14.7 Player State
+
+`Domain.PlayerMovementState` gained `Countdown`, `DoubleJumping`, and `GameOver` (existing `Idle`, `Running`, `Jumping`, `Falling`, `Landing` kept as-is) — covering every state in the brief. `PlayerMotor.ResolveMovementState()` gives `Countdown`/`GameOver` priority over the physics-derived result whenever a `GameLoopState` provider reports those session states, so the player visibly holds still during the countdown and after the run ends even if physics is still settling.
+
+### 14.8 Future Compatibility
+
+No mechanic-specific code was added for Dash/Slide/Wall Jump/Flying Carpet/Mount/Power-Ups/Boosts (none are specified in P001–P050 or this brief), but the extension points now in place are:
+
+- `IGameStateProvider`/`GameStateService` and `IRunSpeedProvider`/`RunSpeedService` mean any future system that needs to react to session state or drive speed (e.g. a Boost) plugs in without PlayerController referencing it.
+- `GameSpeedController.ApplyTemporaryModifier` (Sprint 3 core) is already the designated hook for a future Boost System.
+- `IMovingPlatform` generalizes to "any surface that moves the player" — a Flying Carpet or Mount could implement it (or a parenting variant) to reuse the exact same ground-carrying code path.
+- `PlayerMovementState`/`GameLoopState` are plain enums with room to grow (`Dashing`, `Sliding`, `WallJumping`, ... can be appended without breaking existing switches, since none of the resolvers use exhaustive `switch` — only equality checks).
+- `PlayerMotor.RequestJump()`'s jump-count gate is generic (`config.MaxJumpCount`) — a future triple-jump power-up is a config change, not a code change.
+
+### 14.9 Files Added / Changed
+
+**New:** `Domain` — none (existing files extended, see below). `Core/Services/IGameStateProvider.cs`, `GameStateService.cs`. `Core/Platforms/IMovingPlatform.cs`, `MovingPlatform.cs`. `Features/EndlessRunner/Configuration/CountdownConfig.cs`. `Features/EndlessRunner/GameLoop/CountdownController.cs`, `CountdownView.cs`. `Settings/CountdownConfig.asset`.
+
+**Extended (not replaced):** `Domain/PlayerMovementState.cs` (+3 members), `Domain/PlayerMovementStateResolver.cs` (+`jumpsUsed` param), `Domain/GameLoopState.cs` (+1 member), `Features/PlayerController/PlayerGroundDetector.cs` (CircleCast rewrite), `PlayerMovementConfig.cs` (+2 fields), `PlayerMotor.cs` (state gating, moving-platform delta, strict double-jump state), `PlayerAnimatorDriver.cs` (+DoubleJump trigger), `PlayerDebugView.cs` (+jumps-used line), `Features/EndlessRunner/GameLoop/GameLoopController.cs` (Countdown state + `IGameStateProvider`), `RunnerDebugView.cs` (+countdown line), `Animations/PlayerAnimatorController.controller` (+state, +parameter, +2 transitions), `Scenes/Gameplay.unity` (+`CountdownController` on `GameplaySystems`, +new `RunnerHUD` GameObject).
+
+### 14.10 Build Verification (Addendum)
+
+- **Offline compile:** all project `.cs` files (now **65**, up from 58) recompiled together via `dotnet build` after extending `.compile_check/Shims/UnityEngineShim.cs` with the additional real-Unity surface this addendum needed: `Physics2D.CircleCast`/`RaycastHit2D`, `Rigidbody2D.position`, `Vector2`/`Vector3` arithmetic operators, `Mathf.CeilToInt`/`PingPong`, `Time.time`, `Screen`, `GUIStyle`/`GUISkin`/`TextAnchor`/`FontStyle`, and `Color.white`. **Result: Build succeeded, 0 errors, 0 warnings.**
+- **YAML validation:** `Gameplay.unity` (29 top-level documents, no duplicate anchors) and `PlayerAnimatorController.controller` (16 documents, up from 13) both re-validated with the same fileID/guid cross-reference script used in §11 — **0 dangling references** across the modified scene, controller, new `CountdownConfig.asset`, and `Player.prefab`.
+
+## 15. Remaining TODOs (Addendum)
+
+8. **Countdown UI is an `OnGUI` placeholder** (§14.1) — replace with a Canvas + TextMeshPro HUD once the Editor is available; `CountdownController`'s public `DisplayText`/`SecondsChanged`/`Finished` API was designed so this is a UI-only change.
+9. **No moving-platform prefab exists yet** (§14.4) — `Core.Platforms.MovingPlatform` is implemented and consumed by `PlayerMotor`, but no `WorldGenerationConfig`/chunk-content entry uses it yet since no platform art exists this sprint.
+10. **`DoubleJump` Animator state uses an empty placeholder motion**, same caveat as every other state since Sprint 2 — swap in real clips once available.
+11. **Verify the Countdown/Restart auto-chain and strict double-jump behavior in Play Mode** once the Editor is available — this is exactly the kind of runtime-feel tuning (countdown pacing, jump forces, ground-check tolerances) that can't be judged from an offline compile alone.
+
+---
+
+## 16. Git Workflow
 
 | Item | Value |
 |---|---|
-| Commit hash | `e947768fdf6831d3b1f4cc6527421f4d905967f0` |
-| Commit message | `Sprint 3 - Endless Runner Core` |
+| Commit hash | `e947768fdf6831d3b1f4cc6527421f4d905967f0` (Endless Runner Core) then `7ead9c268f411d57186e9e0c63e546edd5d0b151` (Race Start / Double Jump addendum) |
+| Commit message | `Sprint 3 - Endless Runner Core` then `Sprint 3 addendum - Race start, auto run, strict double jump, player state machine` |
 | Branch | `main` |
 | Push status | Pushed to `origin/main` |
 
-Sprint 3 is complete within the constraints above. Stopping here. Waiting for Sprint 4.
+Sprint 3, including the Race Start / Double Jump / Player State addendum, is complete within the constraints above. Stopping here. Waiting for Sprint 4.
