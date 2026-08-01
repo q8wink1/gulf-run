@@ -22,6 +22,11 @@ MonoBehaviour:
   rewardScreenSeconds: 6
   rewardCounterAnimationSeconds: 1.5
   victoryMusicClip: {fileID: 0}
+  championFanfareClip: {fileID: 0}
+  confettiParticleCount: 40
+  confettiFallSpeed: 0.25
+  flagWaveAmplitudeDegrees: 12
+  flagWaveFrequencyHz: 0.5
   coinRewardMultiplier: 1
   bonusCoinsByPosition:
   - 100

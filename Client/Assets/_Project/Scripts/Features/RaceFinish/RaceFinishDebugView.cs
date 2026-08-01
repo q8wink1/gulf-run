@@ -45,7 +45,7 @@ namespace GulfRun.Features.RaceFinish
             RaceStandingsTracker standings = RaceStandingsTracker.Instance;
             int localId = transport != null ? transport.LocalConnectionId : -1;
 
-            Line($"[Race Finish] Ceremony Phase: {(standings != null ? standings.CurrentPhase.ToString() : "n/a")}");
+            Line($"[Race Finish] Ceremony Phase (host, synchronized): {(standings != null ? standings.CurrentPhase.ToString() : "n/a")}  |  Local View: {(standings != null ? standings.LocalDisplayPhase.ToString() : "n/a")}");
 
             if (standings != null && standings.LiveResults.TryGetValue(localId, out PlayerRaceResult result))
             {

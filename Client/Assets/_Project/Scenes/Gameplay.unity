@@ -771,6 +771,7 @@ GameObject:
   - component: {fileID: 500600008}
   - component: {fileID: 500600010}
   - component: {fileID: 500600012}
+  - component: {fileID: 500600014}
   m_Layer: 0
   m_Name: RaceFinishSystems
   m_TagString: Untagged
@@ -831,6 +832,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2} # RaceFinishConfig asset GUID
+  flagCatalog: {fileID: 11400000, guid: 042278d72ede4d2eaadda8e6e7ec0190, type: 2} # FlagCatalogConfig asset GUID
 --- !u!114 &500600008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -870,3 +872,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showOnScreenDebug: 1
   panelX: 1810
+--- !u!114 &500600014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500600000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0236dfd18b904956b5a30c48ad3c23e1, type: 3} # CeremonySkipWaitingView script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 

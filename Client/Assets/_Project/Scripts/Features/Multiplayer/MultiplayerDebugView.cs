@@ -22,6 +22,9 @@ namespace GulfRun.Features.Multiplayer
         [SerializeField] private bool showOnScreenDebug = true;
         [SerializeField] private int panelX = 460;
 
+        private static readonly GulfCountry[] _debugBotCountries = (GulfCountry[])System.Enum.GetValues(typeof(GulfCountry));
+        private static int _simulatedBotCount;
+
         private void OnGUI()
         {
             if (!showOnScreenDebug)
@@ -114,7 +117,13 @@ namespace GulfRun.Features.Multiplayer
         {
             if (MatchTransportService.Current is LocalLoopbackTransport loopback)
             {
-                MatchParticipant bot = loopback.SimulateRemoteJoin(LocalPlayerIdentity.CreateLocal("Bot"));
+                // Cycle through every GulfCountry so repeated test joins exercise
+                // the Victory Ceremony's national-flag-per-player display (Sprint
+                // 7 addendum) with visibly distinct flags, not four identical ones.
+                GulfCountry botCountry = _debugBotCountries[_simulatedBotCount % _debugBotCountries.Length];
+                _simulatedBotCount++;
+
+                MatchParticipant bot = loopback.SimulateRemoteJoin(LocalPlayerIdentity.CreateLocal("Bot", botCountry));
                 loopback.SimulateRemoteReady(bot.Identity.ConnectionId, PlayerReadyState.Ready);
             }
         }

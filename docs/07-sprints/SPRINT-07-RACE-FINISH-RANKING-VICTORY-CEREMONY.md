@@ -74,11 +74,10 @@ Once `FinalizeRace()` runs, the host broadcasts `MatchState.Finished` then drive
 `PodiumCeremonyView` (`OnGUI`, reads only `RaceStandingsTracker`):
 
 - **Top 3 together** — 1st centered, 2nd on the left platform, 3rd on the right platform; **4th place is never drawn** (the loop only ever looks up `FinishPosition` 1/2/3).
-- **1st Place** — center position, labelled "CHAMPION (Large Trophy)", with a continuous vertical bounce (`Mathf.Sin(Time.time * 3f) * 10f`) standing in for the "Champion Animation" until real animation assets exist.
-- **2nd Place** — "SILVER MEDAL", left platform. **3rd Place** — "BRONZE MEDAL", right platform.
-- **Automatic playback** — `RaceFinishAuthority.TickCeremony` auto-advances after `PodiumCeremonySeconds` (default 6s).
-- **Skip button** — any client's `RequestSkipRaceEndPhase()` sets a host-side flag that immediately advances the *current* phase for **everyone** (a single participant's skip is enough, matching "players stay together").
-- **Victory music** — `AudioManager.PlayMusic`/`StopMusic` (new looping music `AudioSource`, separate from the existing one-shot SFX source so a track is never cut short by an unrelated SFX call), started on entering `Podium` and stopped on leaving it, driven by `RaceFinishConfig.VictoryMusicClip` (currently unassigned — see §11).
+- **1st Place** — center position, Golden Trophy, ceremony-only Gulf Bisht overlay, national flag, golden confetti, and a Champion celebration bounce. **2nd Place** — Silver Medal, national flag, celebration pulse, left platform. **3rd Place** — Bronze Medal, national flag, celebration pulse, right platform. See §15 for the full Sprint 7 addendum covering all of these.
+- **Automatic playback** — `RaceFinishAuthority.TickCeremony` auto-advances after `PodiumCeremonySeconds` (default 6s), identically for every client — this part is unchanged by §15's individual-skip addendum.
+- **Skip button** — **updated by the Sprint 7 addendum (§15.4):** originally any single client's skip advanced the phase for everyone; it now only ever affects that one client's own view, never anyone else's.
+- **Victory music** — `AudioManager.PlayMusic`/`StopMusic` (new looping music `AudioSource`, separate from the existing one-shot SFX source so a track is never cut short by an unrelated SFX call), started on entering `Podium` and stopped on leaving it, driven by `RaceFinishConfig.VictoryMusicClip` (currently unassigned — see §11). §15 adds a second, distinct one-shot `ChampionFanfareClip` for the champion specifically.
 
 ### 5.1 Camera movement
 
@@ -90,7 +89,7 @@ Once `FinalizeRace()` runs, the host broadcasts `MatchState.Finished` then drive
 
 - **Privacy ("players do not see other players' reward totals")**: every client receives every player's breakdown (no unicast channel exists on `IMatchTransport` today — see §11), but `RewardScreenView` only ever looks up the entry matching `IMatchTransport.LocalConnectionId`, so the privacy requirement is enforced at the presentation layer. This is a documented, deliberate simplification, not an oversight.
 - **Animated counters**: Coins Collected, Bonus Coins, Rank Points, Experience, and Total Reward each animate smoothly from 0 via `RewardCounterAnimation.EvaluateInt`, a pure linear-easing function over `RewardCounterAnimationSeconds` (default 1.5s) driven by the view's own local phase timer.
-- **Skip button** — same `RequestSkipRaceEndPhase()` mechanism as the Podium phase.
+- **Skip button** — same mechanism as the Podium phase; see §15.4 for the individual-skip addendum.
 - **Applying the reward**: `RaceRewardApplier` (presentation-free) subscribes to `RaceRewardCalculated`, filters to the local connection, and credits `EconomyManager.AddCoins(reward.TotalReward)` exactly once per race — `EconomyManager` gained a real (in-memory, non-persistent) `Coins` wallet + `AddCoins`/`CoinsChanged` this sprint specifically so this credit has somewhere real to go, reconciling Sprint 7 against P011's "reward amounts are placeholder-only, not yet defined" status: every number in `RaceFinishConfig`'s reward table is designer-editable data, never asserted as final game balance.
 
 ## 7. Return Flow (Lobby Return)
@@ -128,8 +127,8 @@ Every one of these is **host-authoritative**: clients only ever `ReportRaceProgr
 
 ## 11. Build Verification / Compiler Status
 
-- **Offline compile:** all **152** project `.cs` files (up from 130 after Sprint 6) recompiled together via `dotnet build .compile_check/CompileCheck.csproj` against `.compile_check/Shims/UnityEngineShim.cs`, extended this sprint with `AudioSource.loop`/`AudioSource.clip`, `Color.black`/`Color.yellow`/`Color.gray`, `GUI.Box`, and `Mathf.Sin` — real gaps in the shim (the ceremony/reward UI and champion-bounce animation needed them), not workarounds for anything wrong with the actual game code. **Result: Build succeeded, 0 errors, 0 warnings.**
-- **YAML/GUID validation:** `.compile_check/validate_yaml.py` (structural YAML parse) — all 3 new/changed files (`Boot.unity`, `Gameplay.unity`, `RaceFinishConfig.asset`) **OK**. `.compile_check/validate_yaml_refs.py` — **195** unique project `.meta` GUIDs (up from 171), **no duplicates**; the only two flagged references are the same pre-existing Unity built-in `RenderSettings` skybox/spot-cookie references documented as expected false positives since Sprint 4. `.compile_check/check_fileid_refs.py . Gameplay.unity Boot.unity RaceFinishConfig.asset` — **"ALL 3 FILES: fileID/guid references OK (195 known guids in project)."**
+- **Offline compile:** all **152** project `.cs` files (up from 130 after Sprint 6; **159** after the §14 addendum) recompiled together via `dotnet build .compile_check/CompileCheck.csproj` against `.compile_check/Shims/UnityEngineShim.cs`, extended this sprint with `AudioSource.loop`/`AudioSource.clip`, `Color.black`/`Color.yellow`/`Color.gray`, `GUI.Box`, and `Mathf.Sin` — real gaps in the shim (the ceremony/reward UI and champion-bounce animation needed them), not workarounds for anything wrong with the actual game code. **Result: Build succeeded, 0 errors, 0 warnings.**
+- **YAML/GUID validation:** `.compile_check/validate_yaml.py` (structural YAML parse) — all 3 new/changed files (`Boot.unity`, `Gameplay.unity`, `RaceFinishConfig.asset`) **OK**. `.compile_check/validate_yaml_refs.py` — **195** unique project `.meta` GUIDs (up from 171; **203** after the §14 addendum), **no duplicates**; the only two flagged references are the same pre-existing Unity built-in `RenderSettings` skybox/spot-cookie references documented as expected false positives since Sprint 4. `.compile_check/check_fileid_refs.py . Gameplay.unity Boot.unity RaceFinishConfig.asset` — **"ALL 3 FILES: fileID/guid references OK (195 known guids in project)."** (see §14.6 for the addendum's re-verification).
 
 ## 12. Scene & Asset Wiring
 
@@ -148,14 +147,66 @@ Every one of these is **host-authoritative**: clients only ever `ReportRaceProgr
 6. **No final art/audio/animation assets** — `RaceFinishConfig.VictoryMusicClip` is unassigned, the Champion Animation is a placeholder sine-wave bounce, and the Podium/Reward Screens are `OnGUI` placeholders per the project's established "functional now, UI Toolkit later" policy (see `docs/02-architecture/TECHNICAL_STACK.md`) — same status as every prior sprint's UI.
 7. Carries forward all unresolved Sprint 1–6 items (Unity 6 LTS install still only Hub; ADR-0001 still Proposed, not Accepted; no Lobby/Waiting Room UI scene; ping always 0 under the loopback transport; bundle IDs; UI framework ADR; no real "use weapon" input binding; no lane-change axis).
 
-## 14. Git Workflow
+## 14. Sprint 7 Addendum — Victory Ceremony Enhancements
+
+A follow-up requirement, delivered additively on top of the sections above with **no rewrite of Sprint 7** (every file from §1–§13 is unchanged except where explicitly noted): national flags, a fully dressed-up 1st place (Golden Trophy, ceremony-only Gulf Bisht, golden confetti, special victory music), celebration animations for 2nd/3rd, and a corrected individual-skip rule.
+
+### 14.1 National Flags
+
+- **`GulfCountry`** (new Domain enum): the six GCC nations GulfRun's official maps already represent (`Design/GDD/P006-MAP-SYSTEM-v1.0.md` §3 — Riyadh/Saudi Arabia, Jahra/Kuwait, Dubai/UAE, Doha/Qatar, Manama/Bahrain, Muscat/Oman). `Design/GDD/P020-PLAYER-PROFILE-SYSTEM-v1.0.md` marks a profile "Country" field **"Future"**; this addendum's explicit flag requirement supersedes that placeholder status the same way Sprint 7's reward table superseded P011's "not yet defined" note — every value here is real, working data, not another "Future" stub.
+- **`PlayerIdentity.Country`** (new field, additive constructor parameter): the player's selected nationality now travels with their identity through the existing join/participant pipeline — no new networking surface was needed since `PlayerIdentity` is already replicated to every client as part of `MatchParticipant`.
+- **`SessionManager.LocalPlayerCountry`** (new serialized field + `SetLocalPlayerCountry`): stands in for a country-select screen that does not exist yet, the same "serialized default until real UI exists" pattern as `SessionManager`'s existing hardcoded `"Host"` display name in `MultiplayerDebugView`. `MultiplayerDebugView`'s "Simulate Remote Join" button now cycles every simulated bot through all six countries, so the flag ceremony is testable end-to-end today.
+- **`FlagCatalogConfig`** (new ScriptableObject, `Settings/FlagCatalogConfig.asset`): one entry per `GulfCountry` (3-letter code + placeholder color + an unassigned `Sprite` slot for future real flag art) — the same "one catalog ScriptableObject, no hardcoded per-item data in code" convention as `WeaponCatalogConfig`/`TrapCatalogConfig`.
+- **Gentle animation**: `PodiumCeremonyView` draws each finisher's flag behind their podium box and sways it side-to-side via the shared pure `CelebrationAnimation.EvaluateOffset` helper (amplitude/frequency both configurable on `RaceFinishConfig`) — "flags animate gently during the ceremony."
+
+### 14.2 First Place — Champion Presentation
+
+- **Golden Trophy** — the 1st-place box's medal label now reads "Golden Trophy" (previously "Large Trophy").
+- **Traditional Gulf Bisht (cosmetic, ceremony-only)** — rendered as a single label above the champion's box, drawn *only* while this client's own ceremony view (`RaceStandingsTracker.LocalDisplayPhase`, §14.4) is `Podium`. Because it is derived every frame from that flag rather than toggled by a separate timer, it is automatically gone — for this client — the instant the ceremony moves on or is individually skipped, with no separate "remove the Bisht" step to forget.
+- **Champion celebration animation** — the existing bounce, now driven by the shared `CelebrationAnimation` pure function instead of an inline `Mathf.Sin` call (removing the last piece of duplicated oscillation math in the view).
+- **Golden confetti** — new pure `ConfettiSimulation`/`ConfettiParticle` Domain types: a deterministic, stateless "N particles, each a pure function of index + elapsed time" simulation (same shape as `RewardCounterAnimation`), rendered as small golden `GUI.Box` rectangles behind the champion. Particle count and fall speed are `RaceFinishConfig` fields; a real particle system replaces this the moment VFX assets exist.
+- **Special victory music** — `RaceFinishConfig.ChampionFanfareClip` (new, optional): a one-shot fanfare played via `AudioManager.PlayOneShot` the instant the champion's Podium view begins, layered on top of (and distinct from) the existing looping `VictoryMusicClip`.
+
+### 14.3 Second & Third Place
+
+Both already had their medal label and platform position (§5); this addendum adds, to each: a national flag (§14.1) and a celebration pulse — the same shared `CelebrationAnimation` function as the champion's bounce, with a smaller amplitude/faster-settling feel so the champion still reads as the visually "biggest" celebration.
+
+### 14.4 Ceremony Rules — Individual Skip
+
+The original Sprint 7 skip button (§5/§6) advanced the current phase **for every player** the instant any one participant pressed it. The addendum's explicit rule — **"players may skip the ceremony individually; skipping does not interrupt other players"** — is a real behavior change, not just a description update:
+
+- **`CeremonySkipProgression`** (new, pure Domain): each client tracks its own ceremony "rank" (Podium → Reward → done) independently of the host-broadcast `RaceEndPhase`. `AdvanceRank` moves a client's own rank forward on Skip; `SyncRank` lets an incoming host phase change pull a client's rank forward but never backward (so a client that skipped ahead of the host stays ahead until the host catches up).
+- **`RaceStandingsTracker.LocalDisplayPhase`** (new property): the per-client "what should I be showing right now" phase, computed from the rank above. `PodiumCeremonyView` and `RewardScreenView` were switched to render against this instead of the shared `CurrentPhase` — so one client's skip changes only what that client sees, never any other client's.
+- **`RaceFinishAuthority.HandleSkipRequested`** (changed): a skip request from one connection no longer force-advances the shared phase. It is recorded per-connection, and the host's clock only ever advances early once **every currently connected participant** has independently chosen to skip — which by definition interrupts nobody, since everyone already opted in. The normal duration-based auto-advance (§5/§6) is completely unaffected by this change.
+- **`CeremonySkipWaitingView`** (new, tiny `OnGUI` placeholder): shown only to a player who has individually skipped all the way through the ceremony while the host's synchronized ceremony is still running for everyone else, so a fully-skipped player sees confirmation ("Ceremony skipped — returning to lobby shortly...") instead of a blank screen.
+- **Debug**: `RaceFinishDebugView`'s ceremony-phase line now shows both the host's synchronized phase and this client's own `LocalDisplayPhase` side by side.
+
+### 14.5 Code Quality
+
+- **No duplicated logic**: one `CelebrationAnimation.EvaluateOffset` function now drives the champion bounce, the 2nd/3rd place pulses, *and* the flag sway — previously the bounce was an inline `Mathf.Sin` call with no reuse.
+- **No hardcoded values**: confetti particle count/fall speed and flag sway amplitude/frequency are new `RaceFinishConfig` fields; every `GulfCountry`'s code/placeholder color/sprite lives in `FlagCatalogConfig`, not in code.
+- **SOLID**: the individual-skip fix is entirely a Domain (`CeremonySkipProgression`) + `RaceStandingsTracker` change — neither `PodiumCeremonyView` nor `RewardScreenView` gained any new responsibility, they just read a different (already-existing-shape) property.
+- **Honest placeholders, consistent with the rest of the project**: `FlagCatalogConfig.FlagEntry.FlagSprite` and `RaceFinishConfig.ChampionFanfareClip` are left unassigned (no final art/audio — same status as `VictoryMusicClip` since §5); the Bisht and Golden Trophy are text labels, not modeled cosmetics, since no networked `Player.prefab` avatar exists in any scene to attach them to (carried-forward TODO #4, unchanged by this addendum).
+
+### 14.6 Build Verification (Addendum)
+
+- **Offline compile:** `dotnet build .compile_check/CompileCheck.csproj` — all **159** project `.cs` files (up from 152). **Result: Build succeeded, 0 errors, 0 warnings.** The shim gained one addition: `GUI.color` (get/set), needed for the flag/confetti tint calls.
+- **GUID/reference validation:** `.compile_check/check_fileid_refs.py . Gameplay.unity Boot.unity RaceFinishConfig.asset FlagCatalogConfig.asset` — **"ALL 4 FILES: fileID/guid references OK (203 known guids in project)"** (up from 195; 8 new GUIDs for the 7 new scripts + 1 new `FlagCatalogConfig.asset`).
+
+### 14.7 Remaining TODOs (Addendum-specific, additive to §13)
+
+1. `FlagCatalogConfig.FlagEntry.FlagSprite` and `RaceFinishConfig.ChampionFanfareClip` are unassigned — same "no final art/audio" status as every other placeholder clip/sprite in the project.
+2. The Bisht/Golden Trophy exist only as ceremony text labels — a real cosmetic overlay needs a networked `Player.prefab` avatar to attach to, which does not exist yet (§13 TODO #4).
+3. `SessionManager.LocalPlayerCountry` has no selection UI yet (P020 "Country: Future") — it is a real, working field today, just defaulted rather than player-chosen until a country-select screen exists.
+4. Confetti is an `OnGUI` rectangle simulation, not a real particle system — replaced the moment VFX assets/Editor access exist, same posture as the rest of this sprint's presentation layer.
+
+## 15. Git Workflow
 
 | Item | Value |
 |---|---|
-| Commit hash | `abba9e63dce938fc87256c1a2a0875e1a2c9ce1b` |
-| Commit message | `Sprint 7 - Race Finish, Ranking & Victory Ceremony` |
+| Commit hash | `abba9e63dce938fc87256c1a2a0875e1a2c9ce1b` (Sprint 7 initial); addendum commit hash: *(filled in below after commit)* |
+| Commit message | `Sprint 7 - Race Finish, Ranking & Victory Ceremony`; addendum: `Sprint 7 addendum - Victory Ceremony flags, champion presentation, individual skip` |
 | Branch | `main` |
-| Files changed | 58 files changed, 2284 insertions(+), 4 deletions(-) |
-| Push status | ✅ Pushed to `origin/main` (`https://github.com/q8wink1/gulf-run.git`), fast-forward `af5d86e..abba9e6`. Verified via `git status` ("Your branch is up to date with 'origin/main'", working tree clean) and `git log`. |
+| Push status | ✅ Sprint 7 initial pushed to `origin/main` (`https://github.com/q8wink1/gulf-run.git`), fast-forward `af5d86e..abba9e6`. Addendum push status recorded below after commit. |
 
-Sprint 7 is complete within the constraints above. Stopping here. Waiting for Sprint 8.
+Sprint 7 (including this addendum) is complete within the constraints above. Stopping here. Waiting for Sprint 8.

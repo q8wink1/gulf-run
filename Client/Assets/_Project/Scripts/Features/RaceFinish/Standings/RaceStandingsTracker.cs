@@ -27,7 +27,26 @@ namespace GulfRun.Features.RaceFinish.Standings
         /// <summary>Null until the race has fully ended; then the complete, final 1..N ranking.</summary>
         public IReadOnlyList<PlayerRaceResult> FinalResults { get; private set; }
 
+        /// <summary>The host-broadcast, synchronized ceremony phase — identical for every client. Debug/analytics should read this; ceremony views should read <see cref="LocalDisplayPhase"/> instead (see its doc comment).</summary>
         public RaceEndPhase CurrentPhase { get; private set; } = RaceEndPhase.None;
+
+        private int _localSkipRank;
+
+        /// <summary>
+        /// This client's own progress through the ceremony — starts in
+        /// lockstep with <see cref="CurrentPhase"/> but only ever moves
+        /// forward when the local player presses Skip
+        /// (<see cref="RequestLocalSkip"/>), independent of the host's
+        /// synchronized clock (Sprint 7 addendum: "players may skip the
+        /// ceremony individually; skipping does not interrupt other
+        /// players"). Ceremony presentation views should render against
+        /// this, not <see cref="CurrentPhase"/>, so one client's skip never
+        /// depends on — or affects — any other client's view.
+        /// </summary>
+        public RaceEndPhase LocalDisplayPhase => CeremonySkipProgression.PhaseOfRank(_localSkipRank);
+
+        /// <summary>Advances this client's own ceremony progress by one step (Podium → Reward → done/lobby-wait). Never touches any other player's view.</summary>
+        public void RequestLocalSkip() => _localSkipRank = CeremonySkipProgression.AdvanceRank(_localSkipRank);
 
         private void OnEnable()
         {
@@ -77,7 +96,11 @@ namespace GulfRun.Features.RaceFinish.Standings
 
         private void HandleRaceRewardCalculated(RaceRewardBreakdown reward) => _rewards[reward.ConnectionId] = reward;
 
-        private void HandleRaceEndPhaseChanged(RaceEndPhase phase) => CurrentPhase = phase;
+        private void HandleRaceEndPhaseChanged(RaceEndPhase phase)
+        {
+            CurrentPhase = phase;
+            _localSkipRank = CeremonySkipProgression.SyncRank(_localSkipRank, CeremonySkipProgression.RankOf(phase));
+        }
 
         private void HandleMatchStateChanged(MatchState state)
         {
@@ -91,6 +114,7 @@ namespace GulfRun.Features.RaceFinish.Standings
             _rewards.Clear();
             FinalResults = null;
             CurrentPhase = RaceEndPhase.None;
+            _localSkipRank = 0;
         }
     }
 }

@@ -44,6 +44,7 @@ namespace GulfRun.Features.RaceFinish.Authority
         private readonly Dictionary<int, RaceProgressReport> _lastKnownProgress = new Dictionary<int, RaceProgressReport>();
         private readonly Dictionary<int, double> _eliminationWarningStartSeconds = new Dictionary<int, double>();
         private readonly Dictionary<int, int> _lastBroadcastWarningSeconds = new Dictionary<int, int>();
+        private readonly HashSet<int> _skippedThisPhase = new HashSet<int>();
         private readonly List<int> _scratchIds = new List<int>();
 
         protected override void OnInitialize()
@@ -110,6 +111,7 @@ namespace GulfRun.Features.RaceFinish.Authority
             _lastKnownProgress.Clear();
             _eliminationWarningStartSeconds.Clear();
             _lastBroadcastWarningSeconds.Clear();
+            _skippedThisPhase.Clear();
 
             if (_transport == null)
             {
@@ -329,15 +331,38 @@ namespace GulfRun.Features.RaceFinish.Authority
             _currentPhase = phase;
             _phaseElapsedSeconds = 0d;
             _skipRequestedThisPhase = false;
+            _skippedThisPhase.Clear();
             _transport.BroadcastRaceEndPhase(phase);
         }
 
+        /// <summary>
+        /// Sprint 7 addendum: "players may skip the ceremony individually;
+        /// skipping does not interrupt other players." An individual skip
+        /// only ever hides the ceremony for that one client locally (see
+        /// <c>Standings.RaceStandingsTracker.LocalDisplayPhase</c>) — the
+        /// host's shared clock (which every *other* client's presentation
+        /// still follows) only ever advances early once EVERY currently
+        /// connected participant has independently chosen to skip, which by
+        /// definition interrupts nobody.
+        /// </summary>
         private void HandleSkipRequested(int connectionId)
         {
-            if (_currentMatchState == MatchState.Finished && _currentPhase != RaceEndPhase.None)
+            if (_currentMatchState != MatchState.Finished || _currentPhase == RaceEndPhase.None)
             {
-                _skipRequestedThisPhase = true;
+                return;
             }
+
+            _skippedThisPhase.Add(connectionId);
+
+            foreach (MatchParticipant participant in _transport.Participants)
+            {
+                if (!_skippedThisPhase.Contains(participant.Identity.ConnectionId))
+                {
+                    return;
+                }
+            }
+
+            _skipRequestedThisPhase = true;
         }
     }
 }

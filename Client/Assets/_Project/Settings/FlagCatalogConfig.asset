@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d88e3f3de73e4a78a378073c046fd75c, type: 3}
+  m_Name: FlagCatalogConfig
+  m_EditorClassIdentifier: 
+  flags:
+  - country: 0
+    code: KSA
+    flagSprite: {fileID: 0}
+    placeholderColor: {r: 0.004, g: 0.322, b: 0.192, a: 1}
+  - country: 1
+    code: KWT
+    flagSprite: {fileID: 0}
+    placeholderColor: {r: 0.6, g: 0.047, b: 0.086, a: 1}
+  - country: 2
+    code: UAE
+    flagSprite: {fileID: 0}
+    placeholderColor: {r: 0.043, g: 0.043, b: 0.043, a: 1}
+  - country: 3
+    code: QAT
+    flagSprite: {fileID: 0}
+    placeholderColor: {r: 0.365, g: 0.031, b: 0.184, a: 1}
+  - country: 4
+    code: BHR
+    flagSprite: {fileID: 0}
+    placeholderColor: {r: 0.816, g: 0.024, b: 0.125, a: 1}
+  - country: 5
+    code: OMN
+    flagSprite: {fileID: 0}
+    placeholderColor: {r: 0.816, g: 0.412, b: 0.114, a: 1}

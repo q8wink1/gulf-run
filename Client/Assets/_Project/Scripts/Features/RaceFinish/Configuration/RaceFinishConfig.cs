@@ -48,6 +48,18 @@ namespace GulfRun.Features.RaceFinish.Configuration
         [Tooltip("Looping music played while the Podium Ceremony is active (optional).")]
         [SerializeField] private AudioClip victoryMusicClip;
 
+        [Header("Champion Presentation (Sprint 7 addendum)")]
+        [Tooltip("One-shot fanfare/sting played the instant the champion's Podium Ceremony begins, layered on top of the looping victory music — the \"Special victory music\" called for 1st place specifically (optional).")]
+        [SerializeField] private AudioClip championFanfareClip;
+        [Tooltip("Number of golden confetti particles simulated behind the champion during the Podium Ceremony.")]
+        [SerializeField] private int confettiParticleCount = 40;
+        [Tooltip("Downward fall speed of confetti particles, in effect-area heights per second.")]
+        [SerializeField] private float confettiFallSpeed = 0.25f;
+        [Tooltip("Degrees of gentle side-to-side sway applied to each national flag during the ceremony.")]
+        [SerializeField] private float flagWaveAmplitudeDegrees = 12f;
+        [Tooltip("Sway cycles per second for the national flag animation.")]
+        [SerializeField] private float flagWaveFrequencyHz = 0.5f;
+
         [Header("Reward Tuning (placeholder values — see Sprint 7 report re: P011 alignment)")]
         [Tooltip("Multiplier applied to raw coins collected before crediting the reward wallet. 1 = pass-through.")]
         [SerializeField] private float coinRewardMultiplier = 1f;
@@ -68,6 +80,11 @@ namespace GulfRun.Features.RaceFinish.Configuration
         public float RewardScreenSeconds => rewardScreenSeconds;
         public float RewardCounterAnimationSeconds => rewardCounterAnimationSeconds;
         public AudioClip VictoryMusicClip => victoryMusicClip;
+        public AudioClip ChampionFanfareClip => championFanfareClip;
+        public int ConfettiParticleCount => confettiParticleCount;
+        public float ConfettiFallSpeed => confettiFallSpeed;
+        public float FlagWaveAmplitudeDegrees => flagWaveAmplitudeDegrees;
+        public float FlagWaveFrequencyHz => flagWaveFrequencyHz;
         public float CoinRewardMultiplier => coinRewardMultiplier;
         public IReadOnlyList<int> BonusCoinsByPosition => bonusCoinsByPosition;
         public IReadOnlyList<int> RankPointsByPosition => rankPointsByPosition;

@@ -17,6 +17,12 @@ namespace GulfRun.Features.RaceFinish.Ceremony
     /// Contains no gameplay/economy logic — see
     /// <c>Features.RaceFinish.Rewards.RaceRewardApplier</c> for the one place
     /// the reward is actually applied to the wallet.
+    ///
+    /// Renders against <see cref="RaceStandingsTracker.LocalDisplayPhase"/>,
+    /// not the raw host-broadcast <see cref="RaceStandingsTracker.CurrentPhase"/>,
+    /// so a player who skipped the Podium sees their own reward counters
+    /// start immediately rather than waiting for the host's ceremony clock
+    /// (Sprint 7 addendum: individual skip never depends on other players).
     /// </summary>
     public sealed class RewardScreenView : MonoBehaviour
     {
@@ -30,7 +36,7 @@ namespace GulfRun.Features.RaceFinish.Ceremony
         private void Update()
         {
             RaceStandingsTracker standings = RaceStandingsTracker.Instance;
-            RaceEndPhase current = standings != null ? standings.CurrentPhase : RaceEndPhase.None;
+            RaceEndPhase current = standings != null ? standings.LocalDisplayPhase : RaceEndPhase.None;
 
             if (current != _lastPhase)
             {
@@ -48,7 +54,7 @@ namespace GulfRun.Features.RaceFinish.Ceremony
         {
             RaceStandingsTracker standings = RaceStandingsTracker.Instance;
             IMatchTransport transport = MatchTransportService.Current;
-            if (standings == null || transport == null || standings.CurrentPhase != RaceEndPhase.Reward)
+            if (standings == null || transport == null || standings.LocalDisplayPhase != RaceEndPhase.Reward)
             {
                 return;
             }
@@ -76,6 +82,7 @@ namespace GulfRun.Features.RaceFinish.Ceremony
             if (GUI.Button(new Rect(Screen.width - 170f, Screen.height - 60f, 150f, 40f), "Skip >>"))
             {
                 transport.RequestSkipRaceEndPhase();
+                standings.RequestLocalSkip();
             }
         }
 

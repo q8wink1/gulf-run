@@ -22,6 +22,9 @@ namespace GulfRun.Features.Multiplayer.Session
     {
         [SerializeField] private NetworkSyncConfig config;
 
+        [Tooltip("The local player's selected nationality — shown as their national flag in the Victory Ceremony. No country-select UI exists yet (Sprint 7 addendum), so this serialized default stands in until one does.")]
+        [SerializeField] private GulfCountry localPlayerCountry = GulfCountry.SaudiArabia;
+
         private LobbyManager _lobby;
         private MatchManager _match;
 
@@ -29,6 +32,10 @@ namespace GulfRun.Features.Multiplayer.Session
         public bool IsHost { get; private set; }
         public bool IsMatchmaking { get; private set; }
         public PlayerIdentity LocalIdentity { get; private set; }
+        public GulfCountry LocalPlayerCountry => localPlayerCountry;
+
+        /// <summary>Sets the local player's selected nationality before creating/joining a match. The natural hook for a future country-select screen.</summary>
+        public void SetLocalPlayerCountry(GulfCountry country) => localPlayerCountry = country;
 
         protected override void OnInitialize()
         {
@@ -45,7 +52,7 @@ namespace GulfRun.Features.Multiplayer.Session
             }
 
             IsMatchmaking = true;
-            LocalIdentity = LocalPlayerIdentity.CreateLocal(displayName);
+            LocalIdentity = LocalPlayerIdentity.CreateLocal(displayName, localPlayerCountry);
 
             int maxPlayers = config != null ? config.MaxPlayers : 4;
             MatchTransportService.Current.StartHost(LocalIdentity, maxPlayers);
@@ -70,7 +77,7 @@ namespace GulfRun.Features.Multiplayer.Session
             }
 
             IsMatchmaking = true;
-            LocalIdentity = LocalPlayerIdentity.CreateLocal(displayName);
+            LocalIdentity = LocalPlayerIdentity.CreateLocal(displayName, localPlayerCountry);
 
             MatchTransportService.Current.JoinAsClient(LocalIdentity, joinCode);
 
