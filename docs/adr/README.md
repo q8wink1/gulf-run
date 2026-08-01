@@ -14,7 +14,9 @@ ADRs capture **normative** decisions that affect architecture, security, economy
 
 | ID | Title | Status |
 |----|-------|--------|
-| — | _(none yet — create ADR-0001 at M1 for Unity version / server language)_ | — |
+| [0001](0001-multiplayer-transport-abstraction.md) | Multiplayer Transport Abstraction for the Sprint 4 Foundation | Proposed |
+
+_(Unity version / server language ADR for M1 is still outstanding.)_
 
 ## Creating an ADR
 

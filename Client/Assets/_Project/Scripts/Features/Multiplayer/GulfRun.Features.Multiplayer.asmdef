@@ -1,7 +1,8 @@
 {
-    "name": "GulfRun.Core",
-    "rootNamespace": "GulfRun.Core",
+    "name": "GulfRun.Features.Multiplayer",
+    "rootNamespace": "GulfRun.Features.Multiplayer",
     "references": [
+        "GulfRun.Core",
         "GulfRun.Domain"
     ],
     "includePlatforms": [],
