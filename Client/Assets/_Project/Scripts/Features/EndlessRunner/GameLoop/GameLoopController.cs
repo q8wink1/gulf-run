@@ -25,7 +25,7 @@ namespace GulfRun.Features.EndlessRunner.GameLoop
     /// can react to Countdown/Running/GameOver without a direct reference.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class GameLoopController : SceneSingleton<GameLoopController>, IGameStateProvider
+    public sealed class GameLoopController : SceneSingleton<GameLoopController>, IGameStateProvider, IRaceProgressProvider
     {
         private GameSpeedController _speedController;
         private DistanceTracker _distanceTracker;
@@ -40,6 +40,11 @@ namespace GulfRun.Features.EndlessRunner.GameLoop
         public event Action<GameLoopState> StateChanged;
 
         GameLoopState IGameStateProvider.CurrentState => State;
+
+        /// <summary>Sprint 7: exposes this session's live distance/coins to the RaceFinish feature via <see cref="RaceProgressService"/>, without either feature referencing the other.</summary>
+        double IRaceProgressProvider.DistanceMeters => _distanceTracker != null ? _distanceTracker.DistanceMeters : 0d;
+
+        int IRaceProgressProvider.CoinsCollected => _scoreController != null ? _scoreController.CoinsCollected : 0;
 
         /// <summary>
         /// Optional override for tests/tooling. Defaults to
@@ -62,6 +67,7 @@ namespace GulfRun.Features.EndlessRunner.GameLoop
         private void OnEnable()
         {
             GameStateService.Current = this;
+            RaceProgressService.Current = this;
             _countdownController.Finished += HandleCountdownFinished;
         }
 
@@ -72,6 +78,11 @@ namespace GulfRun.Features.EndlessRunner.GameLoop
             if (ReferenceEquals(GameStateService.Current, this))
             {
                 GameStateService.Current = null;
+            }
+
+            if (ReferenceEquals(RaceProgressService.Current, this))
+            {
+                RaceProgressService.Current = null;
             }
         }
 

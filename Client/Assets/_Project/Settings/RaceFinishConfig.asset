@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ced850bf421a436c87b16519315c2506, type: 3}
+  m_Name: RaceFinishConfig
+  m_EditorClassIdentifier:
+  trackLengthMeters: 550
+  eliminationWarningGapMeters: 25
+  eliminationRecoveryGapMeters: 15
+  eliminationCountdownSeconds: 5
+  maxRaceDurationSeconds: 150
+  progressReportIntervalSeconds: 0.5
+  podiumCeremonySeconds: 6
+  rewardScreenSeconds: 6
+  rewardCounterAnimationSeconds: 1.5
+  victoryMusicClip: {fileID: 0}
+  coinRewardMultiplier: 1
+  bonusCoinsByPosition:
+  - 100
+  - 60
+  - 30
+  - 10
+  rankPointsByPosition:
+  - 50
+  - 25
+  - 10
+  - 0
+  experienceByPosition:
+  - 200
+  - 150
+  - 100
+  - 50
+  participationExperience: 25

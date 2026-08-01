@@ -11,6 +11,7 @@ namespace GulfRun.Core.Managers
     public sealed class AudioManager : Singleton<AudioManager>
     {
         private AudioSource _sfxSource;
+        private AudioSource _musicSource;
 
         protected override void OnInitialize()
         {
@@ -18,6 +19,12 @@ namespace GulfRun.Core.Managers
             // (Master, Music, SFX, Voice Chat) per the Settings System (P034).
             _sfxSource = gameObject.AddComponent<AudioSource>();
             _sfxSource.playOnAwake = false;
+
+            // Sprint 7: separate looping source for Victory Ceremony music,
+            // kept independent of one-shot SFX so a music track is never cut
+            // short by an unrelated PlayOneShot call.
+            _musicSource = gameObject.AddComponent<AudioSource>();
+            _musicSource.playOnAwake = false;
         }
 
         /// <summary>
@@ -34,6 +41,26 @@ namespace GulfRun.Core.Managers
             }
 
             _sfxSource.PlayOneShot(clip, volume);
+        }
+
+        /// <summary>Starts (or restarts) looping music playback — e.g. the Victory Ceremony track (Sprint 7). A no-op if <paramref name="clip"/> is null.</summary>
+        public void PlayMusic(AudioClip clip, float volume = 1f, bool loop = true)
+        {
+            if (clip == null || _musicSource == null)
+            {
+                return;
+            }
+
+            _musicSource.clip = clip;
+            _musicSource.volume = volume;
+            _musicSource.loop = loop;
+            _musicSource.Play();
+        }
+
+        /// <summary>Stops any currently playing music. A no-op if nothing is playing.</summary>
+        public void StopMusic()
+        {
+            _musicSource?.Stop();
         }
     }
 }

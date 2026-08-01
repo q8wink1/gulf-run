@@ -52,6 +52,14 @@ namespace GulfRun.Core.Networking
         public event Action<TrapTriggerEvent> TrapTriggerReported;
         public event Action<TrapTriggerEvent> TrapTriggerConfirmed;
 
+        public event Action<RaceProgressReport> RaceProgressReported;
+        public event Action<PlayerRaceResult> PlayerRaceResultReported;
+        public event Action<EliminationStatusEvent> EliminationStatusChanged;
+        public event Action<PlayerRaceResult[]> RaceResultsFinalized;
+        public event Action<RaceRewardBreakdown> RaceRewardCalculated;
+        public event Action<RaceEndPhase> RaceEndPhaseChanged;
+        public event Action<int> SkipRaceEndPhaseRequested;
+
         public void StartHost(PlayerIdentity hostIdentity, int maxParticipants)
         {
             if (IsActive)
@@ -141,6 +149,25 @@ namespace GulfRun.Core.Networking
 
         public void ConfirmTrapTrigger(TrapTriggerEvent confirmed) => TrapTriggerConfirmed?.Invoke(confirmed);
 
+        // --- Sprint 7: Race Finish, Ranking & Victory Ceremony. Same
+        // "this transport only relays" role as the Weapon/Trap blocks above —
+        // all finish/elimination/ranking/reward/ceremony-phase decisions live
+        // entirely in Features.RaceFinish.Authority.RaceFinishAuthority. ---
+
+        public void ReportRaceProgress(RaceProgressReport report) => RaceProgressReported?.Invoke(report);
+
+        public void BroadcastPlayerRaceResult(PlayerRaceResult result) => PlayerRaceResultReported?.Invoke(result);
+
+        public void BroadcastEliminationStatus(EliminationStatusEvent status) => EliminationStatusChanged?.Invoke(status);
+
+        public void BroadcastRaceResultsFinalized(PlayerRaceResult[] results) => RaceResultsFinalized?.Invoke(results);
+
+        public void BroadcastRaceReward(RaceRewardBreakdown reward) => RaceRewardCalculated?.Invoke(reward);
+
+        public void BroadcastRaceEndPhase(RaceEndPhase phase) => RaceEndPhaseChanged?.Invoke(phase);
+
+        public void RequestSkipRaceEndPhase() => SkipRaceEndPhaseRequested?.Invoke(LocalConnectionId);
+
         // --- Local-only test/demo hooks; not part of IMatchTransport ---
 
         public MatchParticipant SimulateRemoteJoin(PlayerIdentity identity)
@@ -168,6 +195,9 @@ namespace GulfRun.Core.Networking
         public void SimulateRemoteReady(int connectionId, PlayerReadyState state) => SetReadyState(connectionId, state);
 
         public void SimulateRemoteSnapshot(NetworkPlayerSnapshot snapshot) => SnapshotReceived?.Invoke(snapshot);
+
+        /// <summary>Test/demo-only: feeds a synthetic remote participant's race progress into the host, exercising finish/elimination logic without a real remote client.</summary>
+        public void SimulateRemoteRaceProgress(RaceProgressReport report) => RaceProgressReported?.Invoke(report);
 
         private void SetReadyState(int connectionId, PlayerReadyState state)
         {

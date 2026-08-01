@@ -73,6 +73,46 @@ namespace GulfRun.Core.Networking
         /// <summary>Authority-only: broadcasts a validated trigger (the trap instance was still active). Status effects are applied from this event alone.</summary>
         void ConfirmTrapTrigger(TrapTriggerEvent confirmed);
 
+        // --- Sprint 7: Race Finish, Ranking & Victory Ceremony sync. The
+        // race does not end at first place, so every participant's progress
+        // must be tracked until they either finish or are eliminated; only
+        // Features.RaceFinish.Authority.RaceFinishAuthority (host-only) ever
+        // decides a finish/elimination/final-ranking/ceremony-phase outcome,
+        // mirroring the "client reports, host confirms" shape Weapons/Traps
+        // already established. Returning to the lobby reuses the existing
+        // MatchState.Waiting broadcast below — no new message is needed,
+        // and since LobbyManager only clears its roster on an explicit
+        // leave/disconnect, every connected player simply stays put. ---
+
+        event Action<RaceProgressReport> RaceProgressReported;
+        event Action<PlayerRaceResult> PlayerRaceResultReported;
+        event Action<EliminationStatusEvent> EliminationStatusChanged;
+        event Action<PlayerRaceResult[]> RaceResultsFinalized;
+        event Action<RaceRewardBreakdown> RaceRewardCalculated;
+        event Action<RaceEndPhase> RaceEndPhaseChanged;
+        event Action<int> SkipRaceEndPhaseRequested;
+
+        /// <summary>Client: periodically reports local distance/coins so the host can detect a finish-line crossing or an elimination gap.</summary>
+        void ReportRaceProgress(RaceProgressReport report);
+
+        /// <summary>Authority-only: broadcasts one player's live resolution (finished or eliminated) the instant it happens. <see cref="PlayerRaceResult.FinishPosition"/> is -1 until the whole race ends.</summary>
+        void BroadcastPlayerRaceResult(PlayerRaceResult result);
+
+        /// <summary>Authority-only: broadcasts a player's live elimination warning/countdown/clear state.</summary>
+        void BroadcastEliminationStatus(EliminationStatusEvent status);
+
+        /// <summary>Authority-only: broadcasts the complete, final 1..N ranking once every participant has resolved. Fired exactly once per race.</summary>
+        void BroadcastRaceResultsFinalized(PlayerRaceResult[] results);
+
+        /// <summary>Authority-only: broadcasts one player's computed reward. Every client receives every player's breakdown; only the Reward Screen's local-connection filter enforces privacy (see <see cref="RaceRewardBreakdown"/>).</summary>
+        void BroadcastRaceReward(RaceRewardBreakdown reward);
+
+        /// <summary>Authority-only: broadcasts the current post-race presentation phase (Podium/Reward/None) so every client's ceremony stays in lockstep.</summary>
+        void BroadcastRaceEndPhase(RaceEndPhase phase);
+
+        /// <summary>Client: asks the host to advance the current Podium/Reward phase immediately (the Skip button). Any single participant's request advances the phase for everyone.</summary>
+        void RequestSkipRaceEndPhase();
+
         /// <summary>Client: asks the authority to resolve an Item Box touch. Never grants a weapon itself.</summary>
         void RequestWeaponPickup(WeaponPickupRequest request);
 
