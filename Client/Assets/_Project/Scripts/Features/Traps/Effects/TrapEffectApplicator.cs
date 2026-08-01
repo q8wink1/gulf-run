@@ -60,6 +60,13 @@ namespace GulfRun.Features.Traps.Effects
             // remote avatar exists today — Sprint 4/5/6 remaining TODO).
             // Still play feedback below so a trigger is never silent.
 
+            // Sprint 9 "Player Statistics: Traps Hit" hook — only for a hit
+            // against the local player, never a remote participant's.
+            if (_transport != null && hit.TargetConnectionId == _transport.LocalConnectionId)
+            {
+                PlayerStatEventService.RaiseLocalTrapHit();
+            }
+
             PlayImpactFeedback(definition);
         }
 

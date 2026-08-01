@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4da50277d254e58832e40c0f318bba6, type: 3}
+  m_Name: RewardCatalogConfig
+  m_EditorClassIdentifier: 
+  rewards:
+  - id: reward_coins_small
+    type: 0
+    displayName: 250 Coins
+    amount: 250
+    cosmeticId: 
+    placeholderColor: {r: 0.95, g: 0.75, b: 0.1, a: 1}
+  - id: reward_coins_large
+    type: 0
+    displayName: 1000 Coins
+    amount: 1000
+    cosmeticId: 
+    placeholderColor: {r: 0.95, g: 0.75, b: 0.1, a: 1}
+  - id: reward_gems_small
+    type: 1
+    displayName: 50 Gems
+    amount: 50
+    cosmeticId: 
+    placeholderColor: {r: 0.2, g: 0.8, b: 0.9, a: 1}
+  - id: reward_gems_large
+    type: 1
+    displayName: 200 Gems
+    amount: 200
+    cosmeticId: 
+    placeholderColor: {r: 0.2, g: 0.8, b: 0.9, a: 1}
+  - id: reward_skin_golden_falcon
+    type: 2
+    displayName: Golden Falcon Skin
+    amount: 0
+    cosmeticId: outfit_limited_edition_01
+    placeholderColor: {r: 0.85, g: 0.65, b: 0.13, a: 1}
+  - id: reward_outfit_champion
+    type: 3
+    displayName: Champion's Outfit
+    amount: 0
+    cosmeticId: outfit_seasonal_event_01
+    placeholderColor: {r: 0.9, g: 0.55, b: 0.1, a: 1}
+  - id: reward_pose_falcon_salute
+    type: 4
+    displayName: Falcon Salute Pose
+    amount: 0
+    cosmeticId: victorypose_falcon_01
+    placeholderColor: {r: 0.6, g: 0.4, b: 0.1, a: 1}
+  - id: reward_title_champion
+    type: 5
+    displayName: "\u201CChampion\u201D Title"
+    amount: 0
+    cosmeticId: 
+    placeholderColor: {r: 0.9, g: 0.75, b: 0.1, a: 1}
+  - id: reward_title_legend
+    type: 5
+    displayName: "\u201CLegend\u201D Title"
+    amount: 0
+    cosmeticId: 
+    placeholderColor: {r: 0.7, g: 0.2, b: 0.9, a: 1}
+  - id: reward_badge_weekend_warrior
+    type: 6
+    displayName: Weekend Warrior Badge
+    amount: 0
+    cosmeticId: 
+    placeholderColor: {r: 0.9, g: 0.4, b: 0.1, a: 1}
+  - id: reward_badge_top3
+    type: 6
+    displayName: Top 3 Finisher Badge
+    amount: 0
+    cosmeticId: 
+    placeholderColor: {r: 0.3, g: 0.7, b: 0.9, a: 1}
+  - id: reward_frame_gold
+    type: 7
+    displayName: Golden Profile Frame
+    amount: 0
+    cosmeticId: 
+    placeholderColor: {r: 0.85, g: 0.65, b: 0.13, a: 1}
+  - id: reward_effect_champion_aura
+    type: 8
+    displayName: Champion Aura Effect
+    amount: 0
+    cosmeticId: 
+    placeholderColor: {r: 0.6, g: 0.2, b: 0.9, a: 1}
+  - id: reward_cosmetic_limited_event
+    type: 9
+    displayName: Limited Event Cosmetic
+    amount: 0
+    cosmeticId: outfit_seasonal_event_01
+    placeholderColor: {r: 0.1, g: 0.8, b: 0.6, a: 1}

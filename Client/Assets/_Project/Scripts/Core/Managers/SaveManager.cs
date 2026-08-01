@@ -1,3 +1,4 @@
+using System;
 using GulfRun.Core.Save;
 using GulfRun.Domain;
 using UnityEngine;
@@ -78,9 +79,23 @@ namespace GulfRun.Core.Managers
             }
 
             string safeDisplayName = string.IsNullOrWhiteSpace(displayName) ? "Player" : displayName;
-            _account = new PlayerAccount(safeDisplayName, country);
+            _account = new PlayerAccount(safeDisplayName, country, GenerateNewPlayerId());
             HasAccount = true;
             return _account;
+        }
+
+        /// <summary>
+        /// Sprint 9: mints a permanent Player ID, once, alongside the
+        /// account itself. Human-friendly ("GR-XXXXXX") rather than a raw
+        /// GUID since it is shown directly on the Player Profile screen.
+        /// In-memory only today, exactly like the rest of this class —
+        /// swap for a real backend-assigned ID once accounts persist
+        /// server-side (see class remarks).
+        /// </summary>
+        private static PlayerId GenerateNewPlayerId()
+        {
+            string suffix = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpperInvariant();
+            return new PlayerId("GR-" + suffix);
         }
     }
 }

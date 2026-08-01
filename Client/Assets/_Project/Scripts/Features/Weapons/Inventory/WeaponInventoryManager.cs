@@ -190,6 +190,14 @@ namespace GulfRun.Features.Weapons.Inventory
             if (inventory.TryConsume(confirmed.Weapon, out _))
             {
                 InventoryChanged?.Invoke(confirmed.UserConnectionId);
+
+                // Sprint 9 "Player Statistics: Weapons Used" hook — only for
+                // the local player's own confirmed activation, never a
+                // remote participant's.
+                if (_transport != null && confirmed.UserConnectionId == _transport.LocalConnectionId)
+                {
+                    PlayerStatEventService.RaiseLocalWeaponUsed();
+                }
             }
         }
 

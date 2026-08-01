@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6753d7afbfb4bdb87d6ae3cede1dc9e, type: 3}
+  m_Name: LeagueCatalogConfig
+  m_EditorClassIdentifier: 
+  tiers:
+  - tier: 0
+    displayName: Bronze
+    trophyThreshold: 0
+    placeholderColor: {r: 0.55, g: 0.35, b: 0.2, a: 1}
+  - tier: 1
+    displayName: Silver
+    trophyThreshold: 100
+    placeholderColor: {r: 0.75, g: 0.75, b: 0.75, a: 1}
+  - tier: 2
+    displayName: Gold
+    trophyThreshold: 250
+    placeholderColor: {r: 0.95, g: 0.8, b: 0.2, a: 1}
+  - tier: 3
+    displayName: Platinum
+    trophyThreshold: 500
+    placeholderColor: {r: 0.6, g: 0.85, b: 0.85, a: 1}
+  - tier: 4
+    displayName: Diamond
+    trophyThreshold: 900
+    placeholderColor: {r: 0.3, g: 0.6, b: 0.95, a: 1}
+  - tier: 5
+    displayName: Master
+    trophyThreshold: 1500
+    placeholderColor: {r: 0.6, g: 0.2, b: 0.85, a: 1}
+  - tier: 6
+    displayName: Grand Master
+    trophyThreshold: 2500
+    placeholderColor: {r: 0.85, g: 0.15, b: 0.15, a: 1}
+  - tier: 7
+    displayName: Legend
+    trophyThreshold: 4000
+    placeholderColor: {r: 0.9, g: 0.7, b: 0.1, a: 1}

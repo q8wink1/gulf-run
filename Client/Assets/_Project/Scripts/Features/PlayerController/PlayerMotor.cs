@@ -107,6 +107,11 @@ namespace GulfRun.Features.PlayerController
             _rigidbody2D.velocity = velocity;
             _jumpsUsed++;
 
+            // Sprint 9 "Player Statistics: Jump Count" hook — raised only
+            // for an actually-accepted jump (past every guard above), never
+            // for a rejected input press.
+            PlayerStatEventService.RaiseLocalJumpPerformed();
+
             SetState(isFirstJump ? PlayerMovementState.Jumping : PlayerMovementState.DoubleJumping);
         }
 

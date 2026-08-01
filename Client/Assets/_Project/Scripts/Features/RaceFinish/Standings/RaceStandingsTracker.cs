@@ -99,9 +99,21 @@ namespace GulfRun.Features.RaceFinish.Standings
         private void HandleRaceResultsFinalized(PlayerRaceResult[] results)
         {
             FinalResults = results;
+            IMatchTransport transport = MatchTransportService.Current;
             for (int i = 0; i < results.Length; i++)
             {
-                _liveResults[results[i].ConnectionId] = results[i];
+                PlayerRaceResult result = results[i];
+                _liveResults[result.ConnectionId] = result;
+
+                // Sprint 9 "Player Statistics"/"Leagues" hook — raised once,
+                // the instant the LOCAL player's FINAL (ranked) outcome is
+                // known, mirroring the local-player filter already used
+                // above for the Sprint 8 animation cue.
+                if (transport != null && result.ConnectionId == transport.LocalConnectionId)
+                {
+                    var outcome = new PlayerMatchOutcome(result.FinishPosition, result.Reason, (float)result.FinishTimeSeconds, result.DistanceMetersReached, result.CoinsCollected);
+                    PlayerStatEventService.RaiseLocalMatchCompleted(outcome);
+                }
             }
         }
 

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using GulfRun.Core;
 using GulfRun.Core.Managers;
 using GulfRun.Core.Networking;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.Character.Configuration;
 using UnityEngine;
@@ -23,7 +24,7 @@ namespace GulfRun.Features.Character.Loadout
     /// character/outfit — never just the local player's.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class PlayerLoadoutManager : Singleton<PlayerLoadoutManager>
+    public sealed class PlayerLoadoutManager : Singleton<PlayerLoadoutManager>, ILocalLoadoutProvider
     {
         [SerializeField] private CharacterCatalogConfig characterCatalog;
         [SerializeField] private CosmeticCatalogConfig cosmeticCatalog;
@@ -51,16 +52,61 @@ namespace GulfRun.Features.Character.Loadout
             // not have happened yet when this singleton wakes up.
         }
 
+        // --- Sprint 9: ILocalLoadoutProvider — lets Features.Online's
+        // ProfileManager show "Current Character"/"Current Outfit" on the
+        // Player Profile screen with zero compile-time reference to this
+        // (Features.Character) assembly. See Core.Services.ILocalLoadoutProvider.
+
+        CharacterId ILocalLoadoutProvider.CurrentCharacterId => _localLoadout != null ? _localLoadout.Character : CharacterId.None;
+
+        string ILocalLoadoutProvider.CurrentCharacterDisplayName
+        {
+            get
+            {
+                if (_localLoadout == null || characterCatalog == null)
+                {
+                    return string.Empty;
+                }
+
+                CharacterDefinition definition = characterCatalog.GetDefinition(_localLoadout.Character);
+                return definition != null ? definition.DisplayName : string.Empty;
+            }
+        }
+
+        CosmeticId ILocalLoadoutProvider.CurrentOutfitId => _localLoadout != null ? _localLoadout.GetEquipped(CosmeticSlot.Outfit) : CosmeticId.None;
+
+        string ILocalLoadoutProvider.CurrentOutfitDisplayName
+        {
+            get
+            {
+                CosmeticId outfit = _localLoadout != null ? _localLoadout.GetEquipped(CosmeticSlot.Outfit) : CosmeticId.None;
+                if (outfit.IsNone || cosmeticCatalog == null)
+                {
+                    return string.Empty;
+                }
+
+                return cosmeticCatalog.TryGetEntry(outfit, out CosmeticCatalogConfig.CosmeticEntry entry) ? entry.DisplayName : string.Empty;
+            }
+        }
+
+        GulfCountry ILocalLoadoutProvider.Country => _localLoadout != null ? _localLoadout.Country : GulfCountry.SaudiArabia;
+
         private void OnEnable()
         {
             IMatchTransport transport = MatchTransportService.Current;
             transport.LoadoutChanged += HandleLoadoutChanged;
             transport.ParticipantJoined += HandleParticipantJoined;
             transport.MatchStateChanged += HandleMatchStateChanged;
+            LocalLoadoutProviderService.Current = this;
         }
 
         private void OnDisable()
         {
+            if (LocalLoadoutProviderService.Current == (ILocalLoadoutProvider)this)
+            {
+                LocalLoadoutProviderService.Current = null;
+            }
+
             IMatchTransport transport = MatchTransportService.Current;
             if (transport == null)
             {

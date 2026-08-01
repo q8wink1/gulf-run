@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc770b2f30df4243a3a55377545d0464, type: 3}
+  m_Name: ChampionshipCatalogConfig
+  m_EditorClassIdentifier: 
+  championships:
+  - id: championship_weekly
+    type: 0
+    displayName: Weekly Championship
+    description: Compete every week for bonus Coins and climb the Weekly leaderboard.
+    rewardType: 0
+    rewardAmount: 500
+    rewardDisplayName: 500 Bonus Coins
+    placeholderColor: {r: 0.2, g: 0.6, b: 1, a: 1}
+  - id: championship_monthly
+    type: 1
+    displayName: Monthly Championship
+    description: A full month of racing — top finishers earn a stash of Gems.
+    rewardType: 1
+    rewardAmount: 150
+    rewardDisplayName: 150 Bonus Gems
+    placeholderColor: {r: 0.6, g: 0.2, b: 0.9, a: 1}
+  - id: championship_season
+    type: 2
+    displayName: Season Championship
+    description: The season-long grand prize — crown the Season Champion and immortalize
+      them in the Hall of Fame.
+    rewardType: 5
+    rewardAmount: 0
+    rewardDisplayName: "\u201CSeason Champion\u201D Title"
+    placeholderColor: {r: 0.9, g: 0.75, b: 0.1, a: 1}
+  - id: championship_weekend
+    type: 3
+    displayName: Weekend Championship
+    description: A short, high-intensity weekend sprint for quick rewards.
+    rewardType: 6
+    rewardAmount: 0
+    rewardDisplayName: Weekend Warrior Badge
+    placeholderColor: {r: 0.9, g: 0.4, b: 0.1, a: 1}
+  - id: championship_special_event
+    type: 4
+    displayName: Special Event Championship
+    description: Limited-time championships tied to special in-game events (Ramadan,
+      Eid, Summer, Winter, and future celebrations).
+    rewardType: 9
+    rewardAmount: 0
+    rewardDisplayName: Limited Event Cosmetic
+    placeholderColor: {r: 0.1, g: 0.8, b: 0.6, a: 1}
