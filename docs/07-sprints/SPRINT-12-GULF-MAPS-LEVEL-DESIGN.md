@@ -177,9 +177,9 @@ Before the first `MatchState.Countdown` of a session, the panel honestly reports
 
 | Item | Value |
 |---|---|
-| Commit hash | _see below_ |
+| Commit hash | `0574b3feedbe9add9ba5aaba07da6bd7fecca7d2` |
 | Commit message | `Sprint 12 - Gulf Maps & Level Design` |
 | Branch | `main` |
-| Push status | _see below_ |
+| Push status | Pushed to `origin/main` (`188da80..0574b3f`); `git status` confirms "Your branch is up to date with 'origin/main'" and a clean working tree. |
 
 Sprint 12 is complete within the constraints above. Stopping here.
