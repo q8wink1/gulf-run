@@ -124,9 +124,9 @@ Two new reused-screen views were added this sprint specifically to cover Right M
 
 | Item | Value |
 |---|---|
-| Commit hash | *(recorded in the follow-up "Sprint 13 report" commit after push — see that commit)* |
+| Commit hash | `eb607f140169f64def6a79610704b0fc2b32ea59` |
 | Commit message | `Sprint 13 - Main Menu & Lobby Design` |
 | Branch | `main` |
-| Push status | *(recorded in the follow-up "Sprint 13 report" commit after push)* |
+| Push status | Pushed to `origin/main` (`9ef226b..eb607f1`); `git status` confirms "Your branch is up to date with 'origin/main'" and a clean working tree. |
 
 Sprint 13 is complete within the constraints above. Stopping here.
