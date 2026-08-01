@@ -470,3 +470,121 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 05d084cae8d4492cb6f0469996ebf1d6, type: 2} # RaceFinishConfig asset GUID
+--- !u!1 &800500000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 800500001}
+  - component: {fileID: 800500002}
+  - component: {fileID: 800500003}
+  - component: {fileID: 800500004}
+  - component: {fileID: 800500005}
+  - component: {fileID: 800500006}
+  - component: {fileID: 800500007}
+  m_Layer: 0
+  m_Name: CharacterSystems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &800500001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800500000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &800500002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800500000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d5e06851ce94b7baeb52ed864e9d62f, type: 3} # SaveManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &800500003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800500000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35f96d5dec1941d49304512e41199222, type: 3} # EconomyManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startingGems: 500
+--- !u!114 &800500004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800500000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a06314f87fc4d9cbfac205d3a19abc8, type: 3} # PlayerLoadoutManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterCatalog: {fileID: 11400000, guid: 1348b27833d9419c9b2f3e665e9d090d, type: 2} # CharacterCatalogConfig asset GUID
+  cosmeticCatalog: {fileID: 11400000, guid: 48663bc9c26a4a59bb315f3ed9aa51a5, type: 2} # CosmeticCatalogConfig asset GUID
+--- !u!114 &800500005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800500000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d6f9b5e2253435da4c35e3ed02e337f, type: 3} # AccountCreationView script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  countryCatalog: {fileID: 11400000, guid: 0fd957ab9fbe4b5a9946008fcc60ffaa, type: 2} # CountryCatalogConfig asset GUID
+--- !u!114 &800500006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800500000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72dc9808894c426f980ab673eba76c6a, type: 3} # CharacterMenuView script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  countryCatalog: {fileID: 11400000, guid: 0fd957ab9fbe4b5a9946008fcc60ffaa, type: 2} # CountryCatalogConfig asset GUID
+--- !u!114 &800500007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800500000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0babfeb45a444b7bb2ce22afe276717, type: 3} # CharacterDebugView script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showOnScreenDebug: 1
+  panelX: 10
+  panelY: 10

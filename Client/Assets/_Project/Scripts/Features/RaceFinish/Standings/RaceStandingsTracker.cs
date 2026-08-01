@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using GulfRun.Core;
 using GulfRun.Core.Networking;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using UnityEngine;
 
@@ -81,7 +82,19 @@ namespace GulfRun.Features.RaceFinish.Standings
         public bool TryGetReward(int connectionId, out RaceRewardBreakdown reward) =>
             _rewards.TryGetValue(connectionId, out reward);
 
-        private void HandlePlayerRaceResultReported(PlayerRaceResult result) => _liveResults[result.ConnectionId] = result;
+        private void HandlePlayerRaceResultReported(PlayerRaceResult result)
+        {
+            _liveResults[result.ConnectionId] = result;
+
+            // Sprint 8 "ANIMATION: Win/Lose" hook — raised once, the instant
+            // the LOCAL player's own outcome resolves (never for anyone
+            // else's, since only this client's avatar exists to animate).
+            IMatchTransport transport = MatchTransportService.Current;
+            if (transport != null && result.ConnectionId == transport.LocalConnectionId)
+            {
+                CharacterAnimationCueService.RaiseLocalCue(CharacterAnimationResolver.FromFinishReason(result.Reason));
+            }
+        }
 
         private void HandleRaceResultsFinalized(PlayerRaceResult[] results)
         {

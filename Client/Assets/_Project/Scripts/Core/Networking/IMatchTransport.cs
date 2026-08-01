@@ -113,6 +113,21 @@ namespace GulfRun.Core.Networking
         /// <summary>Client: asks the host to advance the current Podium/Reward phase immediately (the Skip button). Any single participant's request advances the phase for everyone.</summary>
         void RequestSkipRaceEndPhase();
 
+        // --- Sprint 8: Characters, Countries & Customization sync. Unlike
+        // Weapons/Traps/Race Finish, a loadout is never host-computed or
+        // arbitrated — it is entirely the owning player's own choice (which
+        // character, which owned cosmetic per slot). This mirrors the Ready
+        // System's shape (SetLocalReadyState / ReadyStateChanged) rather
+        // than the heavier Request/Confirm authority pattern: every client
+        // just broadcasts its own current loadout whenever it changes (and
+        // once on joining a match), and every other client's UI reacts only
+        // to the broadcast event. ---
+
+        event Action<PlayerLoadout> LoadoutChanged;
+
+        /// <summary>Broadcasts the local player's current Character/Country/equipped-cosmetics/Victory-Pose loadout to every other participant. Callers must pass a private copy (see <see cref="PlayerLoadout.Clone"/>) — never a reference still being mutated locally.</summary>
+        void SetLocalLoadout(PlayerLoadout loadout);
+
         /// <summary>Client: asks the authority to resolve an Item Box touch. Never grants a weapon itself.</summary>
         void RequestWeaponPickup(WeaponPickupRequest request);
 

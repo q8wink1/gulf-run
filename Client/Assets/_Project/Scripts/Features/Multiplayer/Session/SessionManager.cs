@@ -1,4 +1,5 @@
 using GulfRun.Core;
+using GulfRun.Core.Managers;
 using GulfRun.Core.Networking;
 using GulfRun.Domain;
 using GulfRun.Features.Multiplayer.Configuration;
@@ -22,8 +23,8 @@ namespace GulfRun.Features.Multiplayer.Session
     {
         [SerializeField] private NetworkSyncConfig config;
 
-        [Tooltip("The local player's selected nationality — shown as their national flag in the Victory Ceremony. No country-select UI exists yet (Sprint 7 addendum), so this serialized default stands in until one does.")]
-        [SerializeField] private GulfCountry localPlayerCountry = GulfCountry.SaudiArabia;
+        [Tooltip("Fallback nationality used only if a match is created/joined before Account Creation has run (should not normally happen — Account Creation gates entry into any match). Sprint 8 supersedes the old freely-settable per-session country field: the real value always comes from the permanently-locked SaveManager account once one exists.")]
+        [SerializeField] private GulfCountry fallbackPlayerCountry = GulfCountry.SaudiArabia;
 
         private LobbyManager _lobby;
         private MatchManager _match;
@@ -32,10 +33,20 @@ namespace GulfRun.Features.Multiplayer.Session
         public bool IsHost { get; private set; }
         public bool IsMatchmaking { get; private set; }
         public PlayerIdentity LocalIdentity { get; private set; }
-        public GulfCountry LocalPlayerCountry => localPlayerCountry;
 
-        /// <summary>Sets the local player's selected nationality before creating/joining a match. The natural hook for a future country-select screen.</summary>
-        public void SetLocalPlayerCountry(GulfCountry country) => localPlayerCountry = country;
+        /// <summary>
+        /// The local player's permanent nationality (Sprint 8: "Country
+        /// becomes permanently linked to the account... cannot be changed
+        /// later"). Sourced from the one-time-created <see cref="SaveManager"/>
+        /// account; falls back to <see cref="fallbackPlayerCountry"/> only if
+        /// no account exists yet, which should never happen once Account
+        /// Creation (<c>Features.Character.Account.AccountCreationView</c>)
+        /// gates the flow.
+        /// </summary>
+        public GulfCountry LocalPlayerCountry =>
+            SaveManager.Instance != null && SaveManager.Instance.HasAccount
+                ? SaveManager.Instance.GetAccount().Country
+                : fallbackPlayerCountry;
 
         protected override void OnInitialize()
         {
@@ -52,7 +63,7 @@ namespace GulfRun.Features.Multiplayer.Session
             }
 
             IsMatchmaking = true;
-            LocalIdentity = LocalPlayerIdentity.CreateLocal(displayName, localPlayerCountry);
+            LocalIdentity = LocalPlayerIdentity.CreateLocal(displayName, LocalPlayerCountry);
 
             int maxPlayers = config != null ? config.MaxPlayers : 4;
             MatchTransportService.Current.StartHost(LocalIdentity, maxPlayers);
@@ -77,7 +88,7 @@ namespace GulfRun.Features.Multiplayer.Session
             }
 
             IsMatchmaking = true;
-            LocalIdentity = LocalPlayerIdentity.CreateLocal(displayName, localPlayerCountry);
+            LocalIdentity = LocalPlayerIdentity.CreateLocal(displayName, LocalPlayerCountry);
 
             MatchTransportService.Current.JoinAsClient(LocalIdentity, joinCode);
 

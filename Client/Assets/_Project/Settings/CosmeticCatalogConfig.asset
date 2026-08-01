@@ -1,0 +1,195 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3334b88e76b04a56a39f503245e0d8ad, type: 3}
+  m_Name: CosmeticCatalogConfig
+  m_EditorClassIdentifier: 
+  entries:
+  - id: outfit_traditional_ksa
+    slot: 0
+    displayName: Saudi Thobe, Shemagh & Agal
+    gemPrice: 0
+    isTraditionalOutfit: 1
+    requiredCountry: 0
+    collectionTag: Traditional Outfits
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.004, g: 0.322, b: 0.192, a: 1}
+  - id: outfit_traditional_kwt
+    slot: 0
+    displayName: Kuwaiti Dishdasha, Ghutra & Agal
+    gemPrice: 0
+    isTraditionalOutfit: 1
+    requiredCountry: 1
+    collectionTag: Traditional Outfits
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.6, g: 0.047, b: 0.086, a: 1}
+  - id: outfit_traditional_uae
+    slot: 0
+    displayName: Emirati Kandura & Ghutra
+    gemPrice: 0
+    isTraditionalOutfit: 1
+    requiredCountry: 2
+    collectionTag: Traditional Outfits
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.043, g: 0.043, b: 0.043, a: 1}
+  - id: outfit_traditional_qat
+    slot: 0
+    displayName: Qatari White Thobe & Maroon Ghutra
+    gemPrice: 0
+    isTraditionalOutfit: 1
+    requiredCountry: 3
+    collectionTag: Traditional Outfits
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.365, g: 0.031, b: 0.184, a: 1}
+  - id: outfit_traditional_bhr
+    slot: 0
+    displayName: Traditional Bahraini Outfit
+    gemPrice: 0
+    isTraditionalOutfit: 1
+    requiredCountry: 4
+    collectionTag: Traditional Outfits
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.816, g: 0.024, b: 0.125, a: 1}
+  - id: outfit_traditional_omn
+    slot: 0
+    displayName: Omani Dishdasha & Kumma
+    gemPrice: 0
+    isTraditionalOutfit: 1
+    requiredCountry: 5
+    collectionTag: Traditional Outfits
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.816, g: 0.412, b: 0.114, a: 1}
+  - id: outfit_traditional_irq
+    slot: 0
+    displayName: Traditional Iraqi Outfit
+    gemPrice: 0
+    isTraditionalOutfit: 1
+    requiredCountry: 6
+    collectionTag: Traditional Outfits
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.8, g: 0.024, b: 0.086, a: 1}
+  - id: outfit_traditional_egy
+    slot: 0
+    displayName: Traditional Egyptian Galabeya
+    gemPrice: 0
+    isTraditionalOutfit: 1
+    requiredCountry: 7
+    collectionTag: Traditional Outfits
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.706, g: 0.043, b: 0.043, a: 1}
+  - id: outfit_football_club_kit_01
+    slot: 0
+    displayName: Football Club Kit — Home
+    gemPrice: 150
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: Football Club Kits
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
+  - id: outfit_national_team_kit_01
+    slot: 0
+    displayName: National Team Kit
+    gemPrice: 150
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: National Team Kits
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.1, g: 0.4, b: 0.2, a: 1}
+  - id: outfit_sportswear_01
+    slot: 0
+    displayName: Sportswear Tracksuit
+    gemPrice: 100
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: Sportswear
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.2, g: 0.2, b: 0.8, a: 1}
+  - id: outfit_casual_01
+    slot: 0
+    displayName: Casual Streetwear
+    gemPrice: 80
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: Casual Clothing
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  - id: outfit_ramadan_01
+    slot: 0
+    displayName: Ramadan Collection Robe
+    gemPrice: 200
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: Ramadan Collection
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.3, g: 0.15, b: 0.55, a: 1}
+  - id: outfit_eid_01
+    slot: 0
+    displayName: Eid Collection Outfit
+    gemPrice: 200
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: Eid Collection
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.9, g: 0.8, b: 0.3, a: 1}
+  - id: outfit_national_day_01
+    slot: 0
+    displayName: National Day Collection Outfit
+    gemPrice: 175
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: National Day Collections
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.0, g: 0.5, b: 0.3, a: 1}
+  - id: outfit_seasonal_event_01
+    slot: 0
+    displayName: Seasonal Event Skin
+    gemPrice: 250
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: Seasonal Events
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.9, g: 0.55, b: 0.1, a: 1}
+  - id: outfit_limited_edition_01
+    slot: 0
+    displayName: Limited Edition Skin — Golden Falcon
+    gemPrice: 500
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: Limited Edition Skins
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.85, g: 0.65, b: 0.13, a: 1}
+  - id: hat_desert_cap_01
+    slot: 1
+    displayName: Desert Cap
+    gemPrice: 60
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: Accessories
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.76, g: 0.7, b: 0.5, a: 1}
+  - id: victorypose_falcon_01
+    slot: 8
+    displayName: Falcon Salute
+    gemPrice: 120
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: Victory Poses
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.6, g: 0.4, b: 0.1, a: 1}
+  - id: emote_dance_01
+    slot: 9
+    displayName: Khaleeji Dance Emote
+    gemPrice: 90
+    isTraditionalOutfit: 0
+    requiredCountry: 0
+    collectionTag: Emotes
+    icon: {fileID: 0}
+    placeholderColor: {r: 0.7, g: 0.3, b: 0.5, a: 1}

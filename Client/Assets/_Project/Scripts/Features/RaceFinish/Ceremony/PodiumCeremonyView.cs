@@ -1,5 +1,6 @@
 using GulfRun.Core.Managers;
 using GulfRun.Core.Networking;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.RaceFinish.Configuration;
 using GulfRun.Features.RaceFinish.Standings;
@@ -61,6 +62,7 @@ namespace GulfRun.Features.RaceFinish.Ceremony
             {
                 _localPodiumStartSeconds = Time.timeAsDouble;
                 StartChampionAudio();
+                RaiseCelebrateCueIfLocalTopThree();
             }
             else if (_musicPlaying)
             {
@@ -69,6 +71,26 @@ namespace GulfRun.Features.RaceFinish.Ceremony
                 // since only this client's Update loop observes LocalDisplayPhase.
                 AudioManager.Instance?.StopMusic();
                 _musicPlaying = false;
+            }
+        }
+
+        /// <summary>Sprint 8 "ANIMATION: Celebrate" hook — raised once per ceremony, only for a local player who actually placed top-3 (the only case this client's own avatar has anything to celebrate).</summary>
+        private void RaiseCelebrateCueIfLocalTopThree()
+        {
+            RaceStandingsTracker standings = RaceStandingsTracker.Instance;
+            IMatchTransport transport = MatchTransportService.Current;
+            if (standings == null || standings.FinalResults == null || transport == null)
+            {
+                return;
+            }
+
+            foreach (PlayerRaceResult result in standings.FinalResults)
+            {
+                if (result.ConnectionId == transport.LocalConnectionId && result.FinishPosition >= 1 && result.FinishPosition <= 3)
+                {
+                    CharacterAnimationCueService.RaiseLocalCue(CharacterAnimationState.Celebrate);
+                    return;
+                }
             }
         }
 

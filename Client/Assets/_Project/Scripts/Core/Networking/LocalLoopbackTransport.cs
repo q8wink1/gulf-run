@@ -60,6 +60,8 @@ namespace GulfRun.Core.Networking
         public event Action<RaceEndPhase> RaceEndPhaseChanged;
         public event Action<int> SkipRaceEndPhaseRequested;
 
+        public event Action<PlayerLoadout> LoadoutChanged;
+
         public void StartHost(PlayerIdentity hostIdentity, int maxParticipants)
         {
             if (IsActive)
@@ -168,6 +170,13 @@ namespace GulfRun.Core.Networking
 
         public void RequestSkipRaceEndPhase() => SkipRaceEndPhaseRequested?.Invoke(LocalConnectionId);
 
+        // --- Sprint 8: Characters, Countries & Customization. This
+        // transport only relays, exactly like every broadcast above — it
+        // has no opinion on catalogs, ownership, or Gem prices; that logic
+        // lives entirely in Features.Character.Loadout.PlayerLoadoutManager. ---
+
+        public void SetLocalLoadout(PlayerLoadout loadout) => LoadoutChanged?.Invoke(loadout);
+
         // --- Local-only test/demo hooks; not part of IMatchTransport ---
 
         public MatchParticipant SimulateRemoteJoin(PlayerIdentity identity)
@@ -198,6 +207,9 @@ namespace GulfRun.Core.Networking
 
         /// <summary>Test/demo-only: feeds a synthetic remote participant's race progress into the host, exercising finish/elimination logic without a real remote client.</summary>
         public void SimulateRemoteRaceProgress(RaceProgressReport report) => RaceProgressReported?.Invoke(report);
+
+        /// <summary>Test/demo-only: feeds a synthetic remote participant's loadout, exercising Character/Country/Cosmetic sync without a real remote client.</summary>
+        public void SimulateRemoteLoadout(PlayerLoadout loadout) => LoadoutChanged?.Invoke(loadout);
 
         private void SetReadyState(int connectionId, PlayerReadyState state)
         {
