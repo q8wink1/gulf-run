@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eeccd9e06e9c429d95dfe3a49b65bb14, type: 3}
+  m_Name: WeaponCatalogConfig
+  m_EditorClassIdentifier: 
+  weapons:
+  - {fileID: 11400000, guid: 8ac6eb2740044da5b271c632b7f80be5, type: 2}
+  - {fileID: 11400000, guid: 1155e362725444c1af0286982a45cb26, type: 2}
+  - {fileID: 11400000, guid: acd7f4db40bf4f6596e43031e4cf553c, type: 2}
+  - {fileID: 11400000, guid: dc820b9b56aa4af6be5324a9c141f5c5, type: 2}
+  - {fileID: 11400000, guid: ea4761ba166146e797d78a0366efee1d, type: 2}
+  - {fileID: 11400000, guid: 5e655c56d28840f692516a8c30450c01, type: 2}
+  - {fileID: 11400000, guid: 75f6382929bf4a019cbf1cfd54a86d01, type: 2}
+  - {fileID: 11400000, guid: da05fa7001a44b338f56a4cae9397651, type: 2}
+  - {fileID: 11400000, guid: c3e6a7830a5e47df9cf9eb9d7876a81d, type: 2}
+  - {fileID: 11400000, guid: 4a6811304caf4e9ab3dcfa4c7beaf669, type: 2}
+  legendarySpawnChance01: 0.03

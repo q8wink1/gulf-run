@@ -31,12 +31,21 @@ namespace GulfRun.Core.Networking
         public bool IsHost { get; private set; }
         public int LocalConnectionId { get; private set; } = -1;
 
+        public IReadOnlyCollection<MatchParticipant> Participants => _participants.Values;
+
         public event Action<MatchParticipant> ParticipantJoined;
         public event Action<int, DisconnectReason> ParticipantLeft;
         public event Action<int, PlayerReadyState> ReadyStateChanged;
         public event Action<MatchState> MatchStateChanged;
         public event Action<int> CountdownSecondsChanged;
         public event Action<NetworkPlayerSnapshot> SnapshotReceived;
+
+        public event Action<WeaponPickupRequest> WeaponPickupRequested;
+        public event Action<WeaponPickupEvent> WeaponPickupConfirmed;
+        public event Action<WeaponUseRequest> WeaponUseRequested;
+        public event Action<WeaponUseRequest> WeaponUseConfirmed;
+        public event Action<WeaponHitEvent> WeaponHitReported;
+        public event Action<WeaponHitEvent> WeaponHitConfirmed;
 
         public void StartHost(PlayerIdentity hostIdentity, int maxParticipants)
         {
@@ -94,6 +103,25 @@ namespace GulfRun.Core.Networking
         public void BroadcastCountdownSeconds(int secondsRemaining) => CountdownSecondsChanged?.Invoke(secondsRemaining);
 
         public void SendSnapshot(NetworkPlayerSnapshot snapshot) => SnapshotReceived?.Invoke(snapshot);
+
+        // --- Sprint 5: Weapon System. This transport only relays — it has no
+        // opinion on inventory rules, spawn odds, or targeting; that
+        // authority-side logic lives entirely in
+        // Features.Weapons.Authority.WeaponAuthority, which is the only
+        // listener expected to call the Confirm* methods (mirroring how
+        // BroadcastMatchState is only ever called host-side by MatchManager). ---
+
+        public void RequestWeaponPickup(WeaponPickupRequest request) => WeaponPickupRequested?.Invoke(request);
+
+        public void ConfirmWeaponPickup(WeaponPickupEvent confirmed) => WeaponPickupConfirmed?.Invoke(confirmed);
+
+        public void RequestWeaponUse(WeaponUseRequest request) => WeaponUseRequested?.Invoke(request);
+
+        public void ConfirmWeaponUse(WeaponUseRequest confirmed) => WeaponUseConfirmed?.Invoke(confirmed);
+
+        public void ReportWeaponHit(WeaponHitEvent hit) => WeaponHitReported?.Invoke(hit);
+
+        public void ConfirmWeaponHit(WeaponHitEvent confirmed) => WeaponHitConfirmed?.Invoke(confirmed);
 
         // --- Local-only test/demo hooks; not part of IMatchTransport ---
 

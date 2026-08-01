@@ -25,6 +25,9 @@ namespace GulfRun.Features.EndlessRunner.Spawning
         [SerializeField] private SpawnCategoryConfig powerUpConfig;
         [SerializeField] private SpawnCategoryConfig decorationConfig;
 
+        [Tooltip("Sprint 5: Mystery Item Boxes. Reuses this same pooled, weighted-random, per-chunk pipeline instead of a parallel spawn system — BaseSpawnChance/entry weights ARE the 'configurable respawn rules'.")]
+        [SerializeField] private SpawnCategoryConfig itemBoxConfig;
+
         [Tooltip("0 = non-deterministic (time-seeded). Any other value reproduces the exact same spawn sequence.")]
         [SerializeField] private int randomSeed;
 
@@ -51,6 +54,7 @@ namespace GulfRun.Features.EndlessRunner.Spawning
             PreloadCategory(coinConfig);
             PreloadCategory(powerUpConfig);
             PreloadCategory(decorationConfig);
+            PreloadCategory(itemBoxConfig);
         }
 
         public void PopulateChunk(Chunk chunk, float difficulty01)
@@ -125,6 +129,7 @@ namespace GulfRun.Features.EndlessRunner.Spawning
                 case SpawnCategory.Coin: return coinConfig;
                 case SpawnCategory.PowerUp: return powerUpConfig;
                 case SpawnCategory.Decoration: return decorationConfig;
+                case SpawnCategory.ItemBox: return itemBoxConfig;
                 default: return null;
             }
         }

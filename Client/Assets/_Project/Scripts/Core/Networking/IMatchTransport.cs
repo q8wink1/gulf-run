@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using GulfRun.Domain;
 
 namespace GulfRun.Core.Networking
@@ -21,12 +22,48 @@ namespace GulfRun.Core.Networking
         bool IsHost { get; }
         int LocalConnectionId { get; }
 
+        /// <summary>Live roster of every currently connected participant (Sprint 5: lets a feature resolve "who else is in this match" without depending on Features.Multiplayer.Lobby directly).</summary>
+        IReadOnlyCollection<MatchParticipant> Participants { get; }
+
         event Action<MatchParticipant> ParticipantJoined;
         event Action<int, DisconnectReason> ParticipantLeft;
         event Action<int, PlayerReadyState> ReadyStateChanged;
         event Action<MatchState> MatchStateChanged;
         event Action<int> CountdownSecondsChanged;
         event Action<NetworkPlayerSnapshot> SnapshotReceived;
+
+        // --- Sprint 5: Weapon System sync. Same client-asks / authority-confirms
+        // duality as the Ready System above: a client calls Request*, the
+        // host-authoritative side (see Features.Weapons.Authority.WeaponAuthority)
+        // validates and calls Confirm*, and every connected client (including
+        // the host's own UI) reacts only to the Confirmed events — exactly
+        // what "the server validates pickup/usage/hit detection/removal"
+        // requires, using the same seam every other multiplayer manager uses. ---
+
+        event Action<WeaponPickupRequest> WeaponPickupRequested;
+        event Action<WeaponPickupEvent> WeaponPickupConfirmed;
+        event Action<WeaponUseRequest> WeaponUseRequested;
+        event Action<WeaponUseRequest> WeaponUseConfirmed;
+        event Action<WeaponHitEvent> WeaponHitReported;
+        event Action<WeaponHitEvent> WeaponHitConfirmed;
+
+        /// <summary>Client: asks the authority to resolve an Item Box touch. Never grants a weapon itself.</summary>
+        void RequestWeaponPickup(WeaponPickupRequest request);
+
+        /// <summary>Authority-only: broadcasts the validated pickup outcome (possibly ungranted — "the Item Box is lost").</summary>
+        void ConfirmWeaponPickup(WeaponPickupEvent confirmed);
+
+        /// <summary>Client: asks the authority to activate a weapon it believes it is carrying.</summary>
+        void RequestWeaponUse(WeaponUseRequest request);
+
+        /// <summary>Authority-only: broadcasts a validated weapon activation. Inventories update from this event alone.</summary>
+        void ConfirmWeaponUse(WeaponUseRequest confirmed);
+
+        /// <summary>Client: reports a candidate hit it observed locally (seam for a future collision/prediction system).</summary>
+        void ReportWeaponHit(WeaponHitEvent hit);
+
+        /// <summary>Authority-only: broadcasts a validated hit. Status effects are applied from this event alone.</summary>
+        void ConfirmWeaponHit(WeaponHitEvent confirmed);
 
         /// <summary>Creates a new match and becomes its authoritative host.</summary>
         void StartHost(PlayerIdentity hostIdentity, int maxParticipants);

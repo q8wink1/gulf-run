@@ -1,15 +1,24 @@
 namespace GulfRun.Domain
 {
     /// <summary>
-    /// The four spawnable content categories requested by Sprint 3. Shared
-    /// between chunk spawn-point tagging and spawn-table configuration so
-    /// both sides of the spawning system speak the same vocabulary.
+    /// The spawnable content categories. Shared between chunk spawn-point
+    /// tagging and spawn-table configuration so both sides of the spawning
+    /// system speak the same vocabulary. <see cref="ItemBox"/> was added in
+    /// Sprint 5 — Mystery Item Boxes reuse the exact same pooled,
+    /// weighted-random, per-chunk spawn pipeline built in Sprint 3
+    /// (<c>ChunkContentSpawner</c>/<c>SpawnCategoryConfig</c>) instead of a
+    /// parallel spawning system, which is also what makes "spawn locations
+    /// change every match" and "boxes respawn using configurable rules"
+    /// true for free (chunks are procedurally generated/recycled, and the
+    /// category's <c>BaseSpawnChance</c>/per-entry weights are the
+    /// configurable respawn rules).
     /// </summary>
     public enum SpawnCategory
     {
         Obstacle,
         Coin,
         PowerUp,
-        Decoration
+        Decoration,
+        ItemBox
     }
 }

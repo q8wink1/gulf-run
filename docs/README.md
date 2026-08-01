@@ -93,6 +93,7 @@ All future client, server, tools, and LiveOps *implementation* must conform to e
 | [SPRINT-02-PLAYER-CONTROLLER-FOUNDATION.md](07-sprints/SPRINT-02-PLAYER-CONTROLLER-FOUNDATION.md) | Sprint 2 report: player prefab, movement/input/camera/animator scripts, physics config, and open items |
 | [SPRINT-03-ENDLESS-RUNNER-CORE.md](07-sprints/SPRINT-03-ENDLESS-RUNNER-CORE.md) | Sprint 3 report: world generation, object spawning/pooling, game speed, distance, scoring, game loop, save interfaces, debug tools, and open items |
 | [SPRINT-04-MULTIPLAYER-FOUNDATION.md](07-sprints/SPRINT-04-MULTIPLAYER-FOUNDATION.md) | Sprint 4 report: transport-agnostic multiplayer architecture, Match Flow, Lobby/Ready System, shared countdown, player sync/interpolation, network managers, and open items |
+| [SPRINT-05-WEAPONS-ITEM-BOXES-COMBAT.md](07-sprints/SPRINT-05-WEAPONS-ITEM-BOXES-COMBAT.md) | Sprint 5 report: pooled Item Boxes, 2-slot weapon inventory, 9 Standard + 1 Legendary weapons, targeting types, host-authoritative pickup/use/hit networking, status effects, debug tools, and open items |
 
 ### Architecture Decision Records
 

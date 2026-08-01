@@ -386,6 +386,8 @@ GameObject:
   - component: {fileID: 500200014}
   - component: {fileID: 500200016}
   - component: {fileID: 500200018}
+  - component: {fileID: 500200020}
+  - component: {fileID: 500200022}
   m_Layer: 0
   m_Name: GameplaySystems
   m_TagString: Untagged
@@ -489,6 +491,7 @@ MonoBehaviour:
   coinConfig: {fileID: 11400000, guid: 2a996fc36626499598fdb3bbdd66d366, type: 2}
   powerUpConfig: {fileID: 11400000, guid: 394134bad0ee42528d28659a5315c592, type: 2}
   decorationConfig: {fileID: 11400000, guid: b7fce26e0aea43e995a25d65d185bf71, type: 2}
+  itemBoxConfig: {fileID: 11400000, guid: aa7d40fc0fc34ffc93e1c4d02567527c, type: 2}
   randomSeed: 0
 --- !u!114 &500200014
 MonoBehaviour:
@@ -528,6 +531,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: d3f63b0d69034a06ab2f840bc4a5ddd1, type: 2}
+--- !u!114 &500200020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500200000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c06fafcc06ca455cab5376eedfe32d50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  catalog: {fileID: 11400000, guid: 8a47a861bfa14f688477fd7b7a4b806c, type: 2}
+  impactParticleLifetimeSeconds: 1.5
+--- !u!114 &500200022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500200000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce08f08b64eb4fcc93b4ccea8bffb2a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showOnScreenDebug: 1
+  panelX: 910
+  catalog: {fileID: 11400000, guid: 8a47a861bfa14f688477fd7b7a4b806c, type: 2}
 --- !u!1 &500300000
 GameObject:
   m_ObjectHideFlags: 0

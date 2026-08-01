@@ -33,6 +33,8 @@ namespace GulfRun.Features.PlayerController
         private int _jumpsUsed;
         private bool _justLanded;
         private bool _isRunEnabled;
+        private float _externalSpeedMultiplier = 1f;
+        private bool _movementLocked;
 
         public PlayerMovementState CurrentState { get; private set; } = PlayerMovementState.Idle;
         public float CurrentSpeed => Mathf.Abs(_rigidbody2D.velocity.x);
@@ -88,7 +90,7 @@ namespace GulfRun.Features.PlayerController
         /// </summary>
         public void RequestJump()
         {
-            if (!_isRunEnabled)
+            if (!_isRunEnabled || _movementLocked)
             {
                 return;
             }
@@ -114,6 +116,30 @@ namespace GulfRun.Features.PlayerController
         }
 
         /// <summary>
+        /// Sprint 5 weapon-effect hook: scales auto-run speed on top of
+        /// whatever <see cref="RunSpeedService"/> reports, without the
+        /// PlayerController feature knowing anything about weapons (a status
+        /// effect controller sitting alongside this component calls this).
+        /// 1 = unaffected; below 1 slows (e.g. Sand Storm, Oil Spill); above
+        /// 1 boosts (e.g. Desert Boost, Date Energy).
+        /// </summary>
+        public void SetExternalSpeedMultiplier(float multiplier)
+        {
+            _externalSpeedMultiplier = multiplier <= 0f ? 0f : multiplier;
+        }
+
+        /// <summary>
+        /// Sprint 5 weapon-effect hook: fully freezes auto-run/jump (e.g.
+        /// Flying Agal stun, Arabic Coffee pause, Royal Camel Charge
+        /// knockdown) without ending the run — movement resumes exactly
+        /// where physics left off once unlocked.
+        /// </summary>
+        public void SetMovementLocked(bool locked)
+        {
+            _movementLocked = locked;
+        }
+
+        /// <summary>
         /// Resolves the current auto-run speed. When an endless-runner Game
         /// Speed Controller is present in the scene it drives the speed
         /// (base speed, progressive increase, temporary modifiers); otherwise
@@ -125,12 +151,18 @@ namespace GulfRun.Features.PlayerController
         private float ResolveAutoRunSpeed()
         {
             IRunSpeedProvider provider = RunSpeedService.Current;
-            return provider != null ? provider.CurrentSpeed : config.AutoRunSpeed;
+            float baseSpeed = provider != null ? provider.CurrentSpeed : config.AutoRunSpeed;
+            return baseSpeed * _externalSpeedMultiplier;
         }
 
-        /// <summary>Auto-run/jump are enabled only while the session is Running (or no session is registered at all).</summary>
+        /// <summary>Auto-run/jump are enabled only while the session is Running (or no session is registered at all) and no weapon effect (stun/pause/knockdown) currently locks movement.</summary>
         private bool ResolveRunEnabled()
         {
+            if (_movementLocked)
+            {
+                return false;
+            }
+
             IGameStateProvider provider = GameStateService.Current;
             return provider == null || provider.CurrentState == GameLoopState.Running;
         }
