@@ -1,0 +1,293 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52509890c9f84933a8250141ce0cc1a9, type: 3} # MissionPoolCatalogConfig script GUID
+  m_Name: MissionPoolCatalogConfig
+  m_EditorClassIdentifier:
+  easyRewardMultiplier: 1
+  mediumRewardMultiplier: 1.5
+  hardRewardMultiplier: 2
+  missions:
+  - id: mission_finish_races_easy
+    displayName: Finish 2 Races
+    type: 0
+    difficulty: 0
+    targetAmount: 2
+    rewardType: 0
+    rewardAmount: 100
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_finish_races_medium
+    displayName: Finish 3 Races
+    type: 0
+    difficulty: 1
+    targetAmount: 3
+    rewardType: 0
+    rewardAmount: 150
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_finish_races_hard
+    displayName: Finish 5 Races
+    type: 0
+    difficulty: 2
+    targetAmount: 5
+    rewardType: 0
+    rewardAmount: 200
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_win_race_easy
+    displayName: Win 1 Race
+    type: 1
+    difficulty: 0
+    targetAmount: 1
+    rewardType: 0
+    rewardAmount: 150
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_win_race_medium
+    displayName: Win 1 Race
+    type: 1
+    difficulty: 1
+    targetAmount: 1
+    rewardType: 1
+    rewardAmount: 10
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_win_race_hard
+    displayName: Win 2 Races
+    type: 1
+    difficulty: 2
+    targetAmount: 2
+    rewardType: 1
+    rewardAmount: 15
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_collect_coins_easy
+    displayName: Collect 50 Coins
+    type: 2
+    difficulty: 0
+    targetAmount: 50
+    rewardType: 0
+    rewardAmount: 50
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_collect_coins_medium
+    displayName: Collect 100 Coins
+    type: 2
+    difficulty: 1
+    targetAmount: 100
+    rewardType: 0
+    rewardAmount: 100
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_collect_coins_hard
+    displayName: Collect 250 Coins
+    type: 2
+    difficulty: 2
+    targetAmount: 250
+    rewardType: 11
+    rewardAmount: 100
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_open_boxes_easy
+    displayName: Open 3 Item Boxes
+    type: 3
+    difficulty: 0
+    targetAmount: 3
+    rewardType: 0
+    rewardAmount: 80
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_open_boxes_medium
+    displayName: Open 5 Item Boxes
+    type: 3
+    difficulty: 1
+    targetAmount: 5
+    rewardType: 1
+    rewardAmount: 8
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_open_boxes_hard
+    displayName: Open 8 Item Boxes
+    type: 3
+    difficulty: 2
+    targetAmount: 8
+    rewardType: 10
+    rewardAmount: 0
+    rewardCosmeticId: emote_dance_01
+    isTemporaryCosmeticReward: 1
+    temporaryDuration: 0
+    fallbackCoinsAmount: 60
+  - id: mission_use_weapons_easy
+    displayName: Use 5 Weapons
+    type: 4
+    difficulty: 0
+    targetAmount: 5
+    rewardType: 0
+    rewardAmount: 80
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_use_weapons_medium
+    displayName: Use 8 Weapons
+    type: 4
+    difficulty: 1
+    targetAmount: 8
+    rewardType: 0
+    rewardAmount: 120
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_use_weapons_hard
+    displayName: Use 12 Weapons
+    type: 4
+    difficulty: 2
+    targetAmount: 12
+    rewardType: 11
+    rewardAmount: 150
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_avoid_traps_easy
+    displayName: Avoid 5 Traps
+    type: 5
+    difficulty: 0
+    targetAmount: 5
+    rewardType: 0
+    rewardAmount: 80
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_avoid_traps_medium
+    displayName: Avoid 10 Traps
+    type: 5
+    difficulty: 1
+    targetAmount: 10
+    rewardType: 1
+    rewardAmount: 8
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_avoid_traps_hard
+    displayName: Avoid 15 Traps
+    type: 5
+    difficulty: 2
+    targetAmount: 15
+    rewardType: 4
+    rewardAmount: 0
+    rewardCosmeticId: victorypose_falcon_01
+    isTemporaryCosmeticReward: 1
+    temporaryDuration: 1
+    fallbackCoinsAmount: 70
+  - id: mission_jump_easy
+    displayName: Jump 15 Times
+    type: 6
+    difficulty: 0
+    targetAmount: 15
+    rewardType: 0
+    rewardAmount: 60
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_jump_medium
+    displayName: Jump 30 Times
+    type: 6
+    difficulty: 1
+    targetAmount: 30
+    rewardType: 0
+    rewardAmount: 100
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_jump_hard
+    displayName: Jump 50 Times
+    type: 6
+    difficulty: 2
+    targetAmount: 50
+    rewardType: 1
+    rewardAmount: 10
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_top3_easy
+    displayName: Reach Top 3 Once
+    type: 7
+    difficulty: 0
+    targetAmount: 1
+    rewardType: 0
+    rewardAmount: 100
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_top3_medium
+    displayName: Reach Top 3 Twice
+    type: 7
+    difficulty: 1
+    targetAmount: 2
+    rewardType: 1
+    rewardAmount: 12
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50
+  - id: mission_top3_hard
+    displayName: Reach Top 3 Three Times
+    type: 7
+    difficulty: 2
+    targetAmount: 3
+    rewardType: 3
+    rewardAmount: 0
+    rewardCosmeticId: outfit_seasonal_event_01
+    isTemporaryCosmeticReward: 1
+    temporaryDuration: 2
+    fallbackCoinsAmount: 100
+  - id: mission_login_easy
+    displayName: Login Today
+    type: 8
+    difficulty: 0
+    targetAmount: 1
+    rewardType: 0
+    rewardAmount: 50
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 0
+    fallbackCoinsAmount: 50

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GulfRun.Core;
 using GulfRun.Core.Managers;
@@ -95,8 +96,14 @@ namespace GulfRun.Features.Character.Loadout
         // purchased Outfit/Emote/Victory Pose straight into the real
         // CosmeticInventory with zero compile-time reference to this
         // (Features.Character) assembly. See Core.Services.ICosmeticGrantService.
+        //
+        // Sprint 11 addition: temporary (expiring) ownership for Daily
+        // Mission / Login Reward grants — see Domain.CosmeticInventory
+        // remarks for the permanent-always-wins upgrade rule.
 
         bool ICosmeticGrantService.OwnsCosmetic(CosmeticId id) => _localInventory.Owns(id);
+
+        bool ICosmeticGrantService.OwnsCosmeticPermanently(CosmeticId id) => _localInventory.OwnsPermanently(id);
 
         bool ICosmeticGrantService.GrantCosmetic(CosmeticId id)
         {
@@ -109,15 +116,37 @@ namespace GulfRun.Features.Character.Loadout
             return true;
         }
 
+        bool ICosmeticGrantService.GrantTemporaryCosmetic(CosmeticId id, double expiresAtSeconds) => _localInventory.GrantTemporary(id, expiresAtSeconds);
+
         IReadOnlyList<CosmeticId> ICosmeticGrantService.GetOwnedCosmetics()
         {
-            var owned = new List<CosmeticId>(_localInventory.OwnedIds.Count);
+            var owned = new List<CosmeticId>(_localInventory.OwnedIds.Count + _localInventory.TemporaryOwnedIds.Count);
             foreach (string id in _localInventory.OwnedIds)
             {
                 owned.Add(new CosmeticId(id));
             }
 
+            foreach (string id in _localInventory.TemporaryOwnedIds)
+            {
+                owned.Add(new CosmeticId(id));
+            }
+
             return owned;
+        }
+
+        IReadOnlyList<TemporaryCosmeticOwnership> ICosmeticGrantService.GetTemporaryCosmetics()
+        {
+            var temporary = new List<TemporaryCosmeticOwnership>(_localInventory.TemporaryOwnedIds.Count);
+            foreach (string idValue in _localInventory.TemporaryOwnedIds)
+            {
+                var id = new CosmeticId(idValue);
+                if (_localInventory.TryGetTemporaryExpiry(id, out double expiresAtSeconds))
+                {
+                    temporary.Add(new TemporaryCosmeticOwnership(id, 0d, expiresAtSeconds));
+                }
+            }
+
+            return temporary;
         }
 
         private void OnEnable()
@@ -153,12 +182,80 @@ namespace GulfRun.Features.Character.Loadout
             transport.MatchStateChanged -= HandleMatchStateChanged;
         }
 
+        private static readonly CosmeticSlot[] AllCosmeticSlots = (CosmeticSlot[])Enum.GetValues(typeof(CosmeticSlot));
+
+        private double _nextTemporaryExpiryCheckAtSeconds;
+
         private void Update()
         {
             if (!_localInitialized)
             {
                 TryInitializeFromAccount();
             }
+
+            TickTemporaryCosmeticExpirations();
+        }
+
+        /// <summary>
+        /// Sprint 11 "TEMPORARY COSMETICS: When expired: Item is
+        /// automatically removed." Checked on a throttled interval (real
+        /// time is only meaningful to the second here, and this only ever
+        /// does real work once every couple of days per grant) rather than
+        /// every frame, for "Optimized mobile performance" (brief
+        /// "PERFORMANCE"). Uses <see cref="Time.timeAsDouble"/> purely to
+        /// throttle the check cadence — the actual expiry comparison inside
+        /// <see cref="Domain.CosmeticInventory.RemoveExpired"/> uses
+        /// real-world (Unix epoch) seconds.
+        /// </summary>
+        private void TickTemporaryCosmeticExpirations()
+        {
+            if (Time.timeAsDouble < _nextTemporaryExpiryCheckAtSeconds)
+            {
+                return;
+            }
+
+            _nextTemporaryExpiryCheckAtSeconds = Time.timeAsDouble + 5d;
+
+            List<string> expiredIds = _localInventory.RemoveExpired(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            if (expiredIds.Count == 0)
+            {
+                return;
+            }
+
+            bool anyUnequipped = false;
+            for (int i = 0; i < expiredIds.Count; i++)
+            {
+                if (UnequipIfCurrentlyEquipped(new CosmeticId(expiredIds[i])))
+                {
+                    anyUnequipped = true;
+                }
+            }
+
+            if (anyUnequipped)
+            {
+                BroadcastLocalLoadoutIfActive();
+            }
+        }
+
+        private bool UnequipIfCurrentlyEquipped(CosmeticId id)
+        {
+            if (_localLoadout == null)
+            {
+                return false;
+            }
+
+            bool unequippedAny = false;
+            for (int i = 0; i < AllCosmeticSlots.Length; i++)
+            {
+                CosmeticSlot slot = AllCosmeticSlots[i];
+                if (_localLoadout.GetEquipped(slot) == id)
+                {
+                    _localLoadout.Equip(slot, CosmeticId.None);
+                    unequippedAny = true;
+                }
+            }
+
+            return unequippedAny;
         }
 
         /// <summary>Freely switch to any of the 12 (or more) unlocked characters. "Changing character NEVER changes the selected country" — Country is untouched here.</summary>

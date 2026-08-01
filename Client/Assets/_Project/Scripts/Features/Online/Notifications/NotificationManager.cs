@@ -12,10 +12,13 @@ namespace GulfRun.Features.Online.Notifications
     /// the brief's Notifications section requires (Friend Requests,
     /// Tournament Starting/Ending, Rewards Ready, Promotion/Relegation, New
     /// Event — Sprint 9; New Offers/Limited-Time Deals/Battle Pass Expiring/
-    /// New Store Items/Purchase Success — Sprint 10) — the single place
-    /// every other manager (League, Championship, Friends, and now
-    /// <c>Features.Store</c> via <see cref="StoreNotificationBridge"/>)
-    /// reports a user-facing event, and the single place
+    /// New Store Items/Purchase Success — Sprint 10; New Missions Available/
+    /// Mission Completed/Daily Reward Available/Temporary Item Expiring
+    /// Soon — Sprint 11) — the single place every other manager (League,
+    /// Championship, Friends, <c>Features.Store</c> via
+    /// <see cref="StoreNotificationBridge"/>, and <c>Features.Progression</c>
+    /// via <see cref="ProgressionNotificationBridge"/>) reports a
+    /// user-facing event, and the single place
     /// <see cref="Notifications.NotificationView"/> reads from. Capped at
     /// <see cref="MaxNotifications"/> for "Minimal Memory Usage".
     /// </summary>
@@ -54,11 +57,13 @@ namespace GulfRun.Features.Online.Notifications
         private void OnEnable()
         {
             StoreNotificationBridge.NotificationRequested += Raise;
+            ProgressionNotificationBridge.NotificationRequested += Raise;
         }
 
         private void OnDisable()
         {
             StoreNotificationBridge.NotificationRequested -= Raise;
+            ProgressionNotificationBridge.NotificationRequested -= Raise;
         }
 
         public void Raise(NotificationType type, string message)

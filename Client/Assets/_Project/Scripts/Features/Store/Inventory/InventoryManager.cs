@@ -36,6 +36,10 @@ namespace GulfRun.Features.Store.Inventory
         public IReadOnlyList<CosmeticId> GetOwnedCosmetics() =>
             CosmeticGrantService.Current != null ? CosmeticGrantService.Current.GetOwnedCosmetics() : System.Array.Empty<CosmeticId>();
 
+        /// <summary>Sprint 11: every currently-active temporary (Daily Mission / Login Reward) cosmetic grant, with its expiry — brief "TEMPORARY COSMETICS: Countdown timer displayed."</summary>
+        public IReadOnlyList<TemporaryCosmeticOwnership> GetTemporaryCosmetics() =>
+            CosmeticGrantService.Current != null ? CosmeticGrantService.Current.GetTemporaryCosmetics() : System.Array.Empty<TemporaryCosmeticOwnership>();
+
         public IReadOnlyList<OwnedStoreItem> GetOwnedStoreItems() => StoreBackendService.Current.GetOwnedStoreItems();
 
         public int TotalOwnedItemCount => GetOwnedCosmetics().Count + GetOwnedStoreItems().Count + totalLaunchCharacterCount;

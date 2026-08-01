@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GulfRun.Core;
 using GulfRun.Domain;
@@ -57,10 +58,11 @@ namespace GulfRun.Features.Store.Inventory
 
             IReadOnlyList<CosmeticId> cosmetics = inventory.GetOwnedCosmetics();
             IReadOnlyList<OwnedStoreItem> storeItems = inventory.GetOwnedStoreItems();
+            IReadOnlyList<TemporaryCosmeticOwnership> temporary = inventory.GetTemporaryCosmetics();
 
             Rect viewport = new Rect(x + 14f, rowY, panelWidth - 28f, y + panelHeight - rowY - 14f);
             float rowH = 20f;
-            Rect content = new Rect(0f, 0f, viewport.width - 20f, (cosmetics.Count + storeItems.Count + 2) * rowH);
+            Rect content = new Rect(0f, 0f, viewport.width - 20f, (cosmetics.Count + storeItems.Count + temporary.Count + 3) * rowH);
             _scroll = GUI.BeginScrollView(viewport, _scroll, content);
 
             float cy = 0f;
@@ -80,7 +82,28 @@ namespace GulfRun.Features.Store.Inventory
                 cy += rowH;
             }
 
+            GUI.Label(new Rect(0f, cy, content.width, rowH), "— Temporary Items (Mission/Login Rewards) —", _labelStyle);
+            cy += rowH;
+            double now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            for (int i = 0; i < temporary.Count; i++)
+            {
+                TemporaryCosmeticOwnership grant = temporary[i];
+                GUI.Label(new Rect(0f, cy, content.width, rowH), grant.Id.Value + " — " + FormatRemaining(grant.RemainingSeconds(now)) + " left — see Store to Unlock Permanently", _labelStyle);
+                cy += rowH;
+            }
+
             GUI.EndScrollView();
+        }
+
+        private static string FormatRemaining(double seconds)
+        {
+            if (seconds <= 0d)
+            {
+                return "expired";
+            }
+
+            TimeSpan span = TimeSpan.FromSeconds(seconds);
+            return span.Days > 0 ? span.Days + "d " + span.Hours + "h" : span.Hours + "h " + span.Minutes + "m";
         }
 
         private void EnsureStyles()

@@ -793,3 +793,84 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalLaunchCharacterCount: 12
+--- !u!1 &800800000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 800800001}
+  - component: {fileID: 800800002}
+  - component: {fileID: 800800003}
+  - component: {fileID: 800800004}
+  m_Layer: 0
+  m_Name: ProgressionSystems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &800800001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800800000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &800800002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800800000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 569224e8b5dc4bb8a1217694b57107ee, type: 3} # MissionManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pool: {fileID: 11400000, guid: a8e411e5088044e5a2b1b7c0cae8f0e0, type: 2} # MissionPoolCatalogConfig asset GUID
+--- !u!114 &800800003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800800000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc735fcbb0024c3eb6b16b928ec7ca4e, type: 3} # LoginRewardManager script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  standardCalendar: {fileID: 11400000, guid: cc14e5fa2f804af38ac78327265ed6d8, type: 2} # LoginRewardCalendarConfig_Standard asset GUID
+  specialEventCalendars:
+  - {fileID: 11400000, guid: eee3d3b8f24e40d69cf7c58878abd73b, type: 2} # LoginRewardCalendarConfig_Ramadan asset GUID
+  - {fileID: 11400000, guid: 201ad3ede14b4a089d7deca7f4f1a785, type: 2} # LoginRewardCalendarConfig_Eid asset GUID
+  - {fileID: 11400000, guid: 1ee84c395b5a4640952d036bb10c7e02, type: 2} # LoginRewardCalendarConfig_NationalDay asset GUID
+  - {fileID: 11400000, guid: 064e7b7805e9498caa4f5a9785890063, type: 2} # LoginRewardCalendarConfig_Summer asset GUID
+  - {fileID: 11400000, guid: 2e920cf9e4544fe6b32b59baea3caca5, type: 2} # LoginRewardCalendarConfig_Winter asset GUID
+--- !u!114 &800800004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800800000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4d92c44de68440d9234e1374cdda38f, type: 3} # TemporaryCosmeticExpiryWatcher script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  expiringSoonThresholdSeconds: 21600
+  checkIntervalSeconds: 30

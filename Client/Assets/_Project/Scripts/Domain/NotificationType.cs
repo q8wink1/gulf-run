@@ -24,6 +24,18 @@ namespace GulfRun.Domain
         NewStoreItem,
 
         /// <summary>Sprint 10: a Store purchase completed successfully.</summary>
-        PurchaseSuccess
+        PurchaseSuccess,
+
+        /// <summary>Sprint 11: a fresh set of 3 Daily Missions became available.</summary>
+        NewMissionsAvailable,
+
+        /// <summary>Sprint 11: a Daily Mission's target was reached and is ready to claim.</summary>
+        MissionCompleted,
+
+        /// <summary>Sprint 11: today's Login Streak reward is ready to claim.</summary>
+        DailyRewardAvailable,
+
+        /// <summary>Sprint 11: a temporary (mission/login-reward) cosmetic is about to expire.</summary>
+        TemporaryItemExpiringSoon
     }
 }

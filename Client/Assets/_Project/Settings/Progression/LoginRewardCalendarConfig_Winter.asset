@@ -1,0 +1,139 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90954f3e4941475bbf52c0c53a4961c0, type: 3} # LoginRewardCalendarConfig script GUID
+  m_Name: LoginRewardCalendarConfig_Winter
+  m_EditorClassIdentifier:
+  eventLabel: Winter
+  days:
+  - day: 1
+    displayName: Winter Day 1
+    rewardType: 0
+    rewardAmount: 150
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 1
+    fallbackCoinsAmount: 150
+    isMysteryReward: 0
+    mysteryOptions: []
+    hasBonusReward: 0
+    bonusRewardType: 0
+    bonusRewardAmount: 0
+  - day: 2
+    displayName: Winter Day 2
+    rewardType: 0
+    rewardAmount: 200
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 1
+    fallbackCoinsAmount: 150
+    isMysteryReward: 0
+    mysteryOptions: []
+    hasBonusReward: 0
+    bonusRewardType: 0
+    bonusRewardAmount: 0
+  - day: 3
+    displayName: Winter Day 3
+    rewardType: 11
+    rewardAmount: 250
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 1
+    fallbackCoinsAmount: 150
+    isMysteryReward: 0
+    mysteryOptions: []
+    hasBonusReward: 0
+    bonusRewardType: 0
+    bonusRewardAmount: 0
+  - day: 4
+    displayName: Winter Day 4
+    rewardType: 1
+    rewardAmount: 15
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 1
+    fallbackCoinsAmount: 150
+    isMysteryReward: 0
+    mysteryOptions: []
+    hasBonusReward: 0
+    bonusRewardType: 0
+    bonusRewardAmount: 0
+  - day: 5
+    displayName: Winter Day 5 - Themed Outfit
+    rewardType: 3
+    rewardAmount: 0
+    rewardCosmeticId: outfit_seasonal_event_01
+    isTemporaryCosmeticReward: 1
+    temporaryDuration: 2
+    fallbackCoinsAmount: 200
+    isMysteryReward: 0
+    mysteryOptions: []
+    hasBonusReward: 0
+    bonusRewardType: 0
+    bonusRewardAmount: 0
+  - day: 6
+    displayName: Winter Day 6
+    rewardType: 0
+    rewardAmount: 250
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 1
+    fallbackCoinsAmount: 150
+    isMysteryReward: 0
+    mysteryOptions: []
+    hasBonusReward: 1
+    bonusRewardType: 1
+    bonusRewardAmount: 20
+  - day: 7
+    displayName: Winter Day 7 - Mystery Reward
+    rewardType: 0
+    rewardAmount: 0
+    rewardCosmeticId:
+    isTemporaryCosmeticReward: 0
+    temporaryDuration: 2
+    fallbackCoinsAmount: 350
+    isMysteryReward: 1
+    mysteryOptions:
+    - displayName: Winter Coin Chest
+      rewardType: 0
+      rewardAmount: 600
+      rewardCosmeticId:
+      isTemporaryCosmeticReward: 0
+      temporaryDuration: 2
+      fallbackCoinsAmount: 350
+      weight: 40
+    - displayName: Winter Gem Chest
+      rewardType: 1
+      rewardAmount: 60
+      rewardCosmeticId:
+      isTemporaryCosmeticReward: 0
+      temporaryDuration: 2
+      fallbackCoinsAmount: 350
+      weight: 30
+    - displayName: Winter Battle Pass Boost
+      rewardType: 11
+      rewardAmount: 350
+      rewardCosmeticId:
+      isTemporaryCosmeticReward: 0
+      temporaryDuration: 2
+      fallbackCoinsAmount: 350
+      weight: 20
+    - displayName: Winter Outfit (7 Days)
+      rewardType: 3
+      rewardAmount: 0
+      rewardCosmeticId: outfit_seasonal_event_01
+      isTemporaryCosmeticReward: 1
+      temporaryDuration: 2
+      fallbackCoinsAmount: 350
+      weight: 10
+    hasBonusReward: 0
+    bonusRewardType: 0
+    bonusRewardAmount: 0

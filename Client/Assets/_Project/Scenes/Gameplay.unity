@@ -692,6 +692,7 @@ GameObject:
   - component: {fileID: 500500002}
   - component: {fileID: 500500004}
   - component: {fileID: 500500006}
+  - component: {fileID: 500500008}
   m_Layer: 0
   m_Name: TrapSystems
   m_TagString: Untagged
@@ -756,6 +757,18 @@ MonoBehaviour:
   showOnScreenDebug: 1
   panelX: 1360
   catalog: {fileID: 11400000, guid: c90bc068e2fe4c3590caa69fad6c0fe3, type: 2} # TrapCatalogConfig asset GUID
+--- !u!114 &500500008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500500000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52e4772db65043f09b961ad156f1b4b4, type: 3} # TrapAvoidanceTracker script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &500600000
 GameObject:
   m_ObjectHideFlags: 0
@@ -1143,4 +1156,108 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showOnScreenDebug: 1
   panelX: 2710
+  panelY: 10
+--- !u!1 &501100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 501100001}
+  - component: {fileID: 501100002}
+  - component: {fileID: 501100003}
+  m_Layer: 0
+  m_Name: ProgressionUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &501100001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501100000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &501100002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5d6d92229f94b1088209c9a43ab4224, type: 3} # MissionsView script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &501100003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5388175d7db54b7f8bcae7d582aaa877, type: 3} # LoginRewardView script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &501200000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 501200001}
+  - component: {fileID: 501200002}
+  m_Layer: 0
+  m_Name: ProgressionDebug
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &501200001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501200000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &501200002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501200000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da6b9caf7e854f85846f4d591833e019, type: 3} # ProgressionDebugView script GUID
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showOnScreenDebug: 1
+  panelX: 3160
   panelY: 10

@@ -172,6 +172,17 @@ namespace GulfRun.Features.Weapons.Inventory
 
         private void HandlePickupConfirmed(WeaponPickupEvent confirmed)
         {
+            // Sprint 11 "Daily Missions: Open 5 Item Boxes" hook — counts the
+            // box being touched/opened, even if it turned out to be lost
+            // (inventory full, confirmed.Granted == false); only for the
+            // local player's own confirmed pickup, never a remote
+            // participant's — same guard shape as the "Weapons Used" hook
+            // below.
+            if (_transport != null && confirmed.CollectorConnectionId == _transport.LocalConnectionId)
+            {
+                PlayerStatEventService.RaiseLocalItemBoxOpened();
+            }
+
             if (!confirmed.Granted)
             {
                 return;

@@ -196,9 +196,19 @@ namespace GulfRun.Features.Store
             {
                 StoreItemCatalogConfig.StoreItemEntry entry = items[i];
                 bool owned = StoreManager.Instance.OwnsStoreItem(entry.Id);
+
+                // Sprint 11 "PERMANENT PURCHASE" upsell: a temporary
+                // (Daily Mission / Login Reward) grant of this item's
+                // linked cosmetic is never "Owned" here (see
+                // StoreManager.OwnsStoreItemEntry), so it still reaches
+                // this branch — show its remaining time and let the normal
+                // Buy button double as "Unlock Permanently".
+                double expiresAtSeconds = 0d;
+                bool isTemporaryUpsell = !owned && StoreManager.Instance.TryGetTemporaryCosmeticExpiry(entry.Id, out expiresAtSeconds);
+                string label = entry.DisplayName + (string.IsNullOrEmpty(entry.CollectionTag) ? string.Empty : " [" + entry.CollectionTag + "]") + (isTemporaryUpsell ? " [Temporary: " + FormatRemaining(expiresAtSeconds) + " left]" : string.Empty);
                 string price = owned ? "Owned" : PriceLabel(entry.Currency, entry.PriceAmount, entry.RealMoneyPrice) + (entry.IsOnSale ? " (-" + entry.SaleDiscountPercent + "%)" : string.Empty);
-                string label = entry.DisplayName + (string.IsNullOrEmpty(entry.CollectionTag) ? string.Empty : " [" + entry.CollectionTag + "]");
-                DrawBuyRow(i * rowH, content.width, label, price, owned ? (Action)null : () => SetFeedback(StoreManager.Instance.PurchaseStoreItem(entry.Id), entry.DisplayName));
+                string buyLabel = isTemporaryUpsell ? "Unlock" : "Buy";
+                DrawBuyRow(i * rowH, content.width, label, price, owned ? (Action)null : () => SetFeedback(StoreManager.Instance.PurchaseStoreItem(entry.Id), entry.DisplayName), buyLabel);
             }
 
             GUI.EndScrollView();
@@ -297,17 +307,29 @@ namespace GulfRun.Features.Store
             GUI.EndScrollView();
         }
 
-        private void DrawBuyRow(float rowY, float width, string label, string priceLabel, Action onBuy)
+        private void DrawBuyRow(float rowY, float width, string label, string priceLabel, Action onBuy, string buyLabel = "Buy")
         {
             GUI.Label(new Rect(0f, rowY, width - 190f, 26f), label, _labelStyle);
             GUI.Label(new Rect(width - 190f, rowY, 90f, 26f), priceLabel, _labelStyle);
             if (onBuy != null)
             {
-                if (GUI.Button(new Rect(width - 96f, rowY, 96f, 26f), "Buy", _rowStyle))
+                if (GUI.Button(new Rect(width - 96f, rowY, 96f, 26f), buyLabel, _rowStyle))
                 {
                     onBuy();
                 }
             }
+        }
+
+        private static string FormatRemaining(double expiresAtSeconds)
+        {
+            double remaining = expiresAtSeconds - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (remaining <= 0d)
+            {
+                return "expired";
+            }
+
+            TimeSpan span = TimeSpan.FromSeconds(remaining);
+            return span.Days > 0 ? span.Days + "d " + span.Hours + "h" : span.Hours + "h " + span.Minutes + "m";
         }
 
         private static string PriceLabel(StoreCurrency currency, int amount, RealMoneyPrice realMoneyPrice)

@@ -15,6 +15,9 @@ namespace GulfRun.Domain
         LimitedCosmetic,
 
         /// <summary>Added in Sprint 10 for Battle Pass "Exclusive Emotes" tiers.</summary>
-        ExclusiveEmote
+        ExclusiveEmote,
+
+        /// <summary>Added in Sprint 11 for Daily Mission / Login Reward entries that grant Battle Pass XP directly (brief: "Mission rewards include: ... Battle Pass XP").</summary>
+        BattlePassXp
     }
 }

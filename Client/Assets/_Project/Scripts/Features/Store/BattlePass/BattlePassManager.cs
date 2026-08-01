@@ -18,9 +18,17 @@ namespace GulfRun.Features.Store.BattlePass
     /// single-responsibility reason Sprint 9 split
     /// <c>LeagueManager</c>/<c>ChampionshipManager</c> into two managers
     /// instead of one.
+    /// <para>
+    /// Sprint 11 addition: implements <see cref="IBattlePassXpGrantService"/>
+    /// so <c>Features.Progression</c> (Daily Mission / Login Reward "Battle
+    /// Pass XP" rewards) can add XP here with zero compile-time reference
+    /// to this (Features.Store) assembly — the same "implement the Core
+    /// interface" shape this class already uses for <see cref="ICosmeticGrantService"/>
+    /// via <c>PlayerLoadoutManager</c>.
+    /// </para>
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class BattlePassManager : Singleton<BattlePassManager>
+    public sealed class BattlePassManager : Singleton<BattlePassManager>, IBattlePassXpGrantService
     {
         [SerializeField] private BattlePassSeasonConfig season;
 
@@ -35,12 +43,21 @@ namespace GulfRun.Features.Store.BattlePass
         private void OnEnable()
         {
             PlayerStatEventService.LocalMatchCompleted += HandleLocalMatchCompleted;
+            BattlePassXpGrantService.Current = this;
         }
 
         private void OnDisable()
         {
             PlayerStatEventService.LocalMatchCompleted -= HandleLocalMatchCompleted;
+
+            if (BattlePassXpGrantService.Current == (IBattlePassXpGrantService)this)
+            {
+                BattlePassXpGrantService.Current = null;
+            }
         }
+
+        /// <summary>IBattlePassXpGrantService — see class remarks.</summary>
+        void IBattlePassXpGrantService.AddXp(int amount) => StoreBackendService.Current.AddBattlePassXp(amount);
 
         /// <summary>Real-money purchase of the "Paid only" premium track (brief: "Premium Monthly Battle Pass. Paid only.").</summary>
         public PurchaseResult PurchasePremium()

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using GulfRun.Core;
 using GulfRun.Core.Backend;
 using GulfRun.Core.Managers;
@@ -147,6 +148,41 @@ namespace GulfRun.Features.Store
             return storeItemCatalog != null && storeItemCatalog.TryGetEntry(id, out StoreItemCatalogConfig.StoreItemEntry entry) && OwnsStoreItemEntry(entry);
         }
 
+        /// <summary>
+        /// Sprint 11 "PERMANENT PURCHASE" upsell: for a Store entry linked
+        /// to a cosmetic the local player currently owns only TEMPORARILY
+        /// (a Daily Mission / Login Reward grant), returns its remaining
+        /// time so the Store can show "Remaining Time" + let the existing
+        /// Buy flow double as "Unlock Permanently" at the entry's normal
+        /// Gem/Coin price. Returns false for anything else (not linked to a
+        /// cosmetic, not owned at all, or already permanently owned).
+        /// </summary>
+        public bool TryGetTemporaryCosmeticExpiry(StoreItemId id, out double expiresAtSeconds)
+        {
+            expiresAtSeconds = 0d;
+            if (storeItemCatalog == null || !storeItemCatalog.TryGetEntry(id, out StoreItemCatalogConfig.StoreItemEntry entry) || entry.LinkedCosmeticId.IsNone)
+            {
+                return false;
+            }
+
+            if (CosmeticGrantService.Current == null || CosmeticGrantService.Current.OwnsCosmeticPermanently(entry.LinkedCosmeticId))
+            {
+                return false;
+            }
+
+            IReadOnlyList<TemporaryCosmeticOwnership> temporary = CosmeticGrantService.Current.GetTemporaryCosmetics();
+            for (int i = 0; i < temporary.Count; i++)
+            {
+                if (temporary[i].Id == entry.LinkedCosmeticId)
+                {
+                    expiresAtSeconds = temporary[i].ExpiresAtSeconds;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         // --- Internal helpers ---
 
         private bool OwnsStoreItemEntry(StoreItemCatalogConfig.StoreItemEntry entry)
@@ -158,7 +194,12 @@ namespace GulfRun.Features.Store
 
             if (!entry.LinkedCosmeticId.IsNone)
             {
-                return CosmeticGrantService.Current != null && CosmeticGrantService.Current.OwnsCosmetic(entry.LinkedCosmeticId);
+                // Sprint 11: a TEMPORARY grant is deliberately NOT "already
+                // owned" here — the Store must keep offering the Buy flow
+                // so a temporary owner can pay to Unlock Permanently
+                // (brief "PERMANENT PURCHASE"). Only a permanent grant
+                // counts as owned.
+                return CosmeticGrantService.Current != null && CosmeticGrantService.Current.OwnsCosmeticPermanently(entry.LinkedCosmeticId);
             }
 
             return StoreBackendService.Current.OwnsStoreItem(entry.Id);
