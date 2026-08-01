@@ -170,9 +170,10 @@ This mirrors Sprints 5–7's layering exactly (Domain = rules, Core.Services/Cor
 
 | Item | Value |
 |---|---|
-| Commit hash | recorded in the follow-up commit that captures this table's final value (same "commit, then a small follow-up commit to record its own hash" pattern used for prior sprint reports) |
+| Commit hash | `05bdb0f88b817802c0f472af3867747eb1bfc6b0` |
 | Commit message | `Sprint 8 - Characters, Countries & Customization System` |
 | Branch | `main` |
-| Push status | Pending push to `origin/main` (`https://github.com/q8wink1/gulf-run.git`) at report-authoring time — see the follow-up commit for final confirmation |
+| Files changed | 88 files changed, 2982 insertions(+), 25 deletions(-) |
+| Push status | ✅ Pushed to `origin/main` (`https://github.com/q8wink1/gulf-run.git`), fast-forward `8679f5a..05bdb0f`. Verified via `git status` ("Your branch is up to date with 'origin/main'.") after push. |
 
 Sprint 8 is complete within the constraints above. Stopping here.
