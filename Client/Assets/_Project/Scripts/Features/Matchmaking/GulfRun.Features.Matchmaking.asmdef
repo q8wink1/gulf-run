@@ -3,7 +3,8 @@
     "rootNamespace": "GulfRun.Features.Matchmaking",
     "references": [
         "GulfRun.Core",
-        "GulfRun.Domain"
+        "GulfRun.Domain",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

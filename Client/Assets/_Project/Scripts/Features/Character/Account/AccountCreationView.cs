@@ -1,5 +1,6 @@
 using GulfRun.Core.Countries;
 using GulfRun.Core.Managers;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using UnityEngine;
 
@@ -33,6 +34,11 @@ namespace GulfRun.Features.Character.Account
 
         private void OnGUI()
         {
+            if (!PersistentUiScope.AllowsMainMenuChrome)
+            {
+                return;
+            }
+
             SaveManager save = SaveManager.Instance;
             if (save == null || save.HasAccount)
             {

@@ -10,8 +10,8 @@ namespace GulfRun.Features.Character.Configuration
     public sealed class LockerUiConfig : ScriptableObject
     {
         [Header("Layout (reference resolution for responsive scaling)")]
-        [SerializeField] private float referenceWidth = 1080f;
-        [SerializeField] private float referenceHeight = 1920f;
+        [SerializeField] private float referenceWidth = 1920f;
+        [SerializeField] private float referenceHeight = 1080f;
         [SerializeField] private float phoneScaleFloor = 0.85f;
         [SerializeField] private float tabletScaleCeiling = 1.25f;
 
@@ -60,18 +60,15 @@ namespace GulfRun.Features.Character.Configuration
         public float RarityRewardFlashSeconds => rarityRewardFlashSeconds;
         public float TemporaryTimerRefreshSeconds => temporaryTimerRefreshSeconds;
 
-        /// <summary>Uniform scale factor from the current screen vs reference phone portrait, clamped for tablet/phone.</summary>
+        /// <summary>
+        /// Uniform scale vs 1920×1080 reference with match≈0.5 (average of
+        /// width/height factors), clamped for phone/tablet extremes.
+        /// </summary>
         public float ResolveUiScale()
         {
             float sx = Screen.width / Mathf.Max(1f, referenceWidth);
             float sy = Screen.height / Mathf.Max(1f, referenceHeight);
-            float scale = Mathf.Min(sx, sy);
-            // Landscape tablets: use the larger axis so panels don't shrink too far.
-            if (Screen.width > Screen.height)
-            {
-                scale = Mathf.Max(sx, sy) * 0.55f;
-            }
-
+            float scale = Mathf.Lerp(sx, sy, 0.5f);
             return Mathf.Clamp(scale, phoneScaleFloor, tabletScaleCeiling);
         }
     }

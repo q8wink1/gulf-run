@@ -318,7 +318,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6b65e725a154833ac105e782e7913fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showOnScreenDebug: 1
+  showOnScreenDebug: 0
   panelX: 460
 --- !u!114 &800100007
 MonoBehaviour:
@@ -613,7 +613,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0babfeb45a444b7bb2ce22afe276717, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showOnScreenDebug: 1
+  showOnScreenDebug: 0
   panelX: 10
   panelY: 10
 --- !u!114 &800500008

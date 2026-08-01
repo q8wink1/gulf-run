@@ -17,7 +17,9 @@ namespace GulfRun.Features.Matchmaking
 
         private void OnGUI()
         {
-            if (!showOnScreenDebug)
+            // Keep production Lobby free of the Matchmaking debug strip
+            // (panelX 4960 was off-canvas at 1080p but still an active drawer).
+            if (!showOnScreenDebug || PersistentUiScope.IsLobbyActive)
             {
                 return;
             }

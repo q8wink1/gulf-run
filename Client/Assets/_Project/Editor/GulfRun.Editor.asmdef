@@ -5,7 +5,9 @@
         "GulfRun.Core",
         "GulfRun.Domain",
         "GulfRun.Infrastructure",
-        "GulfRun.Presentation"
+        "GulfRun.Presentation",
+        "GulfRun.Features.Matchmaking",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [
         "Editor"

@@ -26,7 +26,9 @@ namespace GulfRun.Features.Matchmaking.Lobby
                 return;
             }
 
-            float width = Mathf.Min(520f, Screen.width - 24f);
+            // Reference layout: 1920×1080; keep host chrome inside the safe margins
+            // at 1080p / 1440p / 4K via width clamp + wrapped action row.
+            float width = Mathf.Clamp(Screen.width - 48f, 320f, 520f);
             float height = lobby.IsHost ? 110f : 56f;
             float x = (Screen.width - width) * 0.5f;
             float y = 40f;
@@ -41,7 +43,12 @@ namespace GulfRun.Features.Matchmaking.Lobby
                 return;
             }
 
-            Rect copy = _copyAnim.Apply(new Rect(x + 12f, y + 36f, 100f, 28f), 2f);
+            float btnY = y + 36f;
+            float cursorX = x + 12f;
+            float gap = 8f;
+            float maxX = x + width - 12f;
+
+            Rect copy = _copyAnim.Apply(new Rect(cursorX, btnY, 100f, 28f), 2f);
             if (GUI.Button(copy, "Copy", PreRaceLobbyTheme.PanelButton))
             {
                 _copyAnim.NotifyPressed();
@@ -49,22 +56,38 @@ namespace GulfRun.Features.Matchmaking.Lobby
                 ShowToast("Room code copied");
             }
 
-            if (GUI.Button(new Rect(x + 120f, y + 36f, 100f, 28f), "Share", PreRaceLobbyTheme.PanelButton))
+            cursorX += 100f + gap;
+            if (GUI.Button(new Rect(cursorX, btnY, 100f, 28f), "Share", PreRaceLobbyTheme.PanelButton))
             {
                 GUIUtility.systemCopyBuffer = "Join my GulfRun room: " + lobby.LocalRoomCode.Value;
                 ShowToast("Share text copied");
             }
 
-            Rect invite = _inviteAnim.Apply(new Rect(x + 228f, y + 36f, 120f, 28f), 2f);
+            cursorX += 100f + gap;
+            float inviteW = Mathf.Min(120f, maxX - cursorX);
+            Rect invite = _inviteAnim.Apply(new Rect(cursorX, btnY, inviteW, 28f), 2f);
             if (GUI.Button(invite, "Invite", PreRaceLobbyTheme.PanelButton))
             {
                 _inviteAnim.NotifyPressed();
                 InviteFirstOnlineFriend();
             }
 
-            if (lobby.IsPrivateRoom)
+            cursorX += inviteW + gap;
+            if (lobby.IsPrivateRoom && cursorX + 90f <= maxX)
             {
-                Rect bot = _botAnim.Apply(new Rect(x + 356f, y + 36f, 150f, 28f), 2f);
+                float botW = Mathf.Min(150f, maxX - cursorX);
+                Rect bot = _botAnim.Apply(new Rect(cursorX, btnY, botW, 28f), 2f);
+                string botLabel = lobby.BotFillEnabled ? "Bots: ON" : "Bots: OFF";
+                if (GUI.Button(bot, botLabel, PreRaceLobbyTheme.PanelButton))
+                {
+                    _botAnim.NotifyPressed();
+                    lobby.SetBotFillEnabled(!lobby.BotFillEnabled);
+                }
+            }
+            else if (lobby.IsPrivateRoom)
+            {
+                // Second row when the top action strip is too narrow for Bots.
+                Rect bot = _botAnim.Apply(new Rect(x + 12f + 168f, y + 72f, 140f, 28f), 2f);
                 string botLabel = lobby.BotFillEnabled ? "Bots: ON" : "Bots: OFF";
                 if (GUI.Button(bot, botLabel, PreRaceLobbyTheme.PanelButton))
                 {
@@ -84,7 +107,15 @@ namespace GulfRun.Features.Matchmaking.Lobby
             }
 
             GUI.color = previous;
-            GUI.Label(new Rect(x + 184f, y + 76f, width - 200f, 20f),
+            float statusX = x + 184f;
+            float statusW = width - 200f;
+            if (lobby.IsPrivateRoom && cursorX + 90f > maxX)
+            {
+                statusX = x + 320f;
+                statusW = Mathf.Max(120f, width - 332f);
+            }
+
+            GUI.Label(new Rect(statusX, y + 76f, statusW, 20f),
                 lobby.LobbyPlayerCount + "/" + lobby.RequiredPlayerCount + " players  •  min " + lobby.MinimumPlayerCount +
                 (canStart ? "  •  All Ready" : "  •  Waiting for Ready"),
                 PreRaceLobbyTheme.Muted);

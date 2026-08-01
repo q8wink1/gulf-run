@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8598ff9895f74585b75a2fdcd8475113, type: 3}
   m_Name: LockerUiConfig
   m_EditorClassIdentifier: 
-  referenceWidth: 1080
-  referenceHeight: 1920
+  referenceWidth: 1920
+  referenceHeight: 1080
   phoneScaleFloor: 0.85
   tabletScaleCeiling: 1.25
   rotateDegreesPerSecond: 45

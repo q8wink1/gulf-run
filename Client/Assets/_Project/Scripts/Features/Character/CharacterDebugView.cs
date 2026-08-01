@@ -1,5 +1,6 @@
 using System;
 using GulfRun.Core.Managers;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.Character.Configuration;
 using GulfRun.Features.Character.Loadout;
@@ -24,7 +25,7 @@ namespace GulfRun.Features.Character
 
         private void OnGUI()
         {
-            if (!showOnScreenDebug)
+            if (!showOnScreenDebug || !PersistentUiScope.AllowsPersistentDebugOverlay)
             {
                 return;
             }

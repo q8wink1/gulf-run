@@ -123,6 +123,18 @@ namespace GulfRun.Features.Character.Locker
 
         private void OnGUI()
         {
+            // Boot DDOL — hide Locker chrome outside Main Menu so Pre-Race Lobby
+            // (and Gameplay) only show their own production UI.
+            if (!PersistentUiScope.AllowsMainMenuChrome)
+            {
+                if (_open)
+                {
+                    Close();
+                }
+
+                return;
+            }
+
             float scale = uiConfig != null ? uiConfig.ResolveUiScale() : 1f;
             float toggleW = 160f * scale;
             float toggleH = 34f * scale;

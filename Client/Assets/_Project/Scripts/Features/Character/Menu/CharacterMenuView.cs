@@ -15,6 +15,11 @@ namespace GulfRun.Features.Character.Menu
     {
         private void OnGUI()
         {
+            if (!PersistentUiScope.AllowsMainMenuChrome)
+            {
+                return;
+            }
+
             // Corner toggle lives on LockerView now; keep a thin fallback if
             // LockerView is missing from the scene for any reason.
             if (LockerView.Instance != null)

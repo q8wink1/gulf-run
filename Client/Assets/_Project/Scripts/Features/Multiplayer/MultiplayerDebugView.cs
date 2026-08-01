@@ -1,4 +1,5 @@
 using GulfRun.Core.Networking;
+using GulfRun.Core.Services;
 using GulfRun.Domain;
 using GulfRun.Features.Multiplayer.Bots;
 using GulfRun.Features.Multiplayer.Connection;
@@ -30,7 +31,7 @@ namespace GulfRun.Features.Multiplayer
 
         private void OnGUI()
         {
-            if (!showOnScreenDebug)
+            if (!showOnScreenDebug || !PersistentUiScope.AllowsPersistentDebugOverlay)
             {
                 return;
             }
