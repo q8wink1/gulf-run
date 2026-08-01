@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16ba2b50dfdf49828ebf72e0298538ba, type: 3}
+  m_Name: TrapDefinition_BrokenCart
+  m_EditorClassIdentifier: 
+  id: 6
+  displayName: Broken Cart
+  effectFlags: 16
+  magnitude: 1
+  durationSeconds: 1.5
+  lifetimeSeconds: 15
+  spawnWeight: 1
+  continuousWhileStanding: 0
+  continuousRefreshIntervalSeconds: 0.5
+  movesAlongTrack: 0
+  moveSpeedMetersPerSecond: 0
+  prefab: {fileID: 100000, guid: 923e9b9e391a4e9496b8387aee048039, type: 3}
+  debugTint: {r: 0.4, g: 0.25, b: 0.15, a: 1}
+  icon: {fileID: 0}
+  appearSound: {fileID: 0}
+  triggerSound: {fileID: 0}
+  impactParticlePrefab: {fileID: 0}
+  triggerAnimatorTrigger: 

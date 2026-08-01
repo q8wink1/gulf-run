@@ -1,0 +1,9 @@
+{
+    "name": "GulfRun.Features.Traps",
+    "rootNamespace": "GulfRun.Features.Traps",
+    "references": [
+        "GulfRun.Core",
+        "GulfRun.Domain"
+    ],
+    "noEngineReferences": false
+}

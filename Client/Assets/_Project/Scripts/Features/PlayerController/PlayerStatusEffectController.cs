@@ -93,7 +93,15 @@ namespace GulfRun.Features.PlayerController
                 IsMarked = true;
             }
 
-            WeaponEffectFlags movementFlags = effect.Flags & ~(WeaponEffectFlags.Cleanse | WeaponEffectFlags.Mark | WeaponEffectFlags.Shield);
+            if (effect.Has(WeaponEffectFlags.LateralPush))
+            {
+                // One-shot, not duration-based — apply immediately and never
+                // add it to _active (there is nothing to Recompute() every
+                // frame for an instantaneous push; see PlayerMotor.ApplyLateralImpulse).
+                _motor.ApplyLateralImpulse(effect.Magnitude);
+            }
+
+            WeaponEffectFlags movementFlags = effect.Flags & ~(WeaponEffectFlags.Cleanse | WeaponEffectFlags.Mark | WeaponEffectFlags.Shield | WeaponEffectFlags.LateralPush);
             if (movementFlags != WeaponEffectFlags.None)
             {
                 _active.Add(new ActiveEffect(movementFlags, (float)effect.DurationSeconds, effect.Magnitude));

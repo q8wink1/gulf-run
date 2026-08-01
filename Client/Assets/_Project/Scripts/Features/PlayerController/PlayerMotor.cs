@@ -140,6 +140,29 @@ namespace GulfRun.Features.PlayerController
         }
 
         /// <summary>
+        /// Sprint 6 trap-effect hook (Wind Gust, Dust Tornado): an
+        /// instantaneous setback along the run axis. No side-to-side "lane"
+        /// dimension exists yet in this side-scrolling runner (GDD P003 §5.1
+        /// still marks the run/camera-framing relationship as an open
+        /// question), so "pushes players sideways" is honestly implemented
+        /// today as losing <paramref name="magnitude"/> meters of hard-won
+        /// forward progress instead of a fake, invisible axis — a real,
+        /// measurable setback rather than a no-op. Revisit once a real lane
+        /// system exists (see Sprint 6 report Remaining TODOs).
+        /// </summary>
+        public void ApplyLateralImpulse(float magnitude)
+        {
+            if (magnitude == 0f)
+            {
+                return;
+            }
+
+            Vector2 position = _rigidbody2D.position;
+            position.x = Mathf.Max(0f, position.x - Mathf.Abs(magnitude));
+            _rigidbody2D.position = position;
+        }
+
+        /// <summary>
         /// Resolves the current auto-run speed. When an endless-runner Game
         /// Speed Controller is present in the scene it drives the speed
         /// (base speed, progressive increase, temporary modifiers); otherwise

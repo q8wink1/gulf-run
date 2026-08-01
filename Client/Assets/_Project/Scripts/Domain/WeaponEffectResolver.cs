@@ -21,7 +21,7 @@ namespace GulfRun.Domain
         {
             float magnitude = targetIsMarked ? baseMagnitude * MarkedMagnitudeMultiplier : baseMagnitude;
             double duration = targetIsMarked ? baseDurationSeconds * MarkedDurationMultiplier : baseDurationSeconds;
-            return new PlayerStatusEffect(flags, duration, magnitude, sourceWeapon);
+            return new PlayerStatusEffect(flags, duration, magnitude, EffectSourceKind.Weapon, (int)sourceWeapon);
         }
     }
 }

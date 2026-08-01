@@ -47,6 +47,11 @@ namespace GulfRun.Core.Networking
         public event Action<WeaponHitEvent> WeaponHitReported;
         public event Action<WeaponHitEvent> WeaponHitConfirmed;
 
+        public event Action<TrapSpawnEvent> TrapSpawned;
+        public event Action<int> TrapExpired;
+        public event Action<TrapTriggerEvent> TrapTriggerReported;
+        public event Action<TrapTriggerEvent> TrapTriggerConfirmed;
+
         public void StartHost(PlayerIdentity hostIdentity, int maxParticipants)
         {
             if (IsActive)
@@ -122,6 +127,19 @@ namespace GulfRun.Core.Networking
         public void ReportWeaponHit(WeaponHitEvent hit) => WeaponHitReported?.Invoke(hit);
 
         public void ConfirmWeaponHit(WeaponHitEvent confirmed) => WeaponHitConfirmed?.Invoke(confirmed);
+
+        // --- Sprint 6: Dynamic Trap System. Same "this transport only
+        // relays" role as the Weapon System block above — all spawn-rule,
+        // lifetime, and hit-validation logic lives in
+        // Features.Traps.Authority.TrapAuthority. ---
+
+        public void BroadcastTrapSpawned(TrapSpawnEvent spawned) => TrapSpawned?.Invoke(spawned);
+
+        public void BroadcastTrapExpired(int trapInstanceId) => TrapExpired?.Invoke(trapInstanceId);
+
+        public void ReportTrapTrigger(TrapTriggerEvent trigger) => TrapTriggerReported?.Invoke(trigger);
+
+        public void ConfirmTrapTrigger(TrapTriggerEvent confirmed) => TrapTriggerConfirmed?.Invoke(confirmed);
 
         // --- Local-only test/demo hooks; not part of IMatchTransport ---
 

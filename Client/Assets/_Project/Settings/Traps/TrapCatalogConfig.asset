@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3616f5939760450f913e0d0daa584db0, type: 3} # TrapCatalogConfig script GUID
+  m_Name: TrapCatalogConfig
+  m_EditorClassIdentifier: 
+  traps:
+  - {fileID: 11400000, guid: 8f14b29e8b2244d79ec94de5ba258185, type: 2} # SandPit
+  - {fileID: 11400000, guid: 1f25939d17fe45c09f49295ede22fff2, type: 2} # FishingNet
+  - {fileID: 11400000, guid: 13760349582e4705b8bff4db51d36313, type: 2} # AngryCamel
+  - {fileID: 11400000, guid: 41ecc68f122a40a3936abda29b1aef5d, type: 2} # RollingBarrel
+  - {fileID: 11400000, guid: 7388641d37214ab785ad811e1b204daa, type: 2} # FallingPalm
+  - {fileID: 11400000, guid: 59389da27c8e4aa18b33174513837149, type: 2} # LooseRocks
+  - {fileID: 11400000, guid: 575e087f0d904de587cbc90f2ba1f5d6, type: 2} # BrokenCart
+  - {fileID: 11400000, guid: 4d73dfefc9fd48f491d9d74ebf6011f3, type: 2} # ScorpionArea
+  - {fileID: 11400000, guid: 3d061dc0ab82487fb4752b1d7944d48d, type: 2} # HotSand
+  - {fileID: 11400000, guid: 8dbd96fadc934e319050c16c596d078b, type: 2} # CollapsedBridge
+  - {fileID: 11400000, guid: 3d196f1e00a44e8483895d438aa66d73, type: 2} # GoatHerd
+  - {fileID: 11400000, guid: 01e461123fc74c96a83d0ac81ae4693a, type: 2} # WaterBarrel
+  - {fileID: 11400000, guid: 69311aa65b33494a9a99794cf5906a7f, type: 2} # ConstructionBarrier
+  - {fileID: 11400000, guid: 7ce13f92f711444095a134481f76889c, type: 2} # WindGust
+  - {fileID: 11400000, guid: 2ba851e628654fd9b2c4a97d7f98d746, type: 2} # DustTornado
+  minSpawnIntervalSeconds: 4
+  maxSpawnIntervalSeconds: 9
+  maxConcurrentTraps: 2
+  maxConcurrentTrapsBonusAtFullDifficulty: 2
+  minSpawnAheadMeters: 8
+  maxSpawnAheadMeters: 20
+  groundY: 0
+  preloadCountPerPrefab: 4

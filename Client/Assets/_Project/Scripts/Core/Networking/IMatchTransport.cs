@@ -47,6 +47,32 @@ namespace GulfRun.Core.Networking
         event Action<WeaponHitEvent> WeaponHitReported;
         event Action<WeaponHitEvent> WeaponHitConfirmed;
 
+        // --- Sprint 6: Dynamic Trap System sync. Traps belong to the map, not
+        // any player, so unlike weapons there is no client "request" for
+        // spawning — only Features.Traps.Authority.TrapAuthority (host-only)
+        // ever decides to spawn/expire one, and every client (including the
+        // host's own scene) reacts only to the broadcasts below. Triggering
+        // still follows the same client-reports / authority-confirms shape as
+        // WeaponHit, since only a client's own physics can observe the
+        // collision in the first place. ---
+
+        event Action<TrapSpawnEvent> TrapSpawned;
+        event Action<int> TrapExpired;
+        event Action<TrapTriggerEvent> TrapTriggerReported;
+        event Action<TrapTriggerEvent> TrapTriggerConfirmed;
+
+        /// <summary>Authority-only: broadcasts that a new trap instance now exists in the world, at a fully randomized position (see TrapPositionRoll) — never a fixed layout.</summary>
+        void BroadcastTrapSpawned(TrapSpawnEvent spawned);
+
+        /// <summary>Authority-only: broadcasts that a trap instance's ~15s lifetime has elapsed; every client returns its local instance to the pool.</summary>
+        void BroadcastTrapExpired(int trapInstanceId);
+
+        /// <summary>Client: reports a candidate "I touched this active trap" observed locally. Never applies the effect itself.</summary>
+        void ReportTrapTrigger(TrapTriggerEvent trigger);
+
+        /// <summary>Authority-only: broadcasts a validated trigger (the trap instance was still active). Status effects are applied from this event alone.</summary>
+        void ConfirmTrapTrigger(TrapTriggerEvent confirmed);
+
         /// <summary>Client: asks the authority to resolve an Item Box touch. Never grants a weapon itself.</summary>
         void RequestWeaponPickup(WeaponPickupRequest request);
 
