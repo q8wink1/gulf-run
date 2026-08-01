@@ -90,9 +90,9 @@ Hidden during ceremony phases so Podium/Reward screens own the screen.
 |---|---|
 | Implementation commit | `1adf268` |
 | Implementation commit message on git | `Sprint 16 report - verify push confirmation hashes` (mislabeled by a concurrent Sprint 16 docs pass that included the staged Race HUD tree; content is Sprint 15 Race HUD — see `git show 1adf268 --stat`) |
-| Report confirmation commit | $hash |
+| Report confirmation commits | `c827c1f` (feature message) · `dc16f1c` (hash table) |
 | Intended feature message | `Sprint 15 - Race HUD, Gameplay UI & In-Race Experience` |
 | Branch | `main` |
-| Push status | Implementation on origin as `1adf268`; report confirmation `c827c1f` (pushing) |
+| Push status | Pushed to `origin/main` (`f64b631..dc16f1c`); implementation content in `1adf268` |
 
 Sprint 15 is complete within the constraints above.
