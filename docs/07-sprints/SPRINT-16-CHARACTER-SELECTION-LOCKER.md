@@ -113,9 +113,9 @@ Equip/unequip is instant (no loading). Every select/equip/unequip/unlock/grant/e
 
 | Item | Value |
 |---|---|
-| Commit hash | `18c9477` (feature) / `cf458af` (report hash confirmation) |
+| Commit hash | `18c9477` (Sprint 16 feature commit — authoritative) |
 | Commit message | `Sprint 16 - Character Selection, Locker & Customization` |
 | Branch | `main` |
-| Push status | Pushed to `origin/main` (`1e67310..cf458af`); `git rev-parse HEAD` matches `origin/main` at `cf458af` |
+| Push status | Pushed to `origin/main`. Note: while verifying the report hash, a parallel Race HUD worktree staging was unintentionally included in follow-up commit `1adf268` (mislabelled under a Sprint 16 report message). Sprint 16 gameplay/UI itself is fully contained in `18c9477`. |
 
 Sprint 16 is complete within the constraints above.
