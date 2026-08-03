@@ -1,4 +1,4 @@
-﻿# Sprint 18.3 — Import Final Player Card — Sprint Report
+# Sprint 18.3 — Import Final Player Card — Sprint Report
 
 **Role:** Lead UI Systems Engineer  
 **Scope:** Replace MainMenuCanvas TopRight/PlayerCardImage placeholder with production Player Card artwork. No gameplay/script changes. No other UI element modifications beyond PlayerCardImage apply/sizing.  
@@ -39,5 +39,5 @@
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| Commit | `(pending)` |
+| Commit | `08c667a5b80cc4c4d8eb07c3050b76debf645716` |
 | Push | `origin/main` |
