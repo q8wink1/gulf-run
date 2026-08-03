@@ -57,4 +57,5 @@ Mirrors Lobby: **Scale With Screen Size**, reference **1920×1080**, match **0.5
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| Commit | (filled after push) |
+| Commit | `88fc520e493727f78a15a0ea756779f7d76b704c` |
+| Push | `origin/main` |
