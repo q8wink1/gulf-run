@@ -1,4 +1,4 @@
-# Sprint 18.4 — Import Final Main Menu Buttons — Sprint Report
+# Sprint 18.4 â€” Import Final Main Menu Buttons â€” Sprint Report
 
 **Role:** Lead UI Systems Engineer  
 **Scope:** Replace MainMenuCanvas button placeholders with production Btn_*.png artwork. Uniform size/spacing. No gameplay/script changes. No other UI modifications beyond button Images and parent container sizes.  
@@ -17,7 +17,7 @@
 | Settings | `Assets/_Project/UI/MainMenu/Buttons/Btn_Settings.png` | `62974cc4a6c50674989d60cdb727b723` |
 | Rankings | `Assets/_Project/UI/MainMenu/Buttons/Btn_Rankings.png` | `c711f3dd9a59a084abff1c61e2b19cc1` |
 
-- Source: untracked `Client/Assets/Btn_*.png` (1672×941 each)
+- Source: untracked `Client/Assets/Btn_*.png` (1672أ—941 each)
 - Texture Type: Sprite (2D and UI), Single
 - Root `Assets/Btn_*.png` duplicates removed after move
 
@@ -34,7 +34,7 @@
 | `RightMenu/SettingsButtonImage` | Btn_Settings |
 | `RightMenu/RankingsButtonImage` | Btn_Rankings |
 
-- Color alpha → **1** (was 0 placeholder)
+- Color alpha â†’ **1** (was 0 placeholder)
 - `preserveAspect` = **true**
 - `raycastTarget` remains **true**
 - Parent anchors unchanged (TopLeft top-left, LeftMenu left-middle, RightMenu right-middle)
@@ -43,14 +43,14 @@
 
 | Item | Value |
 |---|---|
-| Button size | **220×124** (native ~1.78 aspect) |
+| Button size | **220أ—124** (native ~1.78 aspect) |
 | Vertical center spacing | **148** |
-| LeftMenu order | Lobby, Friends, Clan (y: 148 / 0 / −148) |
-| RightMenu order | Missions, Store, Settings, Rankings (y: 222 / 74 / −74 / −222) |
-| Play | TopLeft, same **220×124** size |
-| LeftMenu SizeDelta | 240×420 |
-| RightMenu SizeDelta | 240×568 |
-| TopLeft SizeDelta | 240×140 |
+| LeftMenu order | Lobby, Friends, Clan (y: 148 / 0 / âˆ’148) |
+| RightMenu order | Missions, Store, Settings, Rankings (y: 222 / 74 / âˆ’74 / âˆ’222) |
+| Play | TopLeft, same **220أ—124** size |
+| LeftMenu SizeDelta | 240أ—420 |
+| RightMenu SizeDelta | 240أ—568 |
+| TopLeft SizeDelta | 240أ—140 |
 
 ## 4. Constraints honored
 
@@ -61,7 +61,7 @@
 
 ## 5. Verification
 
-- Unity batchmode: all 8 button sprites assigned, preserveAspect, uniform 220×124, spacing 148, anchors preserved — PASS, 0 failures
+- Unity batchmode: all 8 button sprites assigned, preserveAspect, uniform 220أ—124, spacing 148, anchors preserved â€” PASS, 0 failures
 - StandaloneWindows64 build: Succeeded, 0 errors, 11 pre-existing warnings
 
 ## 6. Git
@@ -69,5 +69,5 @@
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| Commit | `(pending)` |
+| Commit | `ee42db33b8d0dc5b5d316625cb3bed08aa673a5e` |
 | Push | `origin/main` |
