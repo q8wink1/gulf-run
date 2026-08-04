@@ -4454,6 +4454,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnProfile: {fileID: 11400000, guid: b20c00000000000000000000000000cd, type: 2}
+  obstacleCatalog: {fileID: 11400000, guid: b20c00000000000000000000000000e1, type: 2}
   trackGenerator: {fileID: 520000003}
   randomSeed: 0
   logPlans: 0
@@ -4509,6 +4510,7 @@ MonoBehaviour:
   trackGenerator: {fileID: 520000003}
   spawnManager: {fileID: 530000003}
   hud: {fileID: 510000006}
+  obstacleCatalog: {fileID: 11400000, guid: b20c00000000000000000000000000e1, type: 2}
   initialSpeed: 12
   maximumSpeed: 28
   speedIncreaseRate: 0.35

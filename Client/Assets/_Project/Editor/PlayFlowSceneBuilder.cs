@@ -96,7 +96,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Build Gameplay HUD (Sprint 23.3)")]
         public static void BuildGameplayHudFromMenu() => BuildGameplayHudBatch();
 
-        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.8)")]
+        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.9)")]
         public static void ValidateGameplayRunnerFromMenu() => ValidateGameplayRunnerBatch();
 
         public static void RunBatch()
@@ -320,7 +320,7 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 23.4–23.8: validate runner, camera, track, spawn manager, and race manager on Gameplay.
+        /// Sprint 23.4–23.9: validate runner, camera, track, spawn manager, race manager, and obstacle catalog hooks.
         /// </summary>
         public static void ValidateGameplayRunnerBatch()
         {
@@ -336,7 +336,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn + Race Sprint 23.4–23.8 OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn + Race + Obstacles Sprint 23.4–23.9 OK.");
         }
 
         /// <summary>
@@ -4055,6 +4055,10 @@ namespace GulfRun.Editor
                 {
                     failures.Add("GameplaySpawnManager missing SpawnManager component.");
                 }
+                else if (spawnManager.ObstacleCatalog == null)
+                {
+                    failures.Add("GameplaySpawnManager missing ObstacleCatalog (Sprint 23.9).");
+                }
             }
 
             GameObject raceGo = FindDeep(scene, "RaceManager");
@@ -4066,6 +4070,16 @@ namespace GulfRun.Editor
                 {
                     failures.Add("RaceManager missing RaceManager component.");
                 }
+                else if (raceManager.ObstacleCatalog == null)
+                {
+                    failures.Add("RaceManager missing ObstacleCatalog (Sprint 23.9).");
+                }
+            }
+
+            if (AssetDatabase.LoadAssetAtPath<GulfRun.Features.Gameplay.ObstacleCatalog>(
+                    "Assets/_Project/Settings/Obstacles/ObstacleCatalog_Default.asset") == null)
+            {
+                failures.Add("ObstacleCatalog_Default.asset missing under Settings/Obstacles.");
             }
 
             Require(FindDeep(scene, "ObjectPoolManager"), "ObjectPoolManager", failures);

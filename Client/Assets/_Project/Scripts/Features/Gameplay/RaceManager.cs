@@ -11,7 +11,8 @@ namespace GulfRun.Features.Gameplay
     /// <summary>
     /// Sprint 23.8 — central race flow coordinator. Owns session state,
     /// speed targets, and system references so Features can subscribe without
-    /// owning finish / obstacle / coin / multiplayer logic yet.
+    /// owning finish / obstacle damage / coin / multiplayer logic yet.
+    /// Sprint 23.9 adds an optional <see cref="ObstacleCatalog"/> ref (no spawn).
     /// Starts in <see cref="RaceState.Waiting"/>; callers invoke
     /// <see cref="BeginCountdown"/> / <see cref="StartRace"/> later.
     /// </summary>
@@ -24,6 +25,10 @@ namespace GulfRun.Features.Gameplay
         [SerializeField] private EndlessTrackGenerator trackGenerator;
         [SerializeField] private SpawnManager spawnManager;
         [SerializeField] private GameplayHudController hud;
+
+        [Header("Obstacle Foundation (Sprint 23.9)")]
+        [Tooltip("Optional catalog ref for future race orchestration. No spawn / damage.")]
+        [SerializeField] private ObstacleCatalog obstacleCatalog;
 
         [Header("Speed (future progressive run)")]
         [Tooltip("Baseline race speed used for TargetSpeed reset and player scale.")]
@@ -68,6 +73,7 @@ namespace GulfRun.Features.Gameplay
         public EndlessTrackGenerator TrackGenerator => trackGenerator;
         public SpawnManager SpawnManager => spawnManager;
         public GameplayHudController Hud => hud;
+        public ObstacleCatalog ObstacleCatalog => obstacleCatalog;
 
         /// <summary>C# event for Features subscribers (preferred over UnityEvent).</summary>
         public event Action OnRaceStart;

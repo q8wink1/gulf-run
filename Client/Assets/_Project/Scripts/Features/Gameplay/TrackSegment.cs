@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using GulfRun.Core.Pooling;
+using GulfRun.Domain;
 using UnityEngine;
 
 namespace GulfRun.Features.Gameplay
@@ -8,7 +9,8 @@ namespace GulfRun.Features.Gameplay
     /// Sprint 23.6 — modular endless-track piece (+Z). Root marks the entry /
     /// start edge; content spans forward for <see cref="Length"/>. Exit is at
     /// local Z = Length so segments connect seamlessly. Spawn markers are
-    /// placeholders only (no content spawning yet).
+    /// placeholders only (no content spawning yet). Sprint 23.9 adds obstacle
+    /// marker query hooks for future placement without spawning.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class TrackSegment : MonoBehaviour, IPoolable
@@ -44,6 +46,33 @@ namespace GulfRun.Features.Gameplay
             p.z = worldStartZ;
             transform.position = p;
             SyncEndpoints();
+        }
+
+        /// <summary>
+        /// Sprint 23.9 — copies obstacle-category markers into <paramref name="buffer"/>
+        /// (cleared first). Hook for future obstacle placement; does not spawn.
+        /// </summary>
+        public void CopyObstacleMarkers(List<TrackSpawnMarker> buffer)
+        {
+            if (buffer == null)
+            {
+                return;
+            }
+
+            buffer.Clear();
+            if (spawnMarkers == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < spawnMarkers.Length; i++)
+            {
+                TrackSpawnMarker marker = spawnMarkers[i];
+                if (marker != null && marker.Category == SpawnCategory.Obstacle)
+                {
+                    buffer.Add(marker);
+                }
+            }
         }
 
         private void SyncEndpoints()

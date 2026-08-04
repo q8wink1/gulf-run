@@ -14,6 +14,8 @@ namespace GulfRun.Features.Gameplay
     /// stores <see cref="PlannedSpawnSlot"/>s only. Does not Instantiate or
     /// pool gameplay content yet; designed so a future sprint can call
     /// <see cref="ObjectPoolManager"/> at planned poses.
+    /// Sprint 23.9 adds <see cref="ObstacleCatalog"/> WarmPools / execute stubs
+    /// without placing obstacles.
     /// Distinct from <c>Features.Multiplayer.Spawning.SpawnManager</c> (player slots).
     /// </summary>
     [DisallowMultipleComponent]
@@ -22,6 +24,10 @@ namespace GulfRun.Features.Gameplay
         [Header("Profile")]
         [Tooltip("Map-specific spawn groups (swap Kuwait / Dubai / Doha / Muscat assets).")]
         [SerializeField] private SpawnProfile spawnProfile;
+
+        [Header("Obstacle Foundation (Sprint 23.9)")]
+        [Tooltip("Prefab / data catalog for obstacle WarmPools hooks. Does not spawn.")]
+        [SerializeField] private ObstacleCatalog obstacleCatalog;
 
         [Header("Wiring")]
         [Tooltip("Source of SegmentActivated / SegmentReleased. Auto-finds if unset.")]
@@ -44,6 +50,7 @@ namespace GulfRun.Features.Gameplay
         private EndlessTrackGenerator _subscribedGenerator;
 
         public SpawnProfile Profile => spawnProfile;
+        public ObstacleCatalog ObstacleCatalog => obstacleCatalog;
         public IReadOnlyList<PlannedSpawnSlot> PlannedSlots => _planned;
         public IReadOnlyDictionary<SpawnCategory, int> PlannedCounts => _plannedCounts;
         public int PlannedCount => _planned.Count;
@@ -75,6 +82,12 @@ namespace GulfRun.Features.Gameplay
         {
             spawnProfile = profile;
             ClearAllPlans();
+        }
+
+        /// <summary>Assigns obstacle prefab catalog without executing spawns.</summary>
+        public void SetObstacleCatalog(ObstacleCatalog catalog)
+        {
+            obstacleCatalog = catalog;
         }
 
         /// <summary>Clears every planned slot and spacing cursors.</summary>
@@ -178,13 +191,23 @@ namespace GulfRun.Features.Gameplay
         }
 
         /// <summary>
-        /// Future pool warm-up. No-op until category prefab catalogs exist;
-        /// documents that content must go through <see cref="ObjectPoolManager"/>.
+        /// Future pool warm-up. Preloads obstacle catalog prefabs when assigned;
+        /// still does not place any content on the track.
         /// </summary>
         public void WarmPools(Transform poolParent = null)
         {
-            _ = poolParent;
-            _ = ObjectPoolManager.Instance;
+            ObjectPoolManager pools = ObjectPoolManager.Instance;
+            if (obstacleCatalog != null && pools != null)
+            {
+                obstacleCatalog.WarmPools(pools, poolParent);
+            }
+        }
+
+        /// <summary>Resolves a prefab for <paramref name="data"/> from the obstacle catalog.</summary>
+        public bool TryGetObstaclePrefab(ObstacleData data, out GameObject prefab)
+        {
+            prefab = null;
+            return obstacleCatalog != null && obstacleCatalog.TryGetPrefab(data, out prefab);
         }
 
         /// <summary>
@@ -195,6 +218,33 @@ namespace GulfRun.Features.Gameplay
             _ = slot;
             _ = prefab;
             _ = parent;
+            return false;
+        }
+
+        /// <summary>
+        /// Future obstacle execute path: resolve catalog prefab then pool-Get at the plan.
+        /// Always returns false this sprint (no random / no Instantiate).
+        /// </summary>
+        public bool TryExecuteObstacleSlot(
+            in PlannedSpawnSlot slot,
+            ObstacleData data,
+            RunnerLane lane,
+            Transform parent = null)
+        {
+            if (slot.Category != SpawnCategory.Obstacle)
+            {
+                return false;
+            }
+
+            if (!TryGetObstaclePrefab(data, out GameObject prefab) || prefab == null)
+            {
+                return false;
+            }
+
+            // Prefab + lane reserved for a future pool Get + IObstaclePlacementTarget.ApplyPlannedSlot.
+            _ = lane;
+            _ = parent;
+            _ = prefab;
             return false;
         }
 
