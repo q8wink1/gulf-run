@@ -21,6 +21,7 @@ namespace GulfRun.Core.Managers
         public const string LobbySceneName = "Lobby";
         public const string MapVotingSceneName = "MapVoting";
         public const string WinningMapRevealSceneName = "WinningMapReveal";
+        public const string LoadingScreenSceneName = "LoadingScreen";
         public const string LoadingSceneName = "Loading";
         public const string GameplaySceneName = "Gameplay";
 
@@ -45,6 +46,9 @@ namespace GulfRun.Core.Managers
         public void LoadMapVoting() => UnityEngine.SceneManagement.SceneManager.LoadScene(MapVotingSceneName);
 
         public void LoadWinningMapReveal() => UnityEngine.SceneManagement.SceneManager.LoadScene(WinningMapRevealSceneName);
+
+        /// <summary>Premium Loading Screen UI (Sprint 22.5). Distinct from gameplay <see cref="LoadLoading"/>.</summary>
+        public void LoadLoadingScreen() => UnityEngine.SceneManagement.SceneManager.LoadScene(LoadingScreenSceneName);
 
         public void LoadLoading() => UnityEngine.SceneManagement.SceneManager.LoadScene(LoadingSceneName);
 

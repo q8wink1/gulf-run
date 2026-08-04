@@ -7,6 +7,7 @@ using GulfRun.Features.MapVotingScreen;
 using GulfRun.Features.PlayMenu;
 using GulfRun.Features.QuickPlay;
 using GulfRun.Features.WinningMapRevealScreen;
+using GulfRun.Features.LoadingScreen;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -29,10 +30,13 @@ namespace GulfRun.Editor
         private const string LobbyScreenScenePath = "Assets/_Project/Scenes/LobbyScreen.unity";
         private const string MapVotingScenePath = "Assets/_Project/Scenes/MapVoting.unity";
         private const string WinningMapRevealScenePath = "Assets/_Project/Scenes/WinningMapReveal.unity";
+        private const string LoadingScreenScenePath = "Assets/_Project/Scenes/LoadingScreen.unity";
         private const string MainMenuScenePath = "Assets/_Project/Scenes/MainMenu.unity";
         private const string BackgroundGuid = "a18b0000000000000000000000000001";
+        private const string LogoGuid = "a18c1000000000000000000000000001";
         private static readonly Color GlowGold = new Color(1f, 0.84f, 0.40f, 0.55f);
         private static readonly Color DimOverlayColor = new Color(0.02f, 0.02f, 0.04f, 0.42f);
+        private static readonly Color LoadingDimOverlayColor = new Color(0.02f, 0.02f, 0.04f, 0.62f);
 
         private static readonly Color Gold = new Color(0.90f, 0.71f, 0.25f, 1f);
         private static readonly Color GoldBright = new Color(1f, 0.84f, 0.40f, 1f);
@@ -76,6 +80,9 @@ namespace GulfRun.Editor
 
         [MenuItem("GulfRun/Play Flow/Build Winning Map Reveal (Sprint 22.4)")]
         public static void BuildWinningMapRevealFromMenu() => BuildWinningMapRevealBatch();
+
+        [MenuItem("GulfRun/Play Flow/Build Loading Screen (Sprint 22.5)")]
+        public static void BuildLoadingScreenFromMenu() => BuildLoadingScreenBatch();
 
         public static void RunBatch()
         {
@@ -200,6 +207,40 @@ namespace GulfRun.Editor
             }
 
             ExitWithFailures(failures, "[PlayFlow] PASS — WinningMapReveal Sprint 22.4 UI OK.");
+        }
+
+        /// <summary>
+        /// Sprint 22.5: build LoadingScreen premium UI (blurred map bg, logo,
+        /// progress bar, tips, sync status placeholders). No load progress,
+        /// networking, or gameplay. Does not rebuild Main Menu / Loading.unity.
+        /// </summary>
+        public static void BuildLoadingScreenBatch()
+        {
+            var failures = new List<string>();
+
+            try
+            {
+                BuildLoadingScreenScene(failures);
+                EnsureBuildSettings(failures);
+                ValidateLoadingScreen(failures);
+
+                if (CoreSceneManager.LoadingScreenSceneName != "LoadingScreen")
+                {
+                    failures.Add("SceneManager.LoadingScreenSceneName mismatch.");
+                }
+
+                if (CoreSceneManager.LoadingSceneName != "Loading")
+                {
+                    failures.Add("SceneManager.LoadingSceneName must remain Loading (gameplay transition).");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                failures.Add("Unhandled: " + ex);
+                Debug.LogException(ex);
+            }
+
+            ExitWithFailures(failures, "[PlayFlow] PASS — LoadingScreen Sprint 22.5 Premium Loading UI OK.");
         }
 
         /// <summary>
@@ -1512,6 +1553,247 @@ namespace GulfRun.Editor
             SaveScene(scene, WinningMapRevealScenePath, failures);
         }
 
+        private static void BuildLoadingScreenScene(List<string> failures)
+        {
+            Sprite background = LoadBackground(failures);
+            Sprite logo = LoadSprite(LogoGuid, "MainMenuLogo");
+            if (logo == null)
+            {
+                failures.Add("Main Menu Logo sprite GUID missing.");
+            }
+
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            EnsureEventSystem(scene);
+
+            GameObject canvasGo = CreateOverlayCanvas("LoadingScreenCanvas");
+            LoadingScreenController controller = canvasGo.AddComponent<LoadingScreenController>();
+            RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
+
+            Image bg = CreateUiImage("Background", canvasRt, stretch: true);
+            bg.sprite = background;
+            bg.preserveAspect = false;
+            bg.color = new Color(0.85f, 0.85f, 0.88f, 1f);
+            bg.raycastTarget = false;
+
+            // Soft map-placeholder wash (no real blur shader — darkened overlay stands in).
+            Image mapWash = CreateUiImage("MapBlurPlaceholder", canvasRt, stretch: true);
+            mapWash.color = new Color(0.55f, 0.38f, 0.22f, 0.35f);
+            mapWash.raycastTarget = false;
+
+            Image dim = CreateUiImage("DimOverlay", canvasRt, stretch: true);
+            dim.color = LoadingDimOverlayColor;
+            dim.raycastTarget = false;
+
+            CreateSafeArea(canvasRt);
+
+            RectTransform centerRoot = CreateRect("CenterRoot", canvasRt);
+            centerRoot.anchorMin = new Vector2(0.5f, 0.5f);
+            centerRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            centerRoot.pivot = new Vector2(0.5f, 0.5f);
+            centerRoot.anchoredPosition = new Vector2(0f, 120f);
+            centerRoot.sizeDelta = new Vector2(720f, 420f);
+
+            Image logoImage = CreateUiImage("Logo", centerRoot, stretch: false);
+            logoImage.sprite = logo;
+            logoImage.preserveAspect = true;
+            logoImage.raycastTarget = false;
+            RectTransform logoRt = logoImage.rectTransform;
+            logoRt.anchorMin = new Vector2(0.5f, 1f);
+            logoRt.anchorMax = new Vector2(0.5f, 1f);
+            logoRt.pivot = new Vector2(0.5f, 1f);
+            logoRt.anchoredPosition = new Vector2(0f, 0f);
+            logoRt.sizeDelta = new Vector2(420f, 220f);
+
+            Text loadingText = CreateUiText(
+                "LoadingText",
+                centerRoot,
+                "Loading Race...",
+                40,
+                FontStyle.Bold,
+                GoldBright,
+                TextAnchor.MiddleCenter);
+            RectTransform loadingTextRt = loadingText.rectTransform;
+            loadingTextRt.anchorMin = new Vector2(0f, 0.18f);
+            loadingTextRt.anchorMax = new Vector2(1f, 0.38f);
+            loadingTextRt.offsetMin = new Vector2(16f, 0f);
+            loadingTextRt.offsetMax = new Vector2(-16f, 0f);
+
+            Image spinner = CreateUiImage("Spinner", centerRoot, stretch: false);
+            spinner.sprite = GetBuiltinKnob();
+            spinner.color = GoldBright;
+            spinner.raycastTarget = false;
+            spinner.preserveAspect = true;
+            RectTransform spinnerRt = spinner.rectTransform;
+            spinnerRt.anchorMin = new Vector2(0.5f, 0f);
+            spinnerRt.anchorMax = new Vector2(0.5f, 0f);
+            spinnerRt.pivot = new Vector2(0.5f, 0.5f);
+            spinnerRt.anchoredPosition = new Vector2(0f, 36f);
+            spinnerRt.sizeDelta = new Vector2(72f, 72f);
+
+            RectTransform progressRoot = CreateRect("ProgressRoot", canvasRt);
+            progressRoot.anchorMin = new Vector2(0.5f, 0.5f);
+            progressRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            progressRoot.pivot = new Vector2(0.5f, 0.5f);
+            progressRoot.anchoredPosition = new Vector2(0f, -80f);
+            progressRoot.sizeDelta = new Vector2(760f, 72f);
+
+            Image progressBorder = progressRoot.gameObject.AddComponent<Image>();
+            progressBorder.color = PanelBorder;
+            progressBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(progressRoot.gameObject);
+
+            Image progressTrack = CreateUiImage("Track", progressRoot, stretch: true);
+            progressTrack.color = PanelBg;
+            progressTrack.raycastTarget = false;
+            progressTrack.rectTransform.offsetMin = new Vector2(4f, 4f);
+            progressTrack.rectTransform.offsetMax = new Vector2(-4f, -4f);
+
+            Image progressFill = CreateUiImage("Fill", progressRoot, stretch: true);
+            progressFill.color = Gold;
+            progressFill.raycastTarget = false;
+            progressFill.type = Image.Type.Filled;
+            progressFill.fillMethod = Image.FillMethod.Horizontal;
+            progressFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            progressFill.fillAmount = 0f;
+            progressFill.rectTransform.offsetMin = new Vector2(8f, 14f);
+            progressFill.rectTransform.offsetMax = new Vector2(-120f, -14f);
+
+            Text percentText = CreateUiText(
+                "PercentText",
+                progressRoot,
+                "0%",
+                26,
+                FontStyle.Bold,
+                TextPrimary,
+                TextAnchor.MiddleRight);
+            RectTransform percentRt = percentText.rectTransform;
+            percentRt.anchorMin = new Vector2(1f, 0f);
+            percentRt.anchorMax = new Vector2(1f, 1f);
+            percentRt.pivot = new Vector2(1f, 0.5f);
+            percentRt.anchoredPosition = new Vector2(-16f, 0f);
+            percentRt.sizeDelta = new Vector2(96f, 0f);
+
+            RectTransform tipsPanel = CreateRect("TipsPanel", canvasRt);
+            tipsPanel.anchorMin = new Vector2(0.5f, 0f);
+            tipsPanel.anchorMax = new Vector2(0.5f, 0f);
+            tipsPanel.pivot = new Vector2(0.5f, 0f);
+            tipsPanel.anchoredPosition = new Vector2(0f, 168f);
+            tipsPanel.sizeDelta = new Vector2(980f, 168f);
+
+            Image tipsBorder = tipsPanel.gameObject.AddComponent<Image>();
+            tipsBorder.color = PanelBorder;
+            tipsBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(tipsPanel.gameObject);
+
+            Image tipsFill = CreateUiImage("Fill", tipsPanel, stretch: true);
+            tipsFill.color = PanelBg;
+            tipsFill.raycastTarget = false;
+            tipsFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            tipsFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Text tipsTitle = CreateUiText(
+                "TipsTitle",
+                tipsPanel,
+                "TIP",
+                20,
+                FontStyle.Bold,
+                Gold,
+                TextAnchor.MiddleLeft);
+            RectTransform tipsTitleRt = tipsTitle.rectTransform;
+            tipsTitleRt.anchorMin = new Vector2(0f, 1f);
+            tipsTitleRt.anchorMax = new Vector2(1f, 1f);
+            tipsTitleRt.pivot = new Vector2(0.5f, 1f);
+            tipsTitleRt.anchoredPosition = new Vector2(0f, -14f);
+            tipsTitleRt.sizeDelta = new Vector2(-48f, 28f);
+
+            Text tipPrimary = CreateUiText(
+                "TipPrimary",
+                tipsPanel,
+                "Grab item boxes mid-race to turn the tide.",
+                26,
+                FontStyle.Bold,
+                TextPrimary,
+                TextAnchor.MiddleLeft);
+            tipPrimary.horizontalOverflow = HorizontalWrapMode.Wrap;
+            RectTransform tipPrimaryRt = tipPrimary.rectTransform;
+            tipPrimaryRt.anchorMin = new Vector2(0f, 0f);
+            tipPrimaryRt.anchorMax = new Vector2(1f, 1f);
+            tipPrimaryRt.offsetMin = new Vector2(28f, 36f);
+            tipPrimaryRt.offsetMax = new Vector2(-28f, -48f);
+
+            Text tipSecondary = CreateUiText(
+                "TipSecondary",
+                tipsPanel,
+                "Jump early to clear desert traps.",
+                22,
+                FontStyle.Normal,
+                TextMuted,
+                TextAnchor.MiddleLeft);
+            tipSecondary.gameObject.SetActive(false);
+
+            Text tipTertiary = CreateUiText(
+                "TipTertiary",
+                tipsPanel,
+                "Draft behind rivals to save your boost.",
+                22,
+                FontStyle.Normal,
+                TextMuted,
+                TextAnchor.MiddleLeft);
+            tipTertiary.gameObject.SetActive(false);
+
+            RectTransform syncRoot = CreateRect("SyncStatusRoot", canvasRt);
+            syncRoot.anchorMin = new Vector2(0.5f, 0f);
+            syncRoot.anchorMax = new Vector2(0.5f, 0f);
+            syncRoot.pivot = new Vector2(0.5f, 0f);
+            syncRoot.anchoredPosition = new Vector2(0f, 48f);
+            syncRoot.sizeDelta = new Vector2(720f, 88f);
+
+            Text syncStatus = CreateUiText(
+                "SyncStatusText",
+                syncRoot,
+                "Waiting for players...",
+                24,
+                FontStyle.Bold,
+                TextMuted,
+                TextAnchor.MiddleCenter);
+            RectTransform syncStatusRt = syncStatus.rectTransform;
+            syncStatusRt.anchorMin = new Vector2(0f, 0.45f);
+            syncStatusRt.anchorMax = new Vector2(1f, 1f);
+            syncStatusRt.offsetMin = new Vector2(8f, 0f);
+            syncStatusRt.offsetMax = new Vector2(-8f, 0f);
+
+            Text readyCount = CreateUiText(
+                "ReadyCountText",
+                syncRoot,
+                "4 / 4 Ready",
+                28,
+                FontStyle.Bold,
+                SuccessGreen,
+                TextAnchor.MiddleCenter);
+            RectTransform readyCountRt = readyCount.rectTransform;
+            readyCountRt.anchorMin = new Vector2(0f, 0f);
+            readyCountRt.anchorMax = new Vector2(1f, 0.55f);
+            readyCountRt.offsetMin = new Vector2(8f, 0f);
+            readyCountRt.offsetMax = new Vector2(-8f, 0f);
+
+            Button continueButton = CreateLabeledButton(
+                "ContinueButton",
+                canvasRt,
+                "Continue",
+                280f,
+                72f,
+                Gold,
+                GoldButtonLabel);
+            PlaceBottomRight(continueButton.GetComponent<RectTransform>(), new Vector2(-48f, 48f));
+
+            SerializedObject controllerSo = new SerializedObject(controller);
+            controllerSo.FindProperty("continueButton").objectReferenceValue = continueButton;
+            controllerSo.FindProperty("spinner").objectReferenceValue = spinnerRt;
+            controllerSo.ApplyModifiedPropertiesWithoutUndo();
+
+            SaveScene(scene, LoadingScreenScenePath, failures);
+        }
+
         /// <summary>
         /// Minimal Sprint 22.4 patch: ensure MapVoting has temporary Next button
         /// wired to LoadWinningMapReveal without rebuilding the full voting HUD.
@@ -2157,6 +2439,7 @@ namespace GulfRun.Editor
             InsertSceneAfter(LobbyScreenScenePath, InviteFriendsScenePath, failures);
             InsertSceneAfter(MapVotingScenePath, LobbyScreenScenePath, failures);
             InsertSceneAfter(WinningMapRevealScenePath, MapVotingScenePath, failures);
+            InsertSceneAfter(LoadingScreenScenePath, WinningMapRevealScenePath, failures);
         }
 
         private static void InsertSceneAfter(string scenePath, string afterPath, List<string> failures)
@@ -2981,6 +3264,132 @@ namespace GulfRun.Editor
             RequireCanvasScaler(FindDeep(scene, "WinningMapRevealCanvas"), failures);
             RequireInBuild(WinningMapRevealScenePath, failures);
             RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
+        }
+
+        private static void ValidateLoadingScreen(List<string> failures)
+        {
+            Scene scene = EditorSceneManager.OpenScene(LoadingScreenScenePath, OpenSceneMode.Single);
+            Require(FindDeep(scene, "LoadingScreenCanvas"), "LoadingScreenCanvas", failures);
+            Require(FindDeep(scene, "Background"), "LoadingScreen Background", failures);
+            Require(FindDeep(scene, "MapBlurPlaceholder"), "LoadingScreen MapBlurPlaceholder", failures);
+            Require(FindDeep(scene, "DimOverlay"), "LoadingScreen DimOverlay", failures);
+            Require(FindDeep(scene, "SafeArea"), "LoadingScreen SafeArea", failures);
+            Require(FindDeep(scene, "CenterRoot"), "LoadingScreen CenterRoot", failures);
+            Require(FindDeep(scene, "Logo"), "LoadingScreen Logo", failures);
+            Require(FindDeep(scene, "LoadingText"), "LoadingScreen LoadingText", failures);
+            Require(FindDeep(scene, "Spinner"), "LoadingScreen Spinner", failures);
+            Require(FindDeep(scene, "ProgressRoot"), "LoadingScreen ProgressRoot", failures);
+            Require(FindDeep(scene, "Track"), "LoadingScreen Progress Track", failures);
+            Require(FindDeep(scene, "Fill"), "LoadingScreen Progress Fill", failures);
+            Require(FindDeep(scene, "PercentText"), "LoadingScreen PercentText", failures);
+            Require(FindDeep(scene, "TipsPanel"), "LoadingScreen TipsPanel", failures);
+            Require(FindDeep(scene, "TipPrimary"), "LoadingScreen TipPrimary", failures);
+            Require(FindDeep(scene, "TipSecondary"), "LoadingScreen TipSecondary", failures);
+            Require(FindDeep(scene, "TipTertiary"), "LoadingScreen TipTertiary", failures);
+            Require(FindDeep(scene, "SyncStatusRoot"), "LoadingScreen SyncStatusRoot", failures);
+            Require(FindDeep(scene, "SyncStatusText"), "LoadingScreen SyncStatusText", failures);
+            Require(FindDeep(scene, "ReadyCountText"), "LoadingScreen ReadyCountText", failures);
+            Require(FindDeep(scene, "ContinueButton"), "LoadingScreen ContinueButton", failures);
+
+            Text loadingText = FindDeep(scene, "LoadingText")?.GetComponent<Text>();
+            if (loadingText == null || loadingText.text != "Loading Race...")
+            {
+                failures.Add("LoadingScreen LoadingText must read 'Loading Race...'.");
+            }
+
+            Text percent = FindDeep(scene, "PercentText")?.GetComponent<Text>();
+            if (percent == null || percent.text != "0%")
+            {
+                failures.Add("LoadingScreen PercentText must read '0%'.");
+            }
+
+            Text sync = FindDeep(scene, "SyncStatusText")?.GetComponent<Text>();
+            if (sync == null || sync.text != "Waiting for players...")
+            {
+                failures.Add("LoadingScreen SyncStatusText must read 'Waiting for players...'.");
+            }
+
+            Text ready = FindDeep(scene, "ReadyCountText")?.GetComponent<Text>();
+            if (ready == null || ready.text != "4 / 4 Ready")
+            {
+                failures.Add("LoadingScreen ReadyCountText must read '4 / 4 Ready'.");
+            }
+
+            GameObject tipSecondary = FindDeep(scene, "TipSecondary");
+            GameObject tipTertiary = FindDeep(scene, "TipTertiary");
+            if (tipSecondary != null && tipSecondary.activeSelf)
+            {
+                failures.Add("LoadingScreen TipSecondary must start inactive.");
+            }
+
+            if (tipTertiary != null && tipTertiary.activeSelf)
+            {
+                failures.Add("LoadingScreen TipTertiary must start inactive.");
+            }
+
+            GameObject tipPrimary = FindDeep(scene, "TipPrimary");
+            if (tipPrimary != null && !tipPrimary.activeSelf)
+            {
+                failures.Add("LoadingScreen TipPrimary must start active.");
+            }
+
+            Image fill = FindDeep(scene, "ProgressRoot")?.transform.Find("Fill")?.GetComponent<Image>();
+            if (fill == null || fill.type != Image.Type.Filled || !Mathf.Approximately(fill.fillAmount, 0f))
+            {
+                failures.Add("LoadingScreen Progress Fill must be Filled at 0%.");
+            }
+
+            GameObject logoGo = FindDeep(scene, "Logo");
+            if (logoGo != null)
+            {
+                Image logoImg = logoGo.GetComponent<Image>();
+                string guid = logoImg != null && logoImg.sprite != null
+                    ? AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(logoImg.sprite))
+                    : null;
+                if (guid != LogoGuid)
+                {
+                    failures.Add("LoadingScreen Logo must reuse Main Menu Logo.png sprite.");
+                }
+            }
+
+            GameObject safeArea = FindDeep(scene, "SafeArea");
+            if (safeArea != null)
+            {
+                RectTransform safeRt = safeArea.GetComponent<RectTransform>();
+                if (safeRt == null ||
+                    safeRt.sizeDelta != new Vector2(-96f, -86f) ||
+                    !Mathf.Approximately(safeRt.anchoredPosition.y, -9f))
+                {
+                    failures.Add("LoadingScreen SafeArea expected Main Menu insets (sizeDelta -96/-86, y -9).");
+                }
+            }
+
+            LoadingScreenController controller =
+                FindDeep(scene, "LoadingScreenCanvas")?.GetComponent<LoadingScreenController>();
+            if (controller == null)
+            {
+                failures.Add("LoadingScreenCanvas missing LoadingScreenController.");
+            }
+            else
+            {
+                SerializedObject so = new SerializedObject(controller);
+                if (so.FindProperty("continueButton").objectReferenceValue == null)
+                {
+                    failures.Add("LoadingScreenController.continueButton must be wired.");
+                }
+
+                if (so.FindProperty("spinner").objectReferenceValue == null)
+                {
+                    failures.Add("LoadingScreenController.spinner must be wired.");
+                }
+            }
+
+            RequireCanvasScaler(FindDeep(scene, "LoadingScreenCanvas"), failures);
+            RequireInBuild(LoadingScreenScenePath, failures);
+            RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
+
+            // Ensure legacy Loading.unity remains in build (gameplay transition).
+            RequireInBuild("Assets/_Project/Scenes/Loading.unity", failures);
         }
 
         private static void ValidateMainMenuWiring(List<string> failures)

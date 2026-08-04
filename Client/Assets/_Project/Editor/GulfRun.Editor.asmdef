@@ -15,6 +15,7 @@
         "GulfRun.Features.LobbyScreen",
         "GulfRun.Features.MapVotingScreen",
         "GulfRun.Features.WinningMapRevealScreen",
+        "GulfRun.Features.LoadingScreen",
         "UnityEngine.UI"
     ],
     "includePlatforms": [

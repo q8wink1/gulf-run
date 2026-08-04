@@ -37,14 +37,14 @@ WinningMapRevealCanvas (+ WinningMapRevealScreenController + WinningMapRevealAni
 |------|---------|----|
 | MapVoting | **Back** | LobbyScreen |
 | MapVoting | **Next** (temporary Sprint 22.4) | WinningMapReveal |
-| WinningMapReveal | **Continue** | Loading |
+| WinningMapReveal | **Continue** | LoadingScreen |
 
 - `SceneManager.LoadWinningMapReveal()` / `WinningMapRevealSceneName`
 - EditorBuildSettings: WinningMapReveal inserted **after** MapVoting
 
 ## Scripts
 
-- `WinningMapRevealScreenController` — Continue → Loading only
+- `WinningMapRevealScreenController` — Continue → LoadingScreen only
 - `WinningMapRevealAnimation` — OnEnable lerp: card scale, dim overlay, golden glow, light canvas zoom
 - MapVoting: `nextButton` wired to `LoadWinningMapReveal` (no vote tally)
 

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace GulfRun.Features.WinningMapRevealScreen
 {
     /// <summary>
-    /// Winning Map Reveal UI (Sprint 22.4). Placeholder continue → Loading.
+    /// Winning Map Reveal UI (Sprint 22.4). Placeholder continue → LoadingScreen.
     /// No winner calculation, networking, loading logic, or gameplay.
     /// </summary>
     [DisallowMultipleComponent]
@@ -33,11 +33,11 @@ namespace GulfRun.Features.WinningMapRevealScreen
         {
             if (SceneManager.Instance != null)
             {
-                SceneManager.Instance.LoadLoading();
+                SceneManager.Instance.LoadLoadingScreen();
                 return;
             }
 
-            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.LoadingSceneName);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.LoadingScreenSceneName);
         }
     }
 }
