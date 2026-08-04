@@ -39,8 +39,19 @@ namespace GulfRun.Editor
         private static readonly Color HighlightGold = new Color(0.90f, 0.71f, 0.25f, 0.12f);
         private static readonly Color SuccessGreen = new Color(0.40f, 0.85f, 0.45f, 1f);
         private static readonly Color ReadyMuted = new Color(0.55f, 0.55f, 0.55f, 1f);
+        private static readonly Color ConnectingAmber = new Color(0.95f, 0.72f, 0.28f, 1f);
+        private static readonly Color OnlineGreen = new Color(0.35f, 0.90f, 0.48f, 1f);
         private static readonly Color EmptySlotFill = new Color(0.10f, 0.09f, 0.10f, 0.55f);
+        private static readonly Color EmptySlotBorder = new Color(0.90f, 0.71f, 0.25f, 0.22f);
+        private static readonly Color AvatarTone = new Color(0.72f, 0.58f, 0.42f, 1f);
         private static readonly Color GoldButtonLabel = new Color(0.20f, 0.14f, 0.02f, 1f);
+
+        private enum SlotReadyVisual
+        {
+            Ready,
+            NotReady,
+            Connecting
+        }
 
         private const string QuickPlaySubtitle = "Find and join a public multiplayer match instantly.";
         private const string InviteFriendsSubtitle = "Create a private room and play with your friends.";
@@ -51,7 +62,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Polish Play Menu (Sprint 20.1)")]
         public static void PolishPlayMenuFromMenu() => PolishPlayMenuBatch();
 
-        [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.1)")]
+        [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.2)")]
         public static void BuildLobbyScreenFromMenu() => BuildLobbyScreenBatch();
 
         public static void RunBatch()
@@ -78,8 +89,8 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 21.1: build LobbyScreen UI foundation only. Does not rebuild
-        /// PlayMenu / QuickPlay / InviteFriends (preserves existing polish).
+        /// Sprint 21.2: rebuild LobbyScreen with polished player-slot UI only.
+        /// Does not rebuild PlayMenu / QuickPlay / InviteFriends.
         /// </summary>
         public static void BuildLobbyScreenBatch()
         {
@@ -107,7 +118,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — LobbyScreen Sprint 21.1 UI foundation OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — LobbyScreen Sprint 21.2 player slots UI OK.");
         }
 
         /// <summary>
@@ -523,7 +534,7 @@ namespace GulfRun.Editor
             roomTypeRt.offsetMin = new Vector2(24f, 0f);
             roomTypeRt.offsetMax = new Vector2(-24f, -8f);
 
-            Text playerCount = CreateUiText("PlayerCountText", headerRoot, "1/4", 24, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
+            Text playerCount = CreateUiText("PlayerCountText", headerRoot, "3/4", 24, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
             RectTransform playerCountRt = playerCount.rectTransform;
             playerCountRt.anchorMin = new Vector2(0f, 0f);
             playerCountRt.anchorMax = new Vector2(0.5f, 0.5f);
@@ -537,14 +548,15 @@ namespace GulfRun.Editor
             roomCodeRt.offsetMin = new Vector2(12f, 10f);
             roomCodeRt.offsetMax = new Vector2(-40f, -4f);
 
-            // Center — four vertical player slots (placeholder data)
+            // Center — four vertical player slots (Sprint 21.2 polish; static mock only)
             RectTransform slotsRoot = CreateRect("SlotsRoot", canvasRt);
             slotsRoot.anchorMin = new Vector2(0.5f, 0.5f);
             slotsRoot.anchorMax = new Vector2(0.5f, 0.5f);
             slotsRoot.pivot = new Vector2(0.5f, 0.5f);
-            slotsRoot.anchoredPosition = new Vector2(0f, 10f);
-            slotsRoot.sizeDelta = new Vector2(920f, 620f);
+            slotsRoot.anchoredPosition = new Vector2(0f, 8f);
+            slotsRoot.sizeDelta = new Vector2(980f, 680f);
 
+            // Mock hierarchy: host ready, guest not ready, connecting sample, empty waiting.
             CreatePlayerSlot(
                 "PlayerSlot_0",
                 slotsRoot,
@@ -554,29 +566,35 @@ namespace GulfRun.Editor
                 countryCode: "KW",
                 flagColor: new Color(0.05f, 0.45f, 0.25f, 1f),
                 level: 12,
-                ready: true);
+                readyVisual: SlotReadyVisual.Ready,
+                online: true,
+                showHostBadge: true);
 
             CreatePlayerSlot(
                 "PlayerSlot_1",
                 slotsRoot,
                 1,
-                occupied: false,
-                playerName: string.Empty,
-                countryCode: string.Empty,
-                flagColor: Color.clear,
-                level: 0,
-                ready: false);
+                occupied: true,
+                playerName: "NightOwl",
+                countryCode: "AE",
+                flagColor: new Color(0.05f, 0.28f, 0.55f, 1f),
+                level: 8,
+                readyVisual: SlotReadyVisual.NotReady,
+                online: true,
+                showHostBadge: false);
 
             CreatePlayerSlot(
                 "PlayerSlot_2",
                 slotsRoot,
                 2,
-                occupied: false,
-                playerName: string.Empty,
-                countryCode: string.Empty,
-                flagColor: Color.clear,
-                level: 0,
-                ready: false);
+                occupied: true,
+                playerName: "SandWave",
+                countryCode: "SA",
+                flagColor: new Color(0.10f, 0.42f, 0.22f, 1f),
+                level: 5,
+                readyVisual: SlotReadyVisual.Connecting,
+                online: false,
+                showHostBadge: false);
 
             CreatePlayerSlot(
                 "PlayerSlot_3",
@@ -587,7 +605,9 @@ namespace GulfRun.Editor
                 countryCode: string.Empty,
                 flagColor: Color.clear,
                 level: 0,
-                ready: false);
+                readyVisual: SlotReadyVisual.NotReady,
+                online: false,
+                showHostBadge: false);
 
             // Footer — Ready (left), Lobby Status (center), Play disabled (right)
             RectTransform footerRoot = CreateRect("FooterRoot", canvasRt);
@@ -653,10 +673,13 @@ namespace GulfRun.Editor
             string countryCode,
             Color flagColor,
             int level,
-            bool ready)
+            SlotReadyVisual readyVisual,
+            bool online,
+            bool showHostBadge)
         {
-            const float slotHeight = 132f;
-            const float gap = 16f;
+            // Touch-friendly vertical rhythm for mobile (CanvasScaler 1920×1080 match 0.5).
+            const float slotHeight = 148f;
+            const float gap = 22f;
             float totalHeight = (slotHeight * 4f) + (gap * 3f);
             float topY = totalHeight * 0.5f - slotHeight * 0.5f;
             float y = topY - index * (slotHeight + gap);
@@ -666,10 +689,10 @@ namespace GulfRun.Editor
             slot.anchorMax = new Vector2(0.5f, 0.5f);
             slot.pivot = new Vector2(0.5f, 0.5f);
             slot.anchoredPosition = new Vector2(0f, y);
-            slot.sizeDelta = new Vector2(900f, slotHeight);
+            slot.sizeDelta = new Vector2(960f, slotHeight);
 
             Image border = slot.gameObject.AddComponent<Image>();
-            border.color = occupied ? PanelBorder : new Color(PanelBorder.r, PanelBorder.g, PanelBorder.b, 0.28f);
+            border.color = occupied ? PanelBorder : EmptySlotBorder;
             border.raycastTarget = false;
             EnsureCardShadow(slot.gameObject);
 
@@ -679,36 +702,37 @@ namespace GulfRun.Editor
             fill.rectTransform.offsetMin = new Vector2(4f, 4f);
             fill.rectTransform.offsetMax = new Vector2(-4f, -4f);
 
+            // Host badge exists on every slot; visible only as design mock on slot 0.
+            CreateHostBadge(slot, showHostBadge);
+
             if (!occupied)
             {
-                Text empty = CreateUiText("EmptySlotLabel", slot, "Waiting for player...", 26, FontStyle.Bold, TextMuted, TextAnchor.MiddleCenter);
-                RectTransform emptyRt = empty.rectTransform;
-                emptyRt.anchorMin = Vector2.zero;
-                emptyRt.anchorMax = Vector2.one;
-                emptyRt.offsetMin = new Vector2(24f, 8f);
-                emptyRt.offsetMax = new Vector2(-24f, -8f);
+                CreateEmptySlotContent(slot);
                 return;
             }
 
-            Image avatar = CreateUiImage("Avatar", slot, stretch: false);
-            avatar.sprite = GetBuiltinKnob();
-            avatar.color = GoldBright;
-            avatar.raycastTarget = false;
-            avatar.preserveAspect = true;
-            RectTransform avatarRt = avatar.rectTransform;
-            avatarRt.anchorMin = new Vector2(0f, 0.5f);
-            avatarRt.anchorMax = new Vector2(0f, 0.5f);
-            avatarRt.pivot = new Vector2(0.5f, 0.5f);
-            avatarRt.anchoredPosition = new Vector2(70f, 0f);
-            avatarRt.sizeDelta = new Vector2(84f, 84f);
+            CreateCircularAvatar(slot, out RectTransform avatarRt);
 
-            Text nameText = CreateUiText("PlayerName", slot, playerName, 28, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
+            Image onlineDot = CreateUiImage("OnlineIndicator", avatarRt, stretch: false);
+            onlineDot.sprite = GetBuiltinKnob();
+            onlineDot.color = online ? OnlineGreen : ReadyMuted;
+            onlineDot.raycastTarget = false;
+            onlineDot.preserveAspect = true;
+            RectTransform onlineRt = onlineDot.rectTransform;
+            onlineRt.anchorMin = new Vector2(1f, 0f);
+            onlineRt.anchorMax = new Vector2(1f, 0f);
+            onlineRt.pivot = new Vector2(0.5f, 0.5f);
+            onlineRt.anchoredPosition = new Vector2(-6f, 8f);
+            onlineRt.sizeDelta = new Vector2(22f, 22f);
+            onlineDot.transform.SetAsLastSibling();
+
+            Text nameText = CreateUiText("PlayerName", slot, playerName, 30, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
             RectTransform nameRt = nameText.rectTransform;
             nameRt.anchorMin = new Vector2(0f, 0.5f);
             nameRt.anchorMax = new Vector2(0f, 0.5f);
             nameRt.pivot = new Vector2(0f, 0.5f);
-            nameRt.anchoredPosition = new Vector2(130f, 18f);
-            nameRt.sizeDelta = new Vector2(320f, 40f);
+            nameRt.anchoredPosition = new Vector2(148f, 22f);
+            nameRt.sizeDelta = new Vector2(360f, 42f);
 
             Image flag = CreateUiImage("CountryFlag", slot, stretch: false);
             flag.color = flagColor;
@@ -717,15 +741,15 @@ namespace GulfRun.Editor
             flagRt.anchorMin = new Vector2(0f, 0.5f);
             flagRt.anchorMax = new Vector2(0f, 0.5f);
             flagRt.pivot = new Vector2(0f, 0.5f);
-            flagRt.anchoredPosition = new Vector2(130f, -22f);
-            flagRt.sizeDelta = new Vector2(36f, 24f);
+            flagRt.anchoredPosition = new Vector2(148f, -24f);
+            flagRt.sizeDelta = new Vector2(40f, 26f);
 
             Text country = CreateUiText("CountryCode", slot, countryCode, 18, FontStyle.Bold, TextMuted, TextAnchor.MiddleLeft);
             RectTransform countryRt = country.rectTransform;
             countryRt.anchorMin = new Vector2(0f, 0.5f);
             countryRt.anchorMax = new Vector2(0f, 0.5f);
             countryRt.pivot = new Vector2(0f, 0.5f);
-            countryRt.anchoredPosition = new Vector2(174f, -22f);
+            countryRt.anchoredPosition = new Vector2(196f, -24f);
             countryRt.sizeDelta = new Vector2(80f, 28f);
 
             Image levelBadge = CreateUiImage("LevelBadge", slot, stretch: false);
@@ -737,8 +761,8 @@ namespace GulfRun.Editor
             levelBadgeRt.anchorMin = new Vector2(0.5f, 0.5f);
             levelBadgeRt.anchorMax = new Vector2(0.5f, 0.5f);
             levelBadgeRt.pivot = new Vector2(0.5f, 0.5f);
-            levelBadgeRt.anchoredPosition = new Vector2(80f, 0f);
-            levelBadgeRt.sizeDelta = new Vector2(72f, 72f);
+            levelBadgeRt.anchoredPosition = new Vector2(72f, 0f);
+            levelBadgeRt.sizeDelta = new Vector2(78f, 78f);
 
             Text levelText = CreateUiText("LevelText", levelBadgeRt, "Lv " + level, 16, FontStyle.Bold, GoldButtonLabel, TextAnchor.MiddleCenter);
             RectTransform levelTextRt = levelText.rectTransform;
@@ -747,32 +771,138 @@ namespace GulfRun.Editor
             levelTextRt.offsetMin = Vector2.zero;
             levelTextRt.offsetMax = Vector2.zero;
 
+            ResolveReadyVisual(readyVisual, out Color readyColor, out string readyLabelText);
+
             Image readyDot = CreateUiImage("ReadyStatus", slot, stretch: false);
             readyDot.sprite = GetBuiltinKnob();
-            readyDot.color = ready ? SuccessGreen : ReadyMuted;
+            readyDot.color = readyColor;
             readyDot.raycastTarget = false;
             readyDot.preserveAspect = true;
             RectTransform readyDotRt = readyDot.rectTransform;
             readyDotRt.anchorMin = new Vector2(1f, 0.5f);
             readyDotRt.anchorMax = new Vector2(1f, 0.5f);
             readyDotRt.pivot = new Vector2(1f, 0.5f);
-            readyDotRt.anchoredPosition = new Vector2(-180f, 10f);
-            readyDotRt.sizeDelta = new Vector2(22f, 22f);
+            readyDotRt.anchoredPosition = new Vector2(-200f, 14f);
+            readyDotRt.sizeDelta = new Vector2(24f, 24f);
 
             Text readyLabel = CreateUiText(
                 "ReadyLabel",
                 slot,
-                ready ? "Ready" : "Not Ready",
+                readyLabelText,
                 22,
                 FontStyle.Bold,
-                ready ? SuccessGreen : ReadyMuted,
+                readyColor,
                 TextAnchor.MiddleRight);
             RectTransform readyLabelRt = readyLabel.rectTransform;
             readyLabelRt.anchorMin = new Vector2(1f, 0.5f);
             readyLabelRt.anchorMax = new Vector2(1f, 0.5f);
             readyLabelRt.pivot = new Vector2(1f, 0.5f);
-            readyLabelRt.anchoredPosition = new Vector2(-36f, -14f);
-            readyLabelRt.sizeDelta = new Vector2(160f, 32f);
+            readyLabelRt.anchoredPosition = new Vector2(-40f, -16f);
+            readyLabelRt.sizeDelta = new Vector2(180f, 34f);
+        }
+
+        private static void CreateEmptySlotContent(RectTransform slot)
+        {
+            Image plusRing = CreateUiImage("EmptyPlusRing", slot, stretch: false);
+            plusRing.sprite = GetBuiltinKnob();
+            plusRing.color = new Color(GoldBright.r, GoldBright.g, GoldBright.b, 0.28f);
+            plusRing.raycastTarget = false;
+            plusRing.preserveAspect = true;
+            RectTransform plusRingRt = plusRing.rectTransform;
+            plusRingRt.anchorMin = new Vector2(0.5f, 0.5f);
+            plusRingRt.anchorMax = new Vector2(0.5f, 0.5f);
+            plusRingRt.pivot = new Vector2(0.5f, 0.5f);
+            plusRingRt.anchoredPosition = new Vector2(-210f, 0f);
+            plusRingRt.sizeDelta = new Vector2(72f, 72f);
+
+            Text plusMark = CreateUiText("EmptyPlusMark", plusRingRt, "+", 40, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
+            RectTransform plusMarkRt = plusMark.rectTransform;
+            plusMarkRt.anchorMin = Vector2.zero;
+            plusMarkRt.anchorMax = Vector2.one;
+            plusMarkRt.offsetMin = Vector2.zero;
+            plusMarkRt.offsetMax = Vector2.zero;
+
+            Text empty = CreateUiText(
+                "EmptySlotLabel",
+                slot,
+                "+ Waiting for Player",
+                28,
+                FontStyle.Bold,
+                new Color(TextMuted.r, TextMuted.g, TextMuted.b, 0.92f),
+                TextAnchor.MiddleLeft);
+            RectTransform emptyRt = empty.rectTransform;
+            emptyRt.anchorMin = new Vector2(0.5f, 0.5f);
+            emptyRt.anchorMax = new Vector2(0.5f, 0.5f);
+            emptyRt.pivot = new Vector2(0f, 0.5f);
+            emptyRt.anchoredPosition = new Vector2(-150f, 0f);
+            emptyRt.sizeDelta = new Vector2(520f, 48f);
+        }
+
+        private static void CreateCircularAvatar(RectTransform slot, out RectTransform avatarRt)
+        {
+            Image avatarFrame = CreateUiImage("Avatar", slot, stretch: false);
+            avatarFrame.sprite = GetBuiltinKnob();
+            avatarFrame.color = GoldBright;
+            avatarFrame.raycastTarget = false;
+            avatarFrame.preserveAspect = true;
+            avatarRt = avatarFrame.rectTransform;
+            avatarRt.anchorMin = new Vector2(0f, 0.5f);
+            avatarRt.anchorMax = new Vector2(0f, 0.5f);
+            avatarRt.pivot = new Vector2(0.5f, 0.5f);
+            avatarRt.anchoredPosition = new Vector2(78f, 0f);
+            avatarRt.sizeDelta = new Vector2(96f, 96f);
+
+            Mask mask = avatarFrame.gameObject.AddComponent<Mask>();
+            mask.showMaskGraphic = true;
+
+            Image avatarImage = CreateUiImage("AvatarImage", avatarRt, stretch: true);
+            avatarImage.sprite = GetBuiltinKnob();
+            avatarImage.color = AvatarTone;
+            avatarImage.raycastTarget = false;
+            avatarImage.preserveAspect = true;
+            avatarImage.rectTransform.offsetMin = new Vector2(6f, 6f);
+            avatarImage.rectTransform.offsetMax = new Vector2(-6f, -6f);
+        }
+
+        private static void CreateHostBadge(RectTransform slot, bool visible)
+        {
+            Image badge = CreateUiImage("HostBadge", slot, stretch: false);
+            badge.color = new Color(Gold.r, Gold.g, Gold.b, 0.92f);
+            badge.raycastTarget = false;
+            RectTransform badgeRt = badge.rectTransform;
+            badgeRt.anchorMin = new Vector2(1f, 1f);
+            badgeRt.anchorMax = new Vector2(1f, 1f);
+            badgeRt.pivot = new Vector2(1f, 1f);
+            badgeRt.anchoredPosition = new Vector2(-18f, -12f);
+            badgeRt.sizeDelta = new Vector2(92f, 32f);
+
+            Text label = CreateUiText("HostLabel", badgeRt, "HOST", 16, FontStyle.Bold, GoldButtonLabel, TextAnchor.MiddleCenter);
+            RectTransform labelRt = label.rectTransform;
+            labelRt.anchorMin = Vector2.zero;
+            labelRt.anchorMax = Vector2.one;
+            labelRt.offsetMin = Vector2.zero;
+            labelRt.offsetMax = Vector2.zero;
+
+            badge.gameObject.SetActive(visible);
+        }
+
+        private static void ResolveReadyVisual(SlotReadyVisual visual, out Color color, out string label)
+        {
+            switch (visual)
+            {
+                case SlotReadyVisual.Ready:
+                    color = SuccessGreen;
+                    label = "Ready";
+                    break;
+                case SlotReadyVisual.Connecting:
+                    color = ConnectingAmber;
+                    label = "Connecting";
+                    break;
+                default:
+                    color = ReadyMuted;
+                    label = "Not Ready";
+                    break;
+            }
         }
 
         private static void EnsureBuildSettings(List<string> failures)
@@ -944,13 +1074,60 @@ namespace GulfRun.Editor
 
             GameObject occupied = FindDeep(scene, "PlayerSlot_0");
             Require(occupied != null ? FindChildRecursive(occupied.transform, "Avatar")?.gameObject : null, "PlayerSlot_0 Avatar", failures);
+            Require(occupied != null ? FindChildRecursive(occupied.transform, "AvatarImage")?.gameObject : null, "PlayerSlot_0 AvatarImage", failures);
             Require(occupied != null ? FindChildRecursive(occupied.transform, "PlayerName")?.gameObject : null, "PlayerSlot_0 PlayerName", failures);
             Require(occupied != null ? FindChildRecursive(occupied.transform, "CountryFlag")?.gameObject : null, "PlayerSlot_0 CountryFlag", failures);
             Require(occupied != null ? FindChildRecursive(occupied.transform, "LevelBadge")?.gameObject : null, "PlayerSlot_0 LevelBadge", failures);
             Require(occupied != null ? FindChildRecursive(occupied.transform, "ReadyStatus")?.gameObject : null, "PlayerSlot_0 ReadyStatus", failures);
+            Require(occupied != null ? FindChildRecursive(occupied.transform, "OnlineIndicator")?.gameObject : null, "PlayerSlot_0 OnlineIndicator", failures);
+            Require(occupied != null ? FindChildRecursive(occupied.transform, "HostBadge")?.gameObject : null, "PlayerSlot_0 HostBadge", failures);
 
-            GameObject empty = FindDeep(scene, "PlayerSlot_1");
-            Require(empty != null ? FindChildRecursive(empty.transform, "EmptySlotLabel")?.gameObject : null, "PlayerSlot_1 EmptySlotLabel", failures);
+            GameObject hostBadge = occupied != null ? FindChildRecursive(occupied.transform, "HostBadge")?.gameObject : null;
+            if (hostBadge == null || !hostBadge.activeSelf)
+            {
+                failures.Add("PlayerSlot_0 HostBadge must be active (design mock).");
+            }
+
+            if (occupied != null && occupied.GetComponentInChildren<Mask>(true) == null)
+            {
+                failures.Add("PlayerSlot_0 Avatar must use a Mask for circular clip.");
+            }
+
+            GameObject slot1 = FindDeep(scene, "PlayerSlot_1");
+            Require(slot1 != null ? FindChildRecursive(slot1.transform, "PlayerName")?.gameObject : null, "PlayerSlot_1 PlayerName", failures);
+            Require(slot1 != null ? FindChildRecursive(slot1.transform, "ReadyLabel")?.gameObject : null, "PlayerSlot_1 ReadyLabel", failures);
+            GameObject slot1Host = slot1 != null ? FindChildRecursive(slot1.transform, "HostBadge")?.gameObject : null;
+            if (slot1Host == null || slot1Host.activeSelf)
+            {
+                failures.Add("PlayerSlot_1 HostBadge must exist and be inactive.");
+            }
+
+            Text slot1Ready = slot1 != null ? FindChildRecursive(slot1.transform, "ReadyLabel")?.GetComponent<Text>() : null;
+            if (slot1Ready == null || slot1Ready.text != "Not Ready")
+            {
+                failures.Add("PlayerSlot_1 ReadyLabel expected 'Not Ready' (visual mock).");
+            }
+
+            GameObject slot2 = FindDeep(scene, "PlayerSlot_2");
+            Text slot2Ready = slot2 != null ? FindChildRecursive(slot2.transform, "ReadyLabel")?.GetComponent<Text>() : null;
+            if (slot2Ready == null || slot2Ready.text != "Connecting")
+            {
+                failures.Add("PlayerSlot_2 ReadyLabel expected 'Connecting' (visual mock).");
+            }
+
+            GameObject empty = FindDeep(scene, "PlayerSlot_3");
+            Require(empty != null ? FindChildRecursive(empty.transform, "EmptySlotLabel")?.gameObject : null, "PlayerSlot_3 EmptySlotLabel", failures);
+            Text emptyLabel = empty != null ? FindChildRecursive(empty.transform, "EmptySlotLabel")?.GetComponent<Text>() : null;
+            if (emptyLabel == null || emptyLabel.text != "+ Waiting for Player")
+            {
+                failures.Add("PlayerSlot_3 EmptySlotLabel expected '+ Waiting for Player'.");
+            }
+
+            GameObject emptyHost = empty != null ? FindChildRecursive(empty.transform, "HostBadge")?.gameObject : null;
+            if (emptyHost == null || emptyHost.activeSelf)
+            {
+                failures.Add("PlayerSlot_3 HostBadge must exist and be inactive.");
+            }
 
             GameObject playButtonGo = FindDeep(scene, "PlayButton");
             Button playButton = playButtonGo != null ? playButtonGo.GetComponent<Button>() : null;
@@ -966,9 +1143,9 @@ namespace GulfRun.Editor
             }
 
             Text playerCount = FindDeep(scene, "PlayerCountText")?.GetComponent<Text>();
-            if (playerCount == null || playerCount.text != "1/4")
+            if (playerCount == null || playerCount.text != "3/4")
             {
-                failures.Add("PlayerCountText expected '1/4'.");
+                failures.Add("PlayerCountText expected '3/4'.");
             }
 
             Text roomCode = FindDeep(scene, "RoomCodeText")?.GetComponent<Text>();

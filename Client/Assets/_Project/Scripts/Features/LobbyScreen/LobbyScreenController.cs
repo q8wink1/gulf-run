@@ -6,9 +6,9 @@ using UnityEngine.UI;
 namespace GulfRun.Features.LobbyScreen
 {
     /// <summary>
-    /// Premium Lobby UI foundation (Sprint 21.1). Back → Play Menu only.
-    /// Slot/header/footer content is static placeholder data in the scene —
-    /// no SessionManager, matchmaking, ready, or host logic.
+    /// Premium Lobby UI (Sprint 21.1 foundation + 21.2 player-slot polish).
+    /// Back → Play Menu only. Slot/header/footer content is static placeholder
+    /// data in the scene — no SessionManager, matchmaking, ready, or host logic.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class LobbyScreenController : MonoBehaviour
