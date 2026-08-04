@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GulfRun.Core.Pooling;
 using UnityEngine;
@@ -9,6 +10,8 @@ namespace GulfRun.Features.Gameplay
     /// prefabs from a <see cref="TrackSegmentSet"/>, spawns ahead of the runner,
     /// and returns far-behind segments to the pool. Selection alternates for now;
     /// <see cref="TrackSegmentSet.TrySelectWeighted"/> is ready for future random maps.
+    /// Sprint 23.7 — raises <see cref="SegmentActivated"/> / <see cref="SegmentReleased"/>
+    /// so <see cref="SpawnManager"/> can plan marker slots without Instantiating content.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class EndlessTrackGenerator : MonoBehaviour
@@ -40,12 +43,38 @@ namespace GulfRun.Features.Gameplay
         private bool _warnedMissingPool;
         private bool _warnedMissingSet;
 
+        /// <summary>Fired after a segment is placed and enqueued (Sprint 23.7 spawn planning).</summary>
+        public event Action<TrackSegment> SegmentActivated;
+
+        /// <summary>Fired just before a segment returns to the pool (Sprint 23.7 cleanup).</summary>
+        public event Action<TrackSegment> SegmentReleased;
+
         public float SegmentLength => segmentLength;
         public int ActiveSegments => activeSegments;
         public float SpawnDistance => spawnDistance;
         public float DespawnDistance => despawnDistance;
         public int ActiveCount => _active.Count;
         public float FrontierZ => _frontierZ;
+
+        /// <summary>
+        /// Invokes <paramref name="action"/> for each live segment (queue order).
+        /// Used by <see cref="SpawnManager"/> to catch up after late subscribe.
+        /// </summary>
+        public void ForEachActiveSegment(Action<TrackSegment> action)
+        {
+            if (action == null)
+            {
+                return;
+            }
+
+            foreach (TrackSegment segment in _active)
+            {
+                if (segment != null)
+                {
+                    action(segment);
+                }
+            }
+        }
 
         private void Awake()
         {
@@ -213,6 +242,7 @@ namespace GulfRun.Features.Gameplay
             segment.PlaceAtStartZ(_frontierZ);
             _frontierZ += length;
             _active.Enqueue(segment);
+            SegmentActivated?.Invoke(segment);
             return true;
         }
 
@@ -222,6 +252,8 @@ namespace GulfRun.Features.Gameplay
             {
                 return;
             }
+
+            SegmentReleased?.Invoke(segment);
 
             ObjectPoolManager pool = ObjectPoolManager.Instance;
             if (pool != null)

@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20c00000000000000000000000000c9, type: 3}
+  m_Name: SpawnProfile_Kuwait
+  m_EditorClassIdentifier: 
+  profileId: Kuwait
+  groups:
+  - category: 0
+    enabled: 1
+    spawnProbability: 0.55
+    spawnDensity: 0.7
+    minimumSpacing: 8.0
+    maximumSpacing: 22.0
+  - category: 1
+    enabled: 1
+    spawnProbability: 0.75
+    spawnDensity: 0.85
+    minimumSpacing: 3.0
+    maximumSpacing: 12.0
+  - category: 6
+    enabled: 1
+    spawnProbability: 0.2
+    spawnDensity: 0.35
+    minimumSpacing: 18.0
+    maximumSpacing: 48.0
+  - category: 2
+    enabled: 1
+    spawnProbability: 0.25
+    spawnDensity: 0.4
+    minimumSpacing: 20.0
+    maximumSpacing: 55.0
+  - category: 3
+    enabled: 1
+    spawnProbability: 0.6
+    spawnDensity: 0.7
+    minimumSpacing: 4.0
+    maximumSpacing: 16.0
+  - category: 5
+    enabled: 0
+    spawnProbability: 0.15
+    spawnDensity: 0.25
+    minimumSpacing: 30.0
+    maximumSpacing: 80.0

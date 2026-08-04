@@ -96,7 +96,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Build Gameplay HUD (Sprint 23.3)")]
         public static void BuildGameplayHudFromMenu() => BuildGameplayHudBatch();
 
-        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4/23.5/23.6)")]
+        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4/23.5/23.6/23.7)")]
         public static void ValidateGameplayRunnerFromMenu() => ValidateGameplayRunnerBatch();
 
         public static void RunBatch()
@@ -320,7 +320,7 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 23.4 / 23.5 / 23.6: validate runner, camera follow, and endless track on Gameplay.
+        /// Sprint 23.4 / 23.5 / 23.6 / 23.7: validate runner, camera follow, endless track, and spawn manager on Gameplay.
         /// </summary>
         public static void ValidateGameplayRunnerBatch()
         {
@@ -336,7 +336,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track Sprint 23.4/23.5/23.6 OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn Sprint 23.4/23.5/23.6/23.7 OK.");
         }
 
         /// <summary>
@@ -4043,6 +4043,17 @@ namespace GulfRun.Editor
                 if (generator == null)
                 {
                     failures.Add("EndlessTrackGenerator missing EndlessTrackGenerator component.");
+                }
+            }
+
+            GameObject spawnGo = FindDeep(scene, "GameplaySpawnManager");
+            Require(spawnGo, "GameplaySpawnManager", failures);
+            if (spawnGo != null)
+            {
+                var spawnManager = spawnGo.GetComponent<GulfRun.Features.Gameplay.SpawnManager>();
+                if (spawnManager == null)
+                {
+                    failures.Add("GameplaySpawnManager missing SpawnManager component.");
                 }
             }
 

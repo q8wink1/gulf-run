@@ -8,6 +8,7 @@ Modes:
   --all      All of the above (default)
 
 Sprint 23.6 endless track: run `_tools/patch_gameplay_sprint_23_6_track.py` separately.
+Sprint 23.7 spawn manager: run `_tools/patch_gameplay_sprint_23_7_spawn.py` separately.
 """
 
 from __future__ import annotations
