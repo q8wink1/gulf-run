@@ -4,10 +4,10 @@ using UnityEngine;
 namespace GulfRun.Features.Gameplay
 {
     /// <summary>
-    /// Sprint 23.6 / 23.10 — fixed placeholder slot on a <see cref="TrackSegment"/>
+    /// Sprint 23.6 / 23.10 / 23.12 — fixed placeholder slot on a <see cref="TrackSegment"/>
     /// for a spawnable. Markers are authoring data; SpawnManager plans and may
-    /// pool-Get obstacles at these poses. Lane comes from the serialized field
-    /// or from local X (aligned with runner lane spacing).
+    /// pool-Get obstacles / collectibles at these poses. Lane comes from the
+    /// serialized field or from local X (aligned with runner lane spacing).
     /// </summary>
     public sealed class TrackSpawnMarker : MonoBehaviour
     {

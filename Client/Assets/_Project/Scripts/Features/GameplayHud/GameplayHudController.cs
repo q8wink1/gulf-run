@@ -1,16 +1,17 @@
 using System.Collections;
+using GulfRun.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace GulfRun.Features.GameplayHud
 {
     /// <summary>
-    /// Sprint 23.3 — thin Gameplay HUD controller. Pause toggles a visual-only
-    /// Pause Menu; optional notification demo cycles placeholder toasts.
-    /// No gameplay, scoring, networking, or real time-scale pause.
+    /// Sprint 23.3 / 23.12 — Gameplay HUD controller. Pause toggles a visual-only
+    /// Pause Menu; coin/gem counters update from on-track collectibles.
+    /// Optional notification demo cycles placeholder toasts.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class GameplayHudController : MonoBehaviour
+    public sealed class GameplayHudController : SceneSingleton<GameplayHudController>
     {
         [SerializeField] private Button pauseButton;
         [SerializeField] private Button resumeButton;
@@ -18,6 +19,8 @@ namespace GulfRun.Features.GameplayHud
         [SerializeField] private RectTransform notificationRoot;
         [SerializeField] private Text notificationText;
         [SerializeField] private Graphic notificationBackground;
+        [SerializeField] private Text coinsText;
+        [SerializeField] private Text gemsText;
         [SerializeField] private bool playNotificationDemo = true;
         [SerializeField] private float notificationDemoIntervalSeconds = 4.5f;
         [SerializeField] private float notificationVisibleSeconds = 1.6f;
@@ -33,11 +36,17 @@ namespace GulfRun.Features.GameplayHud
         private Coroutine _toastRoutine;
         private int _demoIndex;
         private bool _paused;
+        private int _coins;
+        private int _gems;
         private Color _textBase = Color.white;
         private Color _bgBase = Color.white;
 
-        private void Awake()
+        public int Coins => _coins;
+        public int Gems => _gems;
+
+        protected override void Awake()
         {
+            base.Awake();
             if (pauseMenuPanel != null)
             {
                 pauseMenuPanel.SetActive(false);
@@ -54,6 +63,7 @@ namespace GulfRun.Features.GameplayHud
             }
 
             ResetNotificationVisual();
+            RefreshCurrencyLabels();
         }
 
         private void OnEnable()
@@ -99,6 +109,40 @@ namespace GulfRun.Features.GameplayHud
             }
         }
 
+        /// <summary>Adds to the session coin counter and refreshes the HUD chip.</summary>
+        public void AddCoins(int amount)
+        {
+            if (amount == 0)
+            {
+                return;
+            }
+
+            int next = _coins + amount;
+            _coins = next < 0 ? 0 : next;
+            RefreshCurrencyLabels();
+        }
+
+        /// <summary>Adds to the session gem counter and refreshes the HUD chip.</summary>
+        public void AddGems(int amount)
+        {
+            if (amount == 0)
+            {
+                return;
+            }
+
+            int next = _gems + amount;
+            _gems = next < 0 ? 0 : next;
+            RefreshCurrencyLabels();
+        }
+
+        /// <summary>Resets session counters (e.g. race restart).</summary>
+        public void ResetCurrencyCounters()
+        {
+            _coins = 0;
+            _gems = 0;
+            RefreshCurrencyLabels();
+        }
+
         public void TogglePauseMenu()
         {
             if (_paused)
@@ -126,6 +170,19 @@ namespace GulfRun.Features.GameplayHud
             if (pauseMenuPanel != null)
             {
                 pauseMenuPanel.SetActive(false);
+            }
+        }
+
+        private void RefreshCurrencyLabels()
+        {
+            if (coinsText != null)
+            {
+                coinsText.text = "COINS  " + _coins;
+            }
+
+            if (gemsText != null)
+            {
+                gemsText.text = "GEMS  " + _gems;
             }
         }
 

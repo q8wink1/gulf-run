@@ -96,7 +96,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Build Gameplay HUD (Sprint 23.3)")]
         public static void BuildGameplayHudFromMenu() => BuildGameplayHudBatch();
 
-        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.11)")]
+        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.12)")]
         public static void ValidateGameplayRunnerFromMenu() => ValidateGameplayRunnerBatch();
 
         public static void RunBatch()
@@ -320,7 +320,7 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 23.4–23.11: validate runner, camera, track, spawn, race, obstacles, and game rules.
+        /// Sprint 23.4–23.12: validate runner, camera, track, spawn, race, obstacles, game rules, collectibles.
         /// </summary>
         public static void ValidateGameplayRunnerBatch()
         {
@@ -336,7 +336,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn + Race + Obstacles + Game Rules Sprint 23.4–23.11 OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn + Race + Obstacles + Game Rules + Collectibles Sprint 23.4–23.12 OK.");
         }
 
         /// <summary>
@@ -4063,6 +4063,14 @@ namespace GulfRun.Editor
                 {
                     failures.Add("GameplaySpawnManager executeObstaclePlans should be enabled (Sprint 23.10).");
                 }
+                else if (spawnManager.CollectibleCatalog == null)
+                {
+                    failures.Add("GameplaySpawnManager missing CollectibleCatalog (Sprint 23.12).");
+                }
+                else if (!spawnManager.ExecuteCollectiblePlans)
+                {
+                    failures.Add("GameplaySpawnManager executeCollectiblePlans should be enabled (Sprint 23.12).");
+                }
             }
 
             GameObject raceGo = FindDeep(scene, "RaceManager");
@@ -4114,6 +4122,12 @@ namespace GulfRun.Editor
                     "Assets/_Project/Settings/GameRules/GameRulesConfig_Default.asset") == null)
             {
                 failures.Add("GameRulesConfig_Default.asset missing under Settings/GameRules.");
+            }
+
+            if (AssetDatabase.LoadAssetAtPath<GulfRun.Features.Gameplay.CollectibleCatalog>(
+                    "Assets/_Project/Settings/Collectibles/CollectibleCatalog_Default.asset") == null)
+            {
+                failures.Add("CollectibleCatalog_Default.asset missing under Settings/Collectibles.");
             }
 
             Require(FindDeep(scene, "ObjectPoolManager"), "ObjectPoolManager", failures);

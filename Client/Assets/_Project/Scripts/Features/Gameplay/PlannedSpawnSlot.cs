@@ -4,9 +4,9 @@ using UnityEngine;
 namespace GulfRun.Features.Gameplay
 {
     /// <summary>
-    /// Sprint 23.7 / 23.10 — spawn plan for one marker. Holds transform + lane;
-    /// SpawnManager may <c>ObjectPoolManager.Get</c> at this pose for obstacles.
-    /// Never owns a live gameplay instance.
+    /// Sprint 23.7 / 23.10 / 23.12 — spawn plan for one marker. Holds transform + lane;
+    /// SpawnManager may <c>ObjectPoolManager.Get</c> at this pose for obstacles
+    /// and collectibles. Never owns a live gameplay instance.
     /// </summary>
     public readonly struct PlannedSpawnSlot
     {

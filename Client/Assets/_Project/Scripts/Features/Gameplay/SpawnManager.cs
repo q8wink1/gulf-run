@@ -8,15 +8,16 @@ using UnityEngine;
 namespace GulfRun.Features.Gameplay
 {
     /// <summary>
-    /// Sprint 23.7 / 23.10 — track spawn planner + obstacle pool execution.
-    /// Discovers <see cref="TrackSpawnMarker"/>s when segments activate, plans
-    /// slots, and for Obstacle category immediately pool-Gets catalog prefabs
-    /// at marker lanes. Coins / power-ups remain plan-only.
+    /// Sprint 23.7 / 23.10 / 23.12 — track spawn planner + obstacle / collectible
+    /// pool execution. Discovers <see cref="TrackSpawnMarker"/>s when segments
+    /// activate, plans slots, and pool-Gets Obstacle / Coin / Gem catalog prefabs.
     /// Distinct from <c>Features.Multiplayer.Spawning.SpawnManager</c>.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class SpawnManager : SceneSingleton<SpawnManager>
     {
+        private const float DefaultLaneSpacing = 2.2f;
+
         [Header("Profile")]
         [Tooltip("Map-specific spawn groups (swap Kuwait / Dubai / Doha / Muscat assets).")]
         [SerializeField] private SpawnProfile spawnProfile;
@@ -32,6 +33,28 @@ namespace GulfRun.Features.Gameplay
             "When true, Obstacle plans are pool-executed on segment register. " +
             "Sprint 23.10 always executes for playability (RaceManager Running gate can come later).")]
         [SerializeField] private bool executeObstaclePlans = true;
+
+        [Header("Collectibles (Sprint 23.12)")]
+        [Tooltip("Coin / Gem prefab catalog for WarmPools + spawn.")]
+        [SerializeField] private CollectibleCatalog collectibleCatalog;
+
+        [Tooltip("When true, Coin / Gem plans are pool-executed on segment register.")]
+        [SerializeField] private bool executeCollectiblePlans = true;
+
+        [Tooltip("Default layout when randomizeCollectiblePattern is off.")]
+        [SerializeField] private CollectiblePattern defaultCoinPattern = CollectiblePattern.Line;
+
+        [Tooltip("When true, Coin slots pick Single / Line / Arc at random.")]
+        [SerializeField] private bool randomizeCoinPattern = true;
+
+        [Tooltip("Gems always use Single unless this is enabled (then same picker as coins).")]
+        [SerializeField] private bool allowGemPatterns;
+
+        [SerializeField] private int lineCount = 5;
+        [SerializeField] private float lineSpacingZ = 1.4f;
+        [SerializeField] private float arcHeight = 0.55f;
+        [SerializeField] private float laneSpacing = DefaultLaneSpacing;
+        [SerializeField] private float laneCenterX;
 
         [Header("Wiring")]
         [Tooltip("Source of SegmentActivated / SegmentReleased. Auto-finds if unset.")]
@@ -50,6 +73,8 @@ namespace GulfRun.Features.Gameplay
         private readonly List<TrackSpawnMarker> _markerScratch = new List<TrackSpawnMarker>(32);
         private readonly Dictionary<int, List<GameObject>> _liveObstaclesBySegment =
             new Dictionary<int, List<GameObject>>(16);
+        private readonly Dictionary<int, List<GameObject>> _liveCollectiblesBySegment =
+            new Dictionary<int, List<GameObject>>(16);
         private readonly List<PlannedSpawnSlot> _executeScratch = new List<PlannedSpawnSlot>(16);
 
         private SeededRandom _rng;
@@ -59,8 +84,10 @@ namespace GulfRun.Features.Gameplay
 
         public SpawnProfile Profile => spawnProfile;
         public ObstacleCatalog ObstacleCatalog => obstacleCatalog;
+        public CollectibleCatalog CollectibleCatalog => collectibleCatalog;
         public ObstacleDifficultyLevel ObstacleDifficulty => obstacleDifficulty;
         public bool ExecuteObstaclePlans => executeObstaclePlans;
+        public bool ExecuteCollectiblePlans => executeCollectiblePlans;
         public IReadOnlyList<PlannedSpawnSlot> PlannedSlots => _planned;
         public IReadOnlyDictionary<SpawnCategory, int> PlannedCounts => _plannedCounts;
         public int PlannedCount => _planned.Count;
@@ -87,6 +114,7 @@ namespace GulfRun.Features.Gameplay
         {
             UnsubscribeGenerator();
             ReleaseAllLiveObstacles();
+            ReleaseAllLiveCollectibles();
         }
 
         /// <summary>Swap map profile at runtime (future map catalog).</summary>
@@ -103,23 +131,31 @@ namespace GulfRun.Features.Gameplay
             _poolsWarmed = false;
         }
 
+        /// <summary>Assigns collectible prefab catalog.</summary>
+        public void SetCollectibleCatalog(CollectibleCatalog catalog)
+        {
+            collectibleCatalog = catalog;
+            _poolsWarmed = false;
+        }
+
         /// <summary>Prepared difficulty tier (filter only — no balancing).</summary>
         public void SetObstacleDifficulty(ObstacleDifficultyLevel difficulty)
         {
             obstacleDifficulty = difficulty;
         }
 
-        /// <summary>Clears planned slots, spacing cursors, and releases live obstacles.</summary>
+        /// <summary>Clears planned slots, spacing cursors, and releases live spawns.</summary>
         public void ClearAllPlans()
         {
             ReleaseAllLiveObstacles();
+            ReleaseAllLiveCollectibles();
             _planned.Clear();
             ResetCategoryState();
         }
 
         /// <summary>
         /// Registers markers from an activated segment, plans groups, then executes
-        /// Obstacle category via object pool (when enabled).
+        /// Obstacle / Coin / Gem categories via object pool (when enabled).
         /// </summary>
         public void RegisterSegment(TrackSegment segment)
         {
@@ -167,9 +203,15 @@ namespace GulfRun.Features.Gameplay
             {
                 ExecuteObstaclePlansForSegment(segmentId);
             }
+
+            if (executeCollectiblePlans)
+            {
+                ExecuteCollectiblePlansForSegment(segmentId, SpawnCategory.Coin);
+                ExecuteCollectiblePlansForSegment(segmentId, SpawnCategory.Gem);
+            }
         }
 
-        /// <summary>Drops plans and releases pooled obstacles for a recycled segment.</summary>
+        /// <summary>Drops plans and releases pooled spawns for a recycled segment.</summary>
         public void UnregisterSegment(TrackSegment segment)
         {
             if (segment == null)
@@ -179,6 +221,7 @@ namespace GulfRun.Features.Gameplay
 
             int segmentId = segment.GetInstanceID();
             ReleaseLiveObstacles(segmentId);
+            ReleaseLiveCollectibles(segmentId);
 
             if (_planned.Count == 0)
             {
@@ -221,16 +264,26 @@ namespace GulfRun.Features.Gameplay
             }
         }
 
-        /// <summary>Preloads obstacle catalog prefabs into <see cref="ObjectPoolManager"/>.</summary>
+        /// <summary>Preloads obstacle + collectible catalog prefabs into <see cref="ObjectPoolManager"/>.</summary>
         public void WarmPools(Transform poolParent = null)
         {
             ObjectPoolManager pools = ObjectPoolManager.Instance;
-            if (obstacleCatalog == null || pools == null)
+            if (pools == null)
             {
                 return;
             }
 
-            obstacleCatalog.WarmPools(pools, poolParent != null ? poolParent : transform);
+            Transform parent = poolParent != null ? poolParent : transform;
+            if (obstacleCatalog != null)
+            {
+                obstacleCatalog.WarmPools(pools, parent);
+            }
+
+            if (collectibleCatalog != null)
+            {
+                collectibleCatalog.WarmPools(pools, parent);
+            }
+
             _poolsWarmed = true;
         }
 
@@ -241,9 +294,15 @@ namespace GulfRun.Features.Gameplay
             return obstacleCatalog != null && obstacleCatalog.TryGetPrefab(data, out prefab);
         }
 
+        /// <summary>Resolves a Coin / Gem prefab from the collectible catalog.</summary>
+        public bool TryGetCollectiblePrefab(CollectibleType type, out GameObject prefab)
+        {
+            prefab = null;
+            return collectibleCatalog != null && collectibleCatalog.TryGetPrefab(type, out prefab);
+        }
+
         /// <summary>
-        /// Pool-Gets <paramref name="prefab"/> at the planned pose. Non-obstacle
-        /// categories are not executed this sprint.
+        /// Pool-Gets <paramref name="prefab"/> at the planned pose for Obstacle category.
         /// </summary>
         public bool TryExecutePlannedSlot(in PlannedSpawnSlot slot, GameObject prefab, Transform parent = null)
         {
@@ -352,6 +411,137 @@ namespace GulfRun.Features.Gameplay
             return true;
         }
 
+        /// <summary>
+        /// Pool-spawns Coin / Gem at the planned marker using <paramref name="pattern"/>.
+        /// </summary>
+        public bool TryExecuteCollectibleSlot(
+            in PlannedSpawnSlot slot,
+            CollectiblePattern pattern,
+            Transform parent = null)
+        {
+            if (slot.Category != SpawnCategory.Coin && slot.Category != SpawnCategory.Gem)
+            {
+                return false;
+            }
+
+            CollectibleType type = slot.Category == SpawnCategory.Gem
+                ? CollectibleType.Gem
+                : CollectibleType.Coin;
+
+            if (!TryGetCollectiblePrefab(type, out GameObject prefab) || prefab == null)
+            {
+                return false;
+            }
+
+            ObjectPoolManager pools = ObjectPoolManager.Instance;
+            if (pools == null)
+            {
+                return false;
+            }
+
+            if (!_poolsWarmed)
+            {
+                WarmPools(transform);
+            }
+
+            Transform poolParent = parent != null ? parent : transform;
+            CollectiblePattern resolved = pattern;
+            if (type == CollectibleType.Gem && !allowGemPatterns)
+            {
+                resolved = CollectiblePattern.Single;
+            }
+
+            int spawned = 0;
+            switch (resolved)
+            {
+                case CollectiblePattern.Line:
+                    spawned = SpawnCollectibleLine(slot, prefab, poolParent);
+                    break;
+                case CollectiblePattern.Arc:
+                    spawned = SpawnCollectibleArc(slot, prefab, poolParent);
+                    break;
+                default:
+                    spawned = SpawnCollectibleAt(slot, prefab, slot.WorldPosition, slot.Lane, poolParent) ? 1 : 0;
+                    break;
+            }
+
+            return spawned > 0;
+        }
+
+        private int SpawnCollectibleLine(in PlannedSpawnSlot slot, GameObject prefab, Transform parent)
+        {
+            int count = Mathf.Max(1, lineCount);
+            float spacing = Mathf.Max(0.25f, lineSpacingZ);
+            int spawned = 0;
+            for (int i = 0; i < count; i++)
+            {
+                Vector3 pos = slot.WorldPosition;
+                pos.z += i * spacing;
+                if (SpawnCollectibleAt(slot, prefab, pos, slot.Lane, parent))
+                {
+                    spawned++;
+                }
+            }
+
+            return spawned;
+        }
+
+        private int SpawnCollectibleArc(in PlannedSpawnSlot slot, GameObject prefab, Transform parent)
+        {
+            float spacing = laneSpacing > 0.1f ? laneSpacing : DefaultLaneSpacing;
+            float height = Mathf.Max(0f, arcHeight);
+            RunnerLane[] lanes = { RunnerLane.Left, RunnerLane.Center, RunnerLane.Right };
+            int spawned = 0;
+            for (int i = 0; i < lanes.Length; i++)
+            {
+                RunnerLane lane = lanes[i];
+                Vector3 pos = slot.WorldPosition;
+                pos.x = RunnerLaneMath.LaneX(lane, laneCenterX, spacing);
+                // Parabola peaking at center: y = base + height * (1 - ((i-1)^2))
+                float t = i - 1;
+                pos.y = slot.WorldPosition.y + (height * (1f - (t * t)));
+                if (SpawnCollectibleAt(slot, prefab, pos, lane, parent))
+                {
+                    spawned++;
+                }
+            }
+
+            return spawned;
+        }
+
+        private bool SpawnCollectibleAt(
+            in PlannedSpawnSlot slot,
+            GameObject prefab,
+            Vector3 worldPosition,
+            RunnerLane lane,
+            Transform parent)
+        {
+            ObjectPoolManager pools = ObjectPoolManager.Instance;
+            if (pools == null)
+            {
+                return false;
+            }
+
+            GameObject instance = pools.Get(prefab, worldPosition, slot.WorldRotation, parent);
+            if (instance == null)
+            {
+                return false;
+            }
+
+            Collectible collectible = instance.GetComponent<Collectible>();
+            if (collectible != null)
+            {
+                collectible.ApplyWorldPose(worldPosition, slot.WorldRotation, lane);
+            }
+            else
+            {
+                instance.transform.SetPositionAndRotation(worldPosition, slot.WorldRotation);
+            }
+
+            TrackLiveCollectible(slot.SegmentInstanceId, instance);
+            return true;
+        }
+
         private void ExecuteObstaclePlansForSegment(int segmentId)
         {
             if (obstacleCatalog == null)
@@ -383,12 +573,76 @@ namespace GulfRun.Features.Gameplay
             }
         }
 
+        private void ExecuteCollectiblePlansForSegment(int segmentId, SpawnCategory category)
+        {
+            if (collectibleCatalog == null)
+            {
+                return;
+            }
+
+            EnsureRng();
+            _executeScratch.Clear();
+            for (int i = 0; i < _planned.Count; i++)
+            {
+                PlannedSpawnSlot slot = _planned[i];
+                if (slot.SegmentInstanceId == segmentId && slot.Category == category)
+                {
+                    _executeScratch.Add(slot);
+                }
+            }
+
+            for (int i = 0; i < _executeScratch.Count; i++)
+            {
+                PlannedSpawnSlot slot = _executeScratch[i];
+                CollectiblePattern pattern = ResolvePattern(category);
+                TryExecuteCollectibleSlot(slot, pattern, transform);
+            }
+        }
+
+        private CollectiblePattern ResolvePattern(SpawnCategory category)
+        {
+            if (category == SpawnCategory.Gem && !allowGemPatterns)
+            {
+                return CollectiblePattern.Single;
+            }
+
+            if (!randomizeCoinPattern)
+            {
+                return defaultCoinPattern;
+            }
+
+            EnsureRng();
+            float roll = _rng.NextFloat01();
+            if (roll < 0.25f)
+            {
+                return CollectiblePattern.Single;
+            }
+
+            if (roll < 0.7f)
+            {
+                return CollectiblePattern.Line;
+            }
+
+            return CollectiblePattern.Arc;
+        }
+
         private void TrackLiveObstacle(int segmentId, GameObject instance)
         {
             if (!_liveObstaclesBySegment.TryGetValue(segmentId, out List<GameObject> list) || list == null)
             {
                 list = new List<GameObject>(4);
                 _liveObstaclesBySegment[segmentId] = list;
+            }
+
+            list.Add(instance);
+        }
+
+        private void TrackLiveCollectible(int segmentId, GameObject instance)
+        {
+            if (!_liveCollectiblesBySegment.TryGetValue(segmentId, out List<GameObject> list) || list == null)
+            {
+                list = new List<GameObject>(8);
+                _liveCollectiblesBySegment[segmentId] = list;
             }
 
             list.Add(instance);
@@ -424,6 +678,37 @@ namespace GulfRun.Features.Gameplay
             _liveObstaclesBySegment.Remove(segmentId);
         }
 
+        private void ReleaseLiveCollectibles(int segmentId)
+        {
+            if (!_liveCollectiblesBySegment.TryGetValue(segmentId, out List<GameObject> list) || list == null)
+            {
+                return;
+            }
+
+            ObjectPoolManager pools = ObjectPoolManager.Instance;
+            for (int i = 0; i < list.Count; i++)
+            {
+                GameObject instance = list[i];
+                if (instance == null || !instance.activeInHierarchy)
+                {
+                    // Already collected + released to pool (inactive).
+                    continue;
+                }
+
+                if (pools != null)
+                {
+                    pools.Release(instance);
+                }
+                else
+                {
+                    instance.SetActive(false);
+                }
+            }
+
+            list.Clear();
+            _liveCollectiblesBySegment.Remove(segmentId);
+        }
+
         private void ReleaseAllLiveObstacles()
         {
             if (_liveObstaclesBySegment.Count == 0)
@@ -435,6 +720,20 @@ namespace GulfRun.Features.Gameplay
             for (int i = 0; i < keys.Count; i++)
             {
                 ReleaseLiveObstacles(keys[i]);
+            }
+        }
+
+        private void ReleaseAllLiveCollectibles()
+        {
+            if (_liveCollectiblesBySegment.Count == 0)
+            {
+                return;
+            }
+
+            List<int> keys = new List<int>(_liveCollectiblesBySegment.Keys);
+            for (int i = 0; i < keys.Count; i++)
+            {
+                ReleaseLiveCollectibles(keys[i]);
             }
         }
 

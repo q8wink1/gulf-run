@@ -1658,6 +1658,8 @@ MonoBehaviour:
   notificationRoot: {fileID: 510000068}
   notificationText: {fileID: 510000117}
   notificationBackground: {fileID: 510000114}
+  coinsText: {fileID: 510000103}
+  gemsText: {fileID: 510000104}
   playNotificationDemo: 1
   notificationDemoIntervalSeconds: 4.5
   notificationVisibleSeconds: 1.6
@@ -2524,7 +2526,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: COINS  42
+  m_Text: COINS  0
 --- !u!1 &510000037
 GameObject:
   m_ObjectHideFlags: 0
@@ -2603,7 +2605,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: GEMS  3
+  m_Text: GEMS  0
 --- !u!1 &510000046
 GameObject:
   m_ObjectHideFlags: 0
@@ -4457,6 +4459,16 @@ MonoBehaviour:
   obstacleCatalog: {fileID: 11400000, guid: b20c00000000000000000000000000e1, type: 2}
   obstacleDifficulty: 1
   executeObstaclePlans: 1
+  collectibleCatalog: {fileID: 11400000, guid: b20c00000000000000000000000000f6, type: 2}
+  executeCollectiblePlans: 1
+  defaultCoinPattern: 1
+  randomizeCoinPattern: 1
+  allowGemPatterns: 0
+  lineCount: 5
+  lineSpacingZ: 1.4
+  arcHeight: 0.55
+  laneSpacing: 2.2
+  laneCenterX: 0
   trackGenerator: {fileID: 520000003}
   randomSeed: 0
   logPlans: 0
