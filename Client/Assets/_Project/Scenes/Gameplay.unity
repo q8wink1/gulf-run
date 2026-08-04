@@ -4459,3 +4459,72 @@ MonoBehaviour:
   logPlans: 0
 # --- END SPRINT-23.7-SPAWN-MANAGER ---
 
+# --- SPRINT-23.8-RACE-MANAGER ---
+--- !u!1 &540000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 540000002}
+  - component: {fileID: 540000003}
+  m_Layer: 0
+  m_Name: RaceManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &540000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 540000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &540000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 540000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20c00000000000000000000000000d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerController: {fileID: 510000137}
+  cameraController: {fileID: 510000148}
+  trackGenerator: {fileID: 520000003}
+  spawnManager: {fileID: 530000003}
+  hud: {fileID: 510000006}
+  initialSpeed: 12
+  maximumSpeed: 28
+  speedIncreaseRate: 0.35
+  raceDistance: 1000
+  applySpeedToPlayer: 0
+  onRaceStart:
+    m_PersistentCalls:
+      m_Calls: []
+  onRacePause:
+    m_PersistentCalls:
+      m_Calls: []
+  onRaceResume:
+    m_PersistentCalls:
+      m_Calls: []
+  onRaceFinish:
+    m_PersistentCalls:
+      m_Calls: []
+# --- END SPRINT-23.8-RACE-MANAGER ---
+

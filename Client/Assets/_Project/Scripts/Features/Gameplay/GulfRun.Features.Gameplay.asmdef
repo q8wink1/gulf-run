@@ -3,7 +3,9 @@
     "rootNamespace": "GulfRun.Features.Gameplay",
     "references": [
         "GulfRun.Core",
-        "GulfRun.Domain"
+        "GulfRun.Domain",
+        "GulfRun.Features.CameraSystem",
+        "GulfRun.Features.GameplayHud"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
