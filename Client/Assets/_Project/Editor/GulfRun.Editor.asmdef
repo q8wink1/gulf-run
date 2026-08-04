@@ -17,6 +17,9 @@
         "GulfRun.Features.WinningMapRevealScreen",
         "GulfRun.Features.LoadingScreen",
         "GulfRun.Features.PreRaceIntro",
+        "GulfRun.Features.GameplayHud",
+        "GulfRun.Features.Gameplay",
+        "GulfRun.Features.CameraSystem",
         "UnityEngine.UI"
     ],
     "includePlatforms": [

@@ -33,6 +33,7 @@ namespace GulfRun.Editor
         private const string WinningMapRevealScenePath = "Assets/_Project/Scenes/WinningMapReveal.unity";
         private const string LoadingScreenScenePath = "Assets/_Project/Scenes/LoadingScreen.unity";
         private const string PreRaceIntroScenePath = "Assets/_Project/Scenes/PreRaceIntro.unity";
+        private const string GameplayScenePath = "Assets/_Project/Scenes/Gameplay.unity";
         private const string MainMenuScenePath = "Assets/_Project/Scenes/MainMenu.unity";
         private const string BackgroundGuid = "a18b0000000000000000000000000001";
         private const string LogoGuid = "a18c1000000000000000000000000001";
@@ -91,6 +92,12 @@ namespace GulfRun.Editor
 
         [MenuItem("GulfRun/Play Flow/Build Race Countdown (Sprint 23.2)")]
         public static void BuildRaceCountdownFromMenu() => BuildRaceCountdownBatch();
+
+        [MenuItem("GulfRun/Play Flow/Build Gameplay HUD (Sprint 23.3)")]
+        public static void BuildGameplayHudFromMenu() => BuildGameplayHudBatch();
+
+        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4/23.5)")]
+        public static void ValidateGameplayRunnerFromMenu() => ValidateGameplayRunnerBatch();
 
         public static void RunBatch()
         {
@@ -291,6 +298,46 @@ namespace GulfRun.Editor
         /// Alias of <see cref="BuildPreRaceIntroBatch"/>.
         /// </summary>
         public static void BuildRaceCountdownBatch() => BuildPreRaceIntroBatch();
+
+        /// <summary>
+        /// Sprint 23.3: validate premium Gameplay HUD canvas on the existing Gameplay scene.
+        /// Scene content is authored via <c>_tools/patch_gameplay_sprint_23.py</c> when Editor is locked.
+        /// </summary>
+        public static void BuildGameplayHudBatch()
+        {
+            var failures = new List<string>();
+            try
+            {
+                ValidateGameplayHud(failures);
+            }
+            catch (System.Exception ex)
+            {
+                failures.Add("Unhandled: " + ex);
+                Debug.LogException(ex);
+            }
+
+            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay HUD Sprint 23.3 OK.");
+        }
+
+        /// <summary>
+        /// Sprint 23.4 / 23.5: validate runner player + camera follow wiring on Gameplay.
+        /// </summary>
+        public static void ValidateGameplayRunnerBatch()
+        {
+            var failures = new List<string>();
+            try
+            {
+                ValidateGameplayHud(failures);
+                ValidateGameplayRunnerAndCamera(failures);
+            }
+            catch (System.Exception ex)
+            {
+                failures.Add("Unhandled: " + ex);
+                Debug.LogException(ex);
+            }
+
+            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera Sprint 23.4/23.5 OK.");
+        }
 
         /// <summary>
         /// Sprint 20.1: polish PlayMenu copy + card icons only. Does not rebuild
@@ -3892,6 +3939,102 @@ namespace GulfRun.Editor
             RequireCanvasScaler(canvasGo, failures);
             RequireInBuild(PreRaceIntroScenePath, failures);
             RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
+        }
+
+        private static void ValidateGameplayHud(List<string> failures)
+        {
+            if (!File.Exists(GameplayScenePath))
+            {
+                failures.Add("Gameplay scene missing.");
+                return;
+            }
+
+            Scene scene = EditorSceneManager.OpenScene(GameplayScenePath, OpenSceneMode.Single);
+            Require(FindDeep(scene, "GameplayHudCanvas"), "GameplayHudCanvas", failures);
+            Require(FindDeep(scene, "SafeArea"), "GameplayHud SafeArea", failures);
+            Require(FindDeep(scene, "PositionPanel"), "GameplayHud PositionPanel", failures);
+            Require(FindDeep(scene, "PositionText"), "GameplayHud PositionText", failures);
+            Require(FindDeep(scene, "LapText"), "GameplayHud LapText", failures);
+            Require(FindDeep(scene, "DistancePanel"), "GameplayHud DistancePanel", failures);
+            Require(FindDeep(scene, "DistanceText"), "GameplayHud DistanceText", failures);
+            Require(FindDeep(scene, "CurrencyPanel"), "GameplayHud CurrencyPanel", failures);
+            Require(FindDeep(scene, "CoinsText"), "GameplayHud CoinsText", failures);
+            Require(FindDeep(scene, "GemsText"), "GameplayHud GemsText", failures);
+            Require(FindDeep(scene, "PauseButton"), "GameplayHud PauseButton", failures);
+            Require(FindDeep(scene, "PauseMenu"), "GameplayHud PauseMenu", failures);
+            Require(FindDeep(scene, "BoostMeter"), "GameplayHud BoostMeter", failures);
+            Require(FindDeep(scene, "NotificationRoot"), "GameplayHud NotificationRoot", failures);
+
+            GameObject canvasGo = FindDeep(scene, "GameplayHudCanvas");
+            RequireCanvasScaler(canvasGo, failures);
+            if (canvasGo != null && canvasGo.GetComponent<GulfRun.Features.GameplayHud.GameplayHudController>() == null)
+            {
+                failures.Add("GameplayHudCanvas missing GameplayHudController.");
+            }
+
+            GameObject pauseMenu = FindDeep(scene, "PauseMenu");
+            if (pauseMenu != null && pauseMenu.activeSelf)
+            {
+                failures.Add("PauseMenu must start inactive.");
+            }
+
+            RequireInBuild(GameplayScenePath, failures);
+        }
+
+        private static void ValidateGameplayRunnerAndCamera(List<string> failures)
+        {
+            if (!File.Exists(GameplayScenePath))
+            {
+                failures.Add("Gameplay scene missing.");
+                return;
+            }
+
+            Scene scene = EditorSceneManager.OpenScene(GameplayScenePath, OpenSceneMode.Single);
+            GameObject player = FindDeep(scene, "RunnerPlayer");
+            Require(player, "RunnerPlayer", failures);
+            Require(FindDeep(scene, "RunnerGround"), "RunnerGround", failures);
+
+            if (player != null)
+            {
+                if (player.GetComponent<GulfRun.Features.Gameplay.RunnerPlayerController>() == null)
+                {
+                    failures.Add("RunnerPlayer missing RunnerPlayerController.");
+                }
+
+                if (player.GetComponent<GulfRun.Features.Gameplay.RunnerSwipeInput>() == null)
+                {
+                    failures.Add("RunnerPlayer missing RunnerSwipeInput.");
+                }
+
+                if (!player.CompareTag("Player"))
+                {
+                    failures.Add("RunnerPlayer must be tagged Player.");
+                }
+            }
+
+            GameObject cam = FindDeep(scene, "Main Camera");
+            if (cam == null)
+            {
+                failures.Add("Main Camera missing.");
+            }
+            else
+            {
+                if (cam.GetComponent<GulfRun.Features.CameraSystem.RunnerCameraFollow>() == null)
+                {
+                    failures.Add("Main Camera missing RunnerCameraFollow.");
+                }
+
+                if (cam.GetComponent<GulfRun.Features.CameraSystem.CameraShake>() == null)
+                {
+                    failures.Add("Main Camera missing CameraShake.");
+                }
+
+                var legacy = cam.GetComponent<GulfRun.Features.CameraSystem.SideScrollCameraFollow>();
+                if (legacy != null && legacy.enabled)
+                {
+                    failures.Add("SideScrollCameraFollow should be disabled while RunnerCameraFollow is active.");
+                }
+            }
         }
 
         private static void ValidateMainMenuWiring(List<string> failures)
