@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using GulfRun.Core;
 using GulfRun.Core.Networking;
 using GulfRun.Core.Services;
@@ -73,7 +74,9 @@ namespace GulfRun.Features.Maps
 
         private void HandleMatchStateChanged(MatchState newState)
         {
-            if (newState == MatchState.Countdown)
+            // Countdown still resolves a fresh environment when no vote forced one
+            // (legacy Auto Start path). Map Voting calls ApplyForcedMap explicitly.
+            if (newState == MatchState.Countdown && !HasResolvedEnvironment)
             {
                 ResolveNewEnvironment();
             }
@@ -97,6 +100,47 @@ namespace GulfRun.Features.Maps
                 return;
             }
 
+            ApplySelection(mapEntry.MapId);
+        }
+
+        public IReadOnlyList<MapId> PickRandomMaps(int count)
+        {
+            var result = new List<MapId>(Mathf.Max(0, count));
+            if (mapCatalog == null || count <= 0 || mapCatalog.Maps == null || mapCatalog.Maps.Count == 0)
+            {
+                return result;
+            }
+
+            var pool = new List<MapCatalogConfig.MapEntry>(mapCatalog.Maps);
+            int take = Mathf.Min(count, pool.Count);
+            for (int i = 0; i < take; i++)
+            {
+                int index = _random.NextInt(0, pool.Count);
+                result.Add(pool[index].MapId);
+                pool.RemoveAt(index);
+            }
+
+            return result;
+        }
+
+        public void ApplyForcedMap(MapId mapId)
+        {
+            if (mapId.IsNone || mapCatalog == null || !mapCatalog.TryGetEntry(mapId, out _))
+            {
+                ResolveNewEnvironment();
+                return;
+            }
+
+            ApplySelection(mapId);
+        }
+
+        private void ApplySelection(MapId mapId)
+        {
+            if (weatherCatalog == null || timeOfDayCatalog == null)
+            {
+                return;
+            }
+
             WeatherCatalogConfig.WeatherEntry weatherEntry = null;
             WeatherType weather = WeightedSelector.TrySelect(weatherCatalog.GetWeightedWeathers(), _random, out weatherEntry) && weatherEntry != null
                 ? weatherEntry.Weather
@@ -108,7 +152,7 @@ namespace GulfRun.Features.Maps
                 : TimeOfDay.Morning;
 
             RaceEnvironmentSeeds seeds = new RaceEnvironmentSeeds(_random.NextInt(1, int.MaxValue), _random.NextInt(1, int.MaxValue));
-            MatchEnvironmentSelection selection = new MatchEnvironmentSelection(mapEntry.MapId, timeOfDay, weather, seeds);
+            MatchEnvironmentSelection selection = new MatchEnvironmentSelection(mapId, timeOfDay, weather, seeds);
 
             Current = selection;
             HasResolvedEnvironment = true;

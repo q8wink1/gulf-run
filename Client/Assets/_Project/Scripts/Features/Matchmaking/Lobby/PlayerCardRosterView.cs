@@ -95,7 +95,7 @@ namespace GulfRun.Features.Matchmaking.Lobby
             string badges = string.Empty;
             if (p.IsHost)
             {
-                badges += "OWNER ";
+                badges += "HOST ";
             }
 
             if (isBot)

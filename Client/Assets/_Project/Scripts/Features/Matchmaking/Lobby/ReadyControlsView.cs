@@ -48,7 +48,7 @@ namespace GulfRun.Features.Matchmaking.Lobby
             {
                 _leaveAnim.NotifyPressed();
                 lobby.CancelOrLeaveMatch();
-                SceneManager.Instance?.LoadMainMenu();
+                SceneManager.Instance?.LoadPlayMenu();
             }
         }
     }

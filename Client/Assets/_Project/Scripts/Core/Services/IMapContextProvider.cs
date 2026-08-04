@@ -35,5 +35,11 @@ namespace GulfRun.Core.Services
 
         /// <summary>Sprint 13: resolves a match's random environment right now, for a menu/lobby context with no Countdown to react to. A no-op if catalogs are unassigned.</summary>
         void ResolveNewEnvironment();
+
+        /// <summary>Picks up to <paramref name="count"/> distinct maps from the catalog for Map Voting. Empty list if catalogs are unavailable.</summary>
+        System.Collections.Generic.IReadOnlyList<MapId> PickRandomMaps(int count);
+
+        /// <summary>Applies a host/vote-selected map while still rolling weather/time-of-day/seeds randomly.</summary>
+        void ApplyForcedMap(MapId mapId);
     }
 }

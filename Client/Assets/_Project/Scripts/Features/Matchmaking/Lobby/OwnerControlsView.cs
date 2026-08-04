@@ -100,12 +100,15 @@ namespace GulfRun.Features.Matchmaking.Lobby
             Rect start = _startAnim.Apply(new Rect(x + 12f, y + 72f, 160f, 28f), 2f);
             Color previous = GUI.color;
             GUI.color = canStart ? PreRaceLobbyTheme.Gold : PreRaceLobbyTheme.SandDark;
-            if (GUI.Button(start, "Start Match", PreRaceLobbyTheme.GoldButton) && canStart)
+            // Host-only Play (non-hosts never reach this block). Disabled until all seats Ready.
+            GUI.enabled = canStart;
+            if (GUI.Button(start, "Play", PreRaceLobbyTheme.GoldButton) && canStart)
             {
                 _startAnim.NotifyPressed();
                 lobby.RequestHostStart();
             }
 
+            GUI.enabled = true;
             GUI.color = previous;
             float statusX = x + 184f;
             float statusW = width - 200f;
@@ -115,8 +118,11 @@ namespace GulfRun.Features.Matchmaking.Lobby
                 statusW = Mathf.Max(120f, width - 332f);
             }
 
+            string readyGate = lobby.IsPrivateRoom
+                ? "min " + lobby.MinimumPlayerCount
+                : "need " + lobby.RequiredPlayerCount + "/" + lobby.RequiredPlayerCount;
             GUI.Label(new Rect(statusX, y + 76f, statusW, 20f),
-                lobby.LobbyPlayerCount + "/" + lobby.RequiredPlayerCount + " players  •  min " + lobby.MinimumPlayerCount +
+                lobby.LobbyPlayerCount + "/" + lobby.RequiredPlayerCount + " players  •  " + readyGate +
                 (canStart ? "  •  All Ready" : "  •  Waiting for Ready"),
                 PreRaceLobbyTheme.Muted);
 

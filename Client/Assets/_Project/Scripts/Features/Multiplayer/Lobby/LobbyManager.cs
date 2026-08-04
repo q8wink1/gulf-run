@@ -52,11 +52,33 @@ namespace GulfRun.Features.Multiplayer.Lobby
         public bool TryGetParticipant(int connectionId, out MatchParticipant participant) =>
             _participants.TryGetValue(connectionId, out participant);
 
-        /// <summary>True once at least the configured minimum number of players have all joined and readied up.</summary>
+        /// <summary>True once at least the configured minimum number of players have all joined and readied up (Private Room path).</summary>
         public bool AllRequiredPlayersReady()
         {
             int minimum = config != null ? config.MinimumPlayersToStart : 2;
             if (_participants.Count < minimum)
+            {
+                return false;
+            }
+
+            return EveryParticipantReady();
+        }
+
+        /// <summary>True once the lobby is at MaxPlayers and every seat is Ready (Quick Play Play button gate).</summary>
+        public bool FullLobbyReady()
+        {
+            int maxPlayers = config != null ? config.MaxPlayers : 4;
+            if (_participants.Count < maxPlayers)
+            {
+                return false;
+            }
+
+            return EveryParticipantReady();
+        }
+
+        public bool EveryParticipantReady()
+        {
+            if (_participants.Count == 0)
             {
                 return false;
             }

@@ -131,7 +131,11 @@ namespace GulfRun.Features.Multiplayer.Match
             SetState(MatchState.Waiting);
         }
 
-        private void HandleLobbyChanged() => TryStartCountdown();
+        private void HandleLobbyChanged()
+        {
+            // Host must press Play → Map Voting. Do not auto-start countdown
+            // when the lobby becomes Ready (Quick Play Lobby flow).
+        }
 
         private void HandleRemoteMatchStateChanged(MatchState newState) => SetState(newState);
 

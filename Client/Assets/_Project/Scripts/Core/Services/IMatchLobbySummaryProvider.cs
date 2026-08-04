@@ -56,8 +56,14 @@ namespace GulfRun.Core.Services
         /// <summary>Sprint 15 (Auto Start "5 4 3 2 1 GO"). Only meaningful while <see cref="LobbyPhase"/> is <see cref="MatchState.Countdown"/>.</summary>
         int AutoStartCountdownSecondsRemaining { get; }
 
-        /// <summary>Sprint 15 (Ready System "Room Owner cannot start unless... Everyone Ready"). True once the minimum required players have all joined and readied up.</summary>
+        /// <summary>Sprint 15 (Ready System "Room Owner cannot start unless... Everyone Ready"). For Quick Play this means a full 4/4 lobby with every seat Ready; Private Room still uses the configured minimum.</summary>
         bool AllPlayersReady { get; }
+
+        /// <summary>Mock Quick Play search status copy for the QuickPlay searching screen (empty when idle).</summary>
+        string MatchmakingStatusMessage { get; }
+
+        /// <summary>True after a Quick Play search resolved by joining an existing public room rather than creating one.</summary>
+        bool JoinedExistingPublicRoom { get; }
 
         /// <summary>Sprint 15 (Player Cards). Live roster snapshot — empty collection when not in a match.</summary>
         IReadOnlyCollection<MatchParticipant> Participants { get; }
@@ -89,7 +95,7 @@ namespace GulfRun.Core.Services
         /// <summary>Sprint 15 (Owner Feature "Kick Player"). Host-only; no-op for a non-host caller or when kicking the local player's own connection.</summary>
         void KickPlayer(int connectionId);
 
-        /// <summary>Sprint 15 (Owner Feature "Start Match"). Host-only manual nudge — a no-op unless <see cref="AllPlayersReady"/> is already true, since the countdown otherwise starts automatically the instant it becomes true (no button required, same as the single-player race-start addendum).</summary>
+        /// <summary>Sprint 15 (Owner Feature "Start Match" / Play). Host-only — opens Map Voting once the lobby is fully Ready (no longer auto-starts the race countdown).</summary>
         void RequestHostStart();
 
         /// <summary>Sprint 15 (Player Cards "BOT" tag / Bot Settings). True if the given connection was added by Bot Fill rather than a real player.</summary>
