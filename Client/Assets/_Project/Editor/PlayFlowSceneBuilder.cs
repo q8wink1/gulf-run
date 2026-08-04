@@ -6,6 +6,7 @@ using GulfRun.Features.MainMenu;
 using GulfRun.Features.MapVotingScreen;
 using GulfRun.Features.PlayMenu;
 using GulfRun.Features.QuickPlay;
+using GulfRun.Features.WinningMapRevealScreen;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -27,8 +28,11 @@ namespace GulfRun.Editor
         private const string InviteFriendsScenePath = "Assets/_Project/Scenes/InviteFriends.unity";
         private const string LobbyScreenScenePath = "Assets/_Project/Scenes/LobbyScreen.unity";
         private const string MapVotingScenePath = "Assets/_Project/Scenes/MapVoting.unity";
+        private const string WinningMapRevealScenePath = "Assets/_Project/Scenes/WinningMapReveal.unity";
         private const string MainMenuScenePath = "Assets/_Project/Scenes/MainMenu.unity";
         private const string BackgroundGuid = "a18b0000000000000000000000000001";
+        private static readonly Color GlowGold = new Color(1f, 0.84f, 0.40f, 0.55f);
+        private static readonly Color DimOverlayColor = new Color(0.02f, 0.02f, 0.04f, 0.42f);
 
         private static readonly Color Gold = new Color(0.90f, 0.71f, 0.25f, 1f);
         private static readonly Color GoldBright = new Color(1f, 0.84f, 0.40f, 1f);
@@ -69,6 +73,9 @@ namespace GulfRun.Editor
 
         [MenuItem("GulfRun/Play Flow/Build Map Voting Screen (Sprint 22.3)")]
         public static void BuildMapVotingScreenFromMenu() => BuildMapVotingScreenBatch();
+
+        [MenuItem("GulfRun/Play Flow/Build Winning Map Reveal (Sprint 22.4)")]
+        public static void BuildWinningMapRevealFromMenu() => BuildWinningMapRevealBatch();
 
         public static void RunBatch()
         {
@@ -156,6 +163,43 @@ namespace GulfRun.Editor
             }
 
             ExitWithFailures(failures, "[PlayFlow] PASS — MapVoting Sprint 22.3 Voting HUD UI OK.");
+        }
+
+        /// <summary>
+        /// Sprint 22.4: build WinningMapReveal UI (winner card, reveal animation
+        /// prep, loading progress placeholder). Also patches MapVoting with a
+        /// temporary Next footer button. No winner calc / networking / loading.
+        /// Does not rebuild LobbyScreen / PlayMenu / Main Menu.
+        /// </summary>
+        public static void BuildWinningMapRevealBatch()
+        {
+            var failures = new List<string>();
+
+            try
+            {
+                BuildWinningMapRevealScene(failures);
+                EnsureMapVotingNextButton(failures);
+                EnsureBuildSettings(failures);
+                ValidateWinningMapRevealScreen(failures);
+                ValidateMapVotingNextButton(failures);
+
+                if (CoreSceneManager.WinningMapRevealSceneName != "WinningMapReveal")
+                {
+                    failures.Add("SceneManager.WinningMapRevealSceneName mismatch.");
+                }
+
+                if (CoreSceneManager.MapVotingSceneName != "MapVoting")
+                {
+                    failures.Add("SceneManager.MapVotingSceneName mismatch.");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                failures.Add("Unhandled: " + ex);
+                Debug.LogException(ex);
+            }
+
+            ExitWithFailures(failures, "[PlayFlow] PASS — WinningMapReveal Sprint 22.4 UI OK.");
         }
 
         /// <summary>
@@ -870,6 +914,10 @@ namespace GulfRun.Editor
             Button backButton = CreateLabeledButton("BackButton", canvasRt, "Back", 168f, 64f, ButtonDark, GoldBright);
             PlaceTopLeft(backButton.GetComponent<RectTransform>(), new Vector2(48f, -52f));
 
+            // Sprint 22.4 temporary placeholder nav — Next → WinningMapReveal
+            Button nextButton = CreateLabeledButton("NextButton", canvasRt, "Next", 200f, 64f, Gold, GoldButtonLabel);
+            PlaceBottomRight(nextButton.GetComponent<RectTransform>(), new Vector2(-48f, 40f));
+
             // Sprint 22.3 — Voting Timer (top-center premium panel, static placeholder)
             RectTransform timerPanel = CreateRect("TimerPanel", canvasRt);
             timerPanel.anchorMin = new Vector2(0.5f, 1f);
@@ -1191,6 +1239,7 @@ namespace GulfRun.Editor
 
             SerializedObject so = new SerializedObject(controller);
             so.FindProperty("backButton").objectReferenceValue = backButton;
+            so.FindProperty("nextButton").objectReferenceValue = nextButton;
             SerializedProperty voteButtonsProp = so.FindProperty("voteButtons");
             SerializedProperty cardBordersProp = so.FindProperty("cardBorders");
             SerializedProperty voteImagesProp = so.FindProperty("voteButtonImages");
@@ -1216,6 +1265,305 @@ namespace GulfRun.Editor
             so.ApplyModifiedPropertiesWithoutUndo();
 
             SaveScene(scene, MapVotingScenePath, failures);
+        }
+
+        private static void BuildWinningMapRevealScene(List<string> failures)
+        {
+            Sprite background = LoadBackground(failures);
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            EnsureEventSystem(scene);
+
+            GameObject canvasGo = CreateOverlayCanvas("WinningMapRevealCanvas");
+            WinningMapRevealScreenController controller = canvasGo.AddComponent<WinningMapRevealScreenController>();
+            WinningMapRevealAnimation animation = canvasGo.AddComponent<WinningMapRevealAnimation>();
+            RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
+
+            Image bg = CreateUiImage("Background", canvasRt, stretch: true);
+            bg.sprite = background;
+            bg.preserveAspect = false;
+            bg.raycastTarget = false;
+
+            Image dim = CreateUiImage("DimOverlay", canvasRt, stretch: true);
+            dim.color = DimOverlayColor;
+            dim.raycastTarget = false;
+
+            CreateSafeArea(canvasRt);
+
+            RectTransform statusRoot = CreateRect("StatusRoot", canvasRt);
+            statusRoot.anchorMin = new Vector2(0.5f, 1f);
+            statusRoot.anchorMax = new Vector2(0.5f, 1f);
+            statusRoot.pivot = new Vector2(0.5f, 1f);
+            statusRoot.anchoredPosition = new Vector2(0f, -72f);
+            statusRoot.sizeDelta = new Vector2(900f, 110f);
+
+            Text winningLabel = CreateUiText(
+                "WinningMapLabel",
+                statusRoot,
+                "Winning Map",
+                48,
+                FontStyle.Bold,
+                GoldBright,
+                TextAnchor.MiddleCenter);
+            RectTransform winningLabelRt = winningLabel.rectTransform;
+            winningLabelRt.anchorMin = new Vector2(0f, 0.42f);
+            winningLabelRt.anchorMax = new Vector2(1f, 1f);
+            winningLabelRt.offsetMin = new Vector2(16f, 0f);
+            winningLabelRt.offsetMax = new Vector2(-16f, -4f);
+
+            Text preparing = CreateUiText(
+                "PreparingText",
+                statusRoot,
+                "Preparing Match...",
+                26,
+                FontStyle.Bold,
+                TextMuted,
+                TextAnchor.MiddleCenter);
+            RectTransform preparingRt = preparing.rectTransform;
+            preparingRt.anchorMin = new Vector2(0f, 0f);
+            preparingRt.anchorMax = new Vector2(1f, 0.48f);
+            preparingRt.offsetMin = new Vector2(24f, 4f);
+            preparingRt.offsetMax = new Vector2(-24f, 0f);
+
+            // Large center winning card (Kuwait City placeholder)
+            const float cardWidth = 720f;
+            const float cardHeight = 780f;
+            RectTransform winningCard = CreateRect("WinningCardRoot", canvasRt);
+            winningCard.anchorMin = new Vector2(0.5f, 0.5f);
+            winningCard.anchorMax = new Vector2(0.5f, 0.5f);
+            winningCard.pivot = new Vector2(0.5f, 0.5f);
+            winningCard.anchoredPosition = new Vector2(0f, -12f);
+            winningCard.sizeDelta = new Vector2(cardWidth, cardHeight);
+
+            Image glow = CreateUiImage("Glow", winningCard, stretch: false);
+            glow.color = GlowGold;
+            glow.raycastTarget = false;
+            RectTransform glowRt = glow.rectTransform;
+            glowRt.anchorMin = new Vector2(0.5f, 0.5f);
+            glowRt.anchorMax = new Vector2(0.5f, 0.5f);
+            glowRt.pivot = new Vector2(0.5f, 0.5f);
+            glowRt.anchoredPosition = Vector2.zero;
+            glowRt.sizeDelta = new Vector2(cardWidth + 72f, cardHeight + 72f);
+
+            Image cardBorder = winningCard.gameObject.AddComponent<Image>();
+            cardBorder.color = new Color(1f, 0.88f, 0.35f, 1f);
+            cardBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(winningCard.gameObject);
+
+            Image fill = CreateUiImage("Fill", winningCard, stretch: true);
+            fill.color = CardFill;
+            fill.raycastTarget = false;
+            fill.rectTransform.offsetMin = new Vector2(4f, 4f);
+            fill.rectTransform.offsetMax = new Vector2(-4f, -4f);
+
+            RectTransform artwork = CreateRect("MapArtwork", winningCard);
+            artwork.anchorMin = new Vector2(0.5f, 1f);
+            artwork.anchorMax = new Vector2(0.5f, 1f);
+            artwork.pivot = new Vector2(0.5f, 1f);
+            artwork.anchoredPosition = new Vector2(0f, -28f);
+            artwork.sizeDelta = new Vector2(cardWidth - 56f, 360f);
+
+            Image artworkBorder = artwork.gameObject.AddComponent<Image>();
+            artworkBorder.color = new Color(Gold.r, Gold.g, Gold.b, 0.45f);
+            artworkBorder.raycastTarget = false;
+
+            Image previewTop = CreateUiImage("PreviewTop", artwork, stretch: true);
+            previewTop.color = new Color(0.78f, 0.52f, 0.30f, 1f);
+            previewTop.raycastTarget = false;
+            previewTop.rectTransform.offsetMin = new Vector2(3f, 110f);
+            previewTop.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Image previewBottom = CreateUiImage("PreviewBottom", artwork, stretch: true);
+            previewBottom.color = new Color(0.38f, 0.24f, 0.14f, 1f);
+            previewBottom.raycastTarget = false;
+            previewBottom.rectTransform.offsetMin = new Vector2(3f, 3f);
+            previewBottom.rectTransform.offsetMax = new Vector2(-3f, -240f);
+
+            Image previewAccent = CreateUiImage("PreviewAccent", artwork, stretch: false);
+            previewAccent.color = new Color(0.95f, 0.78f, 0.42f, 0.55f);
+            previewAccent.raycastTarget = false;
+            RectTransform accentRt = previewAccent.rectTransform;
+            accentRt.anchorMin = new Vector2(0f, 0f);
+            accentRt.anchorMax = new Vector2(1f, 0f);
+            accentRt.pivot = new Vector2(0.5f, 0f);
+            accentRt.anchoredPosition = new Vector2(0f, 3f);
+            accentRt.sizeDelta = new Vector2(-6f, 32f);
+
+            RectTransform metaRow = CreateRect("MetaRow", winningCard);
+            metaRow.anchorMin = new Vector2(0.5f, 1f);
+            metaRow.anchorMax = new Vector2(0.5f, 1f);
+            metaRow.pivot = new Vector2(0.5f, 1f);
+            metaRow.anchoredPosition = new Vector2(0f, -408f);
+            metaRow.sizeDelta = new Vector2(cardWidth - 80f, 40f);
+
+            Image flag = CreateUiImage("CountryFlag", metaRow, stretch: false);
+            flag.color = new Color(0.00f, 0.45f, 0.28f, 1f);
+            flag.raycastTarget = false;
+            RectTransform flagRt = flag.rectTransform;
+            flagRt.anchorMin = new Vector2(0.5f, 0.5f);
+            flagRt.anchorMax = new Vector2(0.5f, 0.5f);
+            flagRt.pivot = new Vector2(1f, 0.5f);
+            flagRt.anchoredPosition = new Vector2(-18f, 0f);
+            flagRt.sizeDelta = new Vector2(56f, 34f);
+
+            Text country = CreateUiText("CountryCode", metaRow, "KW", 22, FontStyle.Bold, TextMuted, TextAnchor.MiddleLeft);
+            RectTransform countryRt = country.rectTransform;
+            countryRt.anchorMin = new Vector2(0.5f, 0.5f);
+            countryRt.anchorMax = new Vector2(0.5f, 0.5f);
+            countryRt.pivot = new Vector2(0f, 0.5f);
+            countryRt.anchoredPosition = new Vector2(18f, 0f);
+            countryRt.sizeDelta = new Vector2(80f, 34f);
+
+            Text mapName = CreateUiText(
+                "MapName",
+                winningCard,
+                "Kuwait City",
+                44,
+                FontStyle.Bold,
+                GoldBright,
+                TextAnchor.MiddleCenter);
+            RectTransform mapNameRt = mapName.rectTransform;
+            mapNameRt.anchorMin = new Vector2(0f, 1f);
+            mapNameRt.anchorMax = new Vector2(1f, 1f);
+            mapNameRt.pivot = new Vector2(0.5f, 1f);
+            mapNameRt.anchoredPosition = new Vector2(0f, -460f);
+            mapNameRt.sizeDelta = new Vector2(-48f, 56f);
+
+            Text description = CreateUiText(
+                "Description",
+                winningCard,
+                "Neon towers and desert highways racing through the capital skyline.",
+                24,
+                FontStyle.Normal,
+                TextMuted,
+                TextAnchor.UpperCenter);
+            description.horizontalOverflow = HorizontalWrapMode.Wrap;
+            RectTransform descriptionRt = description.rectTransform;
+            descriptionRt.anchorMin = new Vector2(0f, 0f);
+            descriptionRt.anchorMax = new Vector2(1f, 1f);
+            descriptionRt.offsetMin = new Vector2(48f, 48f);
+            descriptionRt.offsetMax = new Vector2(-48f, -530f);
+
+            // Confetti placeholder — inactive / simple burst image
+            RectTransform confetti = CreateRect("ConfettiPlaceholder", canvasRt);
+            confetti.anchorMin = new Vector2(0.5f, 0.5f);
+            confetti.anchorMax = new Vector2(0.5f, 0.5f);
+            confetti.pivot = new Vector2(0.5f, 0.5f);
+            confetti.anchoredPosition = new Vector2(0f, 220f);
+            confetti.sizeDelta = new Vector2(1100f, 280f);
+            confetti.gameObject.SetActive(false);
+
+            Image confettiBurst = CreateUiImage("Burst", confetti, stretch: true);
+            confettiBurst.color = new Color(1f, 0.84f, 0.40f, 0.28f);
+            confettiBurst.raycastTarget = false;
+
+            RectTransform loadingRoot = CreateRect("LoadingProgressRoot", canvasRt);
+            loadingRoot.anchorMin = new Vector2(0.5f, 0f);
+            loadingRoot.anchorMax = new Vector2(0.5f, 0f);
+            loadingRoot.pivot = new Vector2(0.5f, 0f);
+            loadingRoot.anchoredPosition = new Vector2(0f, 48f);
+            loadingRoot.sizeDelta = new Vector2(720f, 56f);
+
+            Image loadingBorder = loadingRoot.gameObject.AddComponent<Image>();
+            loadingBorder.color = PanelBorder;
+            loadingBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(loadingRoot.gameObject);
+
+            Image loadingFill = CreateUiImage("Fill", loadingRoot, stretch: true);
+            loadingFill.color = PanelBg;
+            loadingFill.raycastTarget = false;
+            loadingFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            loadingFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Text loadingText = CreateUiText(
+                "LoadingProgressText",
+                loadingRoot,
+                "Loading... 0%",
+                24,
+                FontStyle.Bold,
+                TextPrimary,
+                TextAnchor.MiddleCenter);
+            RectTransform loadingTextRt = loadingText.rectTransform;
+            loadingTextRt.anchorMin = Vector2.zero;
+            loadingTextRt.anchorMax = Vector2.one;
+            loadingTextRt.offsetMin = new Vector2(16f, 4f);
+            loadingTextRt.offsetMax = new Vector2(-16f, -4f);
+
+            Button continueButton = CreateLabeledButton(
+                "ContinueButton",
+                canvasRt,
+                "Continue",
+                280f,
+                72f,
+                Gold,
+                GoldButtonLabel);
+            PlaceBottomRight(continueButton.GetComponent<RectTransform>(), new Vector2(-48f, 130f));
+
+            SerializedObject controllerSo = new SerializedObject(controller);
+            controllerSo.FindProperty("continueButton").objectReferenceValue = continueButton;
+            controllerSo.ApplyModifiedPropertiesWithoutUndo();
+
+            SerializedObject animSo = new SerializedObject(animation);
+            animSo.FindProperty("winningCard").objectReferenceValue = winningCard;
+            animSo.FindProperty("dimOverlay").objectReferenceValue = dim;
+            animSo.FindProperty("glowImage").objectReferenceValue = glow;
+            animSo.FindProperty("canvasRoot").objectReferenceValue = canvasRt;
+            animSo.ApplyModifiedPropertiesWithoutUndo();
+
+            SaveScene(scene, WinningMapRevealScenePath, failures);
+        }
+
+        /// <summary>
+        /// Minimal Sprint 22.4 patch: ensure MapVoting has temporary Next button
+        /// wired to LoadWinningMapReveal without rebuilding the full voting HUD.
+        /// </summary>
+        private static void EnsureMapVotingNextButton(List<string> failures)
+        {
+            if (!File.Exists(MapVotingScenePath))
+            {
+                failures.Add("MapVoting scene missing; cannot wire Next button.");
+                return;
+            }
+
+            Scene scene = EditorSceneManager.OpenScene(MapVotingScenePath, OpenSceneMode.Single);
+            GameObject canvasGo = FindDeep(scene, "MapVotingCanvas");
+            if (canvasGo == null)
+            {
+                failures.Add("MapVotingCanvas missing while wiring Next.");
+                return;
+            }
+
+            RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
+            MapVotingScreenController controller = canvasGo.GetComponent<MapVotingScreenController>();
+            if (controller == null)
+            {
+                failures.Add("MapVotingScreenController missing while wiring Next.");
+                return;
+            }
+
+            GameObject existing = FindDeep(scene, "NextButton");
+            Button nextButton;
+            if (existing != null)
+            {
+                nextButton = existing.GetComponent<Button>();
+            }
+            else
+            {
+                nextButton = CreateLabeledButton("NextButton", canvasRt, "Next", 200f, 64f, Gold, GoldButtonLabel);
+                PlaceBottomRight(nextButton.GetComponent<RectTransform>(), new Vector2(-48f, 40f));
+            }
+
+            SerializedObject so = new SerializedObject(controller);
+            so.FindProperty("nextButton").objectReferenceValue = nextButton;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene))
+            {
+                failures.Add("Failed to save MapVoting after Next button wire.");
+                return;
+            }
+
+            Debug.Log("[PlayFlow] MapVoting Next → WinningMapReveal wired.");
         }
 
         private static void CreateMapCard(
@@ -1808,6 +2156,7 @@ namespace GulfRun.Editor
             InsertSceneAfter(InviteFriendsScenePath, QuickPlayScenePath, failures);
             InsertSceneAfter(LobbyScreenScenePath, InviteFriendsScenePath, failures);
             InsertSceneAfter(MapVotingScenePath, LobbyScreenScenePath, failures);
+            InsertSceneAfter(WinningMapRevealScenePath, MapVotingScenePath, failures);
         }
 
         private static void InsertSceneAfter(string scenePath, string afterPath, List<string> failures)
@@ -2240,6 +2589,7 @@ namespace GulfRun.Editor
             Require(FindDeep(scene, "Background"), "MapVoting Background", failures);
             Require(FindDeep(scene, "SafeArea"), "MapVoting SafeArea", failures);
             Require(FindDeep(scene, "BackButton"), "MapVoting BackButton", failures);
+            Require(FindDeep(scene, "NextButton"), "MapVoting NextButton", failures);
             Require(FindDeep(scene, "TimerPanel"), "MapVoting TimerPanel", failures);
             Require(FindDeep(scene, "TimerText"), "MapVoting TimerText", failures);
             Require(FindDeep(scene, "ProgressBarTrack"), "MapVoting ProgressBarTrack", failures);
@@ -2441,6 +2791,11 @@ namespace GulfRun.Editor
                     failures.Add("MapVotingScreenController.backButton must be wired.");
                 }
 
+                if (so.FindProperty("nextButton").objectReferenceValue == null)
+                {
+                    failures.Add("MapVotingScreenController.nextButton must be wired.");
+                }
+
                 SerializedProperty voteButtons = so.FindProperty("voteButtons");
                 if (voteButtons == null || voteButtons.arraySize != 3)
                 {
@@ -2492,6 +2847,139 @@ namespace GulfRun.Editor
 
             RequireCanvasScaler(FindDeep(scene, "MapVotingCanvas"), failures);
             RequireInBuild(MapVotingScenePath, failures);
+            RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
+        }
+
+        private static void ValidateMapVotingNextButton(List<string> failures)
+        {
+            if (!File.Exists(MapVotingScenePath))
+            {
+                failures.Add("MapVoting scene missing for Next button validation.");
+                return;
+            }
+
+            Scene scene = EditorSceneManager.OpenScene(MapVotingScenePath, OpenSceneMode.Single);
+            Require(FindDeep(scene, "NextButton"), "MapVoting NextButton", failures);
+
+            MapVotingScreenController controller = FindDeep(scene, "MapVotingCanvas")?.GetComponent<MapVotingScreenController>();
+            if (controller == null)
+            {
+                failures.Add("MapVotingScreenController missing for Next validation.");
+                return;
+            }
+
+            SerializedObject so = new SerializedObject(controller);
+            if (so.FindProperty("nextButton").objectReferenceValue == null)
+            {
+                failures.Add("MapVotingScreenController.nextButton must be wired.");
+            }
+        }
+
+        private static void ValidateWinningMapRevealScreen(List<string> failures)
+        {
+            Scene scene = EditorSceneManager.OpenScene(WinningMapRevealScenePath, OpenSceneMode.Single);
+            Require(FindDeep(scene, "WinningMapRevealCanvas"), "WinningMapRevealCanvas", failures);
+            Require(FindDeep(scene, "Background"), "WinningMapReveal Background", failures);
+            Require(FindDeep(scene, "DimOverlay"), "WinningMapReveal DimOverlay", failures);
+            Require(FindDeep(scene, "SafeArea"), "WinningMapReveal SafeArea", failures);
+            Require(FindDeep(scene, "StatusRoot"), "WinningMapReveal StatusRoot", failures);
+            Require(FindDeep(scene, "WinningMapLabel"), "WinningMapReveal WinningMapLabel", failures);
+            Require(FindDeep(scene, "PreparingText"), "WinningMapReveal PreparingText", failures);
+            Require(FindDeep(scene, "WinningCardRoot"), "WinningMapReveal WinningCardRoot", failures);
+            Require(FindDeep(scene, "Glow"), "WinningMapReveal Glow", failures);
+            Require(FindDeep(scene, "MapArtwork"), "WinningMapReveal MapArtwork", failures);
+            Require(FindDeep(scene, "CountryFlag"), "WinningMapReveal CountryFlag", failures);
+            Require(FindDeep(scene, "MapName"), "WinningMapReveal MapName", failures);
+            Require(FindDeep(scene, "Description"), "WinningMapReveal Description", failures);
+            Require(FindDeep(scene, "ConfettiPlaceholder"), "WinningMapReveal ConfettiPlaceholder", failures);
+            Require(FindDeep(scene, "LoadingProgressRoot"), "WinningMapReveal LoadingProgressRoot", failures);
+            Require(FindDeep(scene, "LoadingProgressText"), "WinningMapReveal LoadingProgressText", failures);
+            Require(FindDeep(scene, "ContinueButton"), "WinningMapReveal ContinueButton", failures);
+
+            Text winningLabel = FindDeep(scene, "WinningMapLabel")?.GetComponent<Text>();
+            if (winningLabel == null || winningLabel.text != "Winning Map")
+            {
+                failures.Add("WinningMapReveal WinningMapLabel must read 'Winning Map'.");
+            }
+
+            Text preparing = FindDeep(scene, "PreparingText")?.GetComponent<Text>();
+            if (preparing == null || preparing.text != "Preparing Match...")
+            {
+                failures.Add("WinningMapReveal PreparingText must read 'Preparing Match...'.");
+            }
+
+            Text mapName = FindDeep(scene, "MapName")?.GetComponent<Text>();
+            if (mapName == null || mapName.text != "Kuwait City")
+            {
+                failures.Add("WinningMapReveal MapName must read 'Kuwait City' (placeholder).");
+            }
+
+            Text loading = FindDeep(scene, "LoadingProgressText")?.GetComponent<Text>();
+            if (loading == null || loading.text != "Loading... 0%")
+            {
+                failures.Add("WinningMapReveal LoadingProgressText must read 'Loading... 0%'.");
+            }
+
+            GameObject confetti = FindDeep(scene, "ConfettiPlaceholder");
+            if (confetti != null && confetti.activeSelf)
+            {
+                failures.Add("WinningMapReveal ConfettiPlaceholder must start inactive.");
+            }
+
+            GameObject safeArea = FindDeep(scene, "SafeArea");
+            if (safeArea != null)
+            {
+                RectTransform safeRt = safeArea.GetComponent<RectTransform>();
+                if (safeRt == null ||
+                    safeRt.sizeDelta != new Vector2(-96f, -86f) ||
+                    !Mathf.Approximately(safeRt.anchoredPosition.y, -9f))
+                {
+                    failures.Add("WinningMapReveal SafeArea expected Main Menu insets (sizeDelta -96/-86, y -9).");
+                }
+            }
+
+            WinningMapRevealScreenController controller =
+                FindDeep(scene, "WinningMapRevealCanvas")?.GetComponent<WinningMapRevealScreenController>();
+            if (controller == null)
+            {
+                failures.Add("WinningMapRevealCanvas missing WinningMapRevealScreenController.");
+            }
+            else
+            {
+                SerializedObject so = new SerializedObject(controller);
+                if (so.FindProperty("continueButton").objectReferenceValue == null)
+                {
+                    failures.Add("WinningMapRevealScreenController.continueButton must be wired.");
+                }
+            }
+
+            WinningMapRevealAnimation animation =
+                FindDeep(scene, "WinningMapRevealCanvas")?.GetComponent<WinningMapRevealAnimation>();
+            if (animation == null)
+            {
+                failures.Add("WinningMapRevealCanvas missing WinningMapRevealAnimation.");
+            }
+            else
+            {
+                SerializedObject so = new SerializedObject(animation);
+                if (so.FindProperty("winningCard").objectReferenceValue == null)
+                {
+                    failures.Add("WinningMapRevealAnimation.winningCard must be wired.");
+                }
+
+                if (so.FindProperty("dimOverlay").objectReferenceValue == null)
+                {
+                    failures.Add("WinningMapRevealAnimation.dimOverlay must be wired.");
+                }
+
+                if (so.FindProperty("glowImage").objectReferenceValue == null)
+                {
+                    failures.Add("WinningMapRevealAnimation.glowImage must be wired.");
+                }
+            }
+
+            RequireCanvasScaler(FindDeep(scene, "WinningMapRevealCanvas"), failures);
+            RequireInBuild(WinningMapRevealScenePath, failures);
             RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
         }
 
@@ -3003,6 +3491,14 @@ namespace GulfRun.Editor
             rt.anchorMin = new Vector2(0f, 1f);
             rt.anchorMax = new Vector2(0f, 1f);
             rt.pivot = new Vector2(0f, 1f);
+            rt.anchoredPosition = anchoredPos;
+        }
+
+        private static void PlaceBottomRight(RectTransform rt, Vector2 anchoredPos)
+        {
+            rt.anchorMin = new Vector2(1f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot = new Vector2(1f, 0f);
             rt.anchoredPosition = anchoredPos;
         }
 

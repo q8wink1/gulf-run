@@ -6,6 +6,7 @@ namespace GulfRun.Features.MapVotingScreen
 {
     /// <summary>
     /// Premium Map Voting UI (Sprint 22.3 HUD + 22.2 cards). Back → LobbyScreen.
+    /// Sprint 22.4 temporary Next → WinningMapReveal (placeholder nav only).
     /// Vote buttons are local visual highlight only — no countdown, vote
     /// counting, networking, SessionManager, or matchmaking.
     /// </summary>
@@ -20,6 +21,7 @@ namespace GulfRun.Features.MapVotingScreen
         private static readonly Color VoteSelectedLabel = new Color(0.08f, 0.18f, 0.10f, 1f);
 
         [SerializeField] private Button backButton;
+        [SerializeField] private Button nextButton;
         [SerializeField] private Button[] voteButtons;
         [SerializeField] private Image[] cardBorders;
         [SerializeField] private Image[] voteButtonImages;
@@ -34,6 +36,11 @@ namespace GulfRun.Features.MapVotingScreen
             if (backButton != null)
             {
                 backButton.onClick.AddListener(OnBackClicked);
+            }
+
+            if (nextButton != null)
+            {
+                nextButton.onClick.AddListener(OnNextClicked);
             }
 
             if (voteButtons == null)
@@ -61,6 +68,11 @@ namespace GulfRun.Features.MapVotingScreen
             if (backButton != null)
             {
                 backButton.onClick.RemoveListener(OnBackClicked);
+            }
+
+            if (nextButton != null)
+            {
+                nextButton.onClick.RemoveListener(OnNextClicked);
             }
 
             if (voteButtons == null)
@@ -128,6 +140,18 @@ namespace GulfRun.Features.MapVotingScreen
             }
 
             UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.LobbyScreenSceneName);
+        }
+
+        /// <summary>Sprint 22.4 temporary placeholder nav — no vote tally.</summary>
+        private static void OnNextClicked()
+        {
+            if (SceneManager.Instance != null)
+            {
+                SceneManager.Instance.LoadWinningMapReveal();
+                return;
+            }
+
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.WinningMapRevealSceneName);
         }
     }
 }

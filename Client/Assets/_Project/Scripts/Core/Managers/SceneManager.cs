@@ -20,6 +20,7 @@ namespace GulfRun.Core.Managers
         public const string LobbyScreenSceneName = "LobbyScreen";
         public const string LobbySceneName = "Lobby";
         public const string MapVotingSceneName = "MapVoting";
+        public const string WinningMapRevealSceneName = "WinningMapReveal";
         public const string LoadingSceneName = "Loading";
         public const string GameplaySceneName = "Gameplay";
 
@@ -42,6 +43,8 @@ namespace GulfRun.Core.Managers
         public void LoadLobby() => UnityEngine.SceneManagement.SceneManager.LoadScene(LobbySceneName);
 
         public void LoadMapVoting() => UnityEngine.SceneManagement.SceneManager.LoadScene(MapVotingSceneName);
+
+        public void LoadWinningMapReveal() => UnityEngine.SceneManagement.SceneManager.LoadScene(WinningMapRevealSceneName);
 
         public void LoadLoading() => UnityEngine.SceneManagement.SceneManager.LoadScene(LoadingSceneName);
 

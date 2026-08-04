@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Generate MapVoting.unity (Sprint 22.3 Voting HUD UI) without Unity batchmode."""
+"""Generate WinningMapReveal.unity (Sprint 22.4 Winning Map Reveal UI) without Unity batchmode."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
 
-OUT = Path(r"C:\Projects\GulfRun\Client\Assets\_Project\Scenes\MapVoting.unity")
+OUT = Path(r"C:\Projects\GulfRun\Client\Assets\_Project\Scenes\WinningMapReveal.unity")
 
 GUID_TEXT = "5f7201a12d95ffc409449d95f23cf332"
 GUID_IMAGE = "fe87c0e1cc204ed48ad3b37840f39efc"
@@ -14,33 +14,30 @@ GUID_BUTTON = "4e29b1a8efbd4b44bb3f3716e73f07ff"
 GUID_SCALER = "0cd44c1031e13a943bb63640046fad76"
 GUID_RAYCASTER = "dc42784cf147c0c48a680349fa168899"
 GUID_SHADOW = "cfabb0440166ab443bba8876756fdfa9"
-GUID_MASK = "31a19414c41e5ae4aae2af33fee712f6"
 GUID_EVENTSYSTEM = "76c392e42b5098c458856cdf6ecaaaa1"
 GUID_STANDALONE = "4f231c4fb786f3946a6b90b886c48677"
-GUID_CONTROLLER = "b20c0000000000000000000000000073"
-GUID_MAP_CARD_VISUAL = "b20c0000000000000000000000000074"
+GUID_CONTROLLER = "b20c0000000000000000000000000083"
+GUID_ANIMATION = "b20c0000000000000000000000000084"
 GUID_BG = "a18b0000000000000000000000000001"
-KNOB = "{fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}"
 FONT = "{fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}"
 BG_SPRITE = f"{{fileID: 21300000, guid: {GUID_BG}, type: 3}}"
 
 GOLD = (0.90, 0.71, 0.25, 1.0)
 GOLD_BRIGHT = (1.0, 0.84, 0.40, 1.0)
+GLOW_GOLD = (1.0, 0.84, 0.40, 0.55)
+DIM = (0.02, 0.02, 0.04, 0.42)
 PANEL_BG = (0.10, 0.09, 0.10, 0.78)
 PANEL_BORDER = (0.90, 0.71, 0.25, 0.55)
 WHITE = (1.0, 1.0, 1.0, 1.0)
 MUTED = (0.80, 0.80, 0.80, 1.0)
-BUTTON_DARK = (0.12, 0.10, 0.09, 0.92)
 CARD = (0.12, 0.11, 0.12, 0.88)
-SUCCESS = (0.40, 0.85, 0.45, 1.0)
-READY_MUTED = (0.55, 0.55, 0.55, 1.0)
-CONNECTING = (0.95, 0.72, 0.28, 1.0)
-ONLINE = (0.35, 0.90, 0.48, 1.0)
-EMPTY_FILL = (0.10, 0.09, 0.10, 0.55)
-EMPTY_BORDER = (0.90, 0.71, 0.25, 0.22)
-AVATAR = (0.72, 0.58, 0.42, 1.0)
 GOLD_LABEL = (0.20, 0.14, 0.02, 1.0)
-HARD_RED = (0.92, 0.38, 0.32, 1.0)
+CARD_BORDER = (1.0, 0.88, 0.35, 1.0)
+FLAG_KW = (0.00, 0.45, 0.28, 1.0)
+PREVIEW_TOP = (0.78, 0.52, 0.30, 1.0)
+PREVIEW_BOTTOM = (0.38, 0.24, 0.14, 1.0)
+PREVIEW_ACCENT = (0.95, 0.78, 0.42, 0.55)
+CONFETTI = (1.0, 0.84, 0.40, 0.28)
 
 _next = 10000
 
@@ -68,13 +65,11 @@ class Node:
     size: tuple[float, float] = (100.0, 100.0)
     pivot: tuple[float, float] = (0.5, 0.5)
     scale: tuple[float, float, float] = (1.0, 1.0, 1.0)
-    # visual
     image: tuple[float, float, float, float] | None = None
     sprite: str = "{fileID: 0}"
     preserve: int = 0
     raycast: int = 0
     shadow: bool = False
-    mask: bool = False
     text: str | None = None
     font_size: int = 24
     font_style: int = 1
@@ -84,23 +79,14 @@ class Node:
     interactable: int = 1
     transition: int = 1
     script_guid: str | None = None
-    image_type: int = 0  # 0 Simple, 1 Sliced, 2 Tiled, 3 Filled
-    fill_method: int = 0  # Horizontal
-    fill_amount: float = 1.0
-    fill_origin: int = 0
-    # ids for optional components
     cr: int = field(default_factory=nid)
     img_id: int | None = None
     txt_id: int | None = None
     btn_id: int | None = None
     sh_id: int | None = None
-    mask_id: int | None = None
     script_id: int | None = None
 
     def prep(self) -> None:
-        needs_cr = self.image is not None or self.text is not None or self.button
-        if needs_cr or self.shadow or self.mask:
-            pass  # cr always allocated
         if self.image is not None or self.button:
             self.img_id = nid()
         if self.text is not None:
@@ -109,8 +95,6 @@ class Node:
             self.btn_id = nid()
         if self.shadow:
             self.sh_id = nid()
-        if self.mask:
-            self.mask_id = nid()
         if self.script_guid:
             self.script_id = nid()
         for ch in self.children:
@@ -130,8 +114,6 @@ def comps(n: Node) -> list[int]:
         out.append(n.btn_id)
     if n.sh_id:
         out.append(n.sh_id)
-    if n.mask_id:
-        out.append(n.mask_id)
     if n.script_id:
         out.append(n.script_id)
     return out
@@ -155,7 +137,6 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
     lines.append("  m_NavMeshLayer: 0")
     lines.append("  m_StaticEditorFlags: 0")
     lines.append(f"  m_IsActive: {n.active}")
-
     lines.append(f"--- !u!224 &{n.rt}")
     lines.append("RectTransform:")
     lines.append("  m_ObjectHideFlags: 0")
@@ -190,7 +171,6 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append("  m_CullTransparentMesh: 1")
 
     if n.img_id is not None:
-        color = n.image if n.image is not None else (1, 1, 1, 1)
         lines.append(f"--- !u!114 &{n.img_id}")
         lines.append("MonoBehaviour:")
         lines.append("  m_ObjectHideFlags: 0")
@@ -203,8 +183,8 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append(f"  m_Script: {{fileID: 11500000, guid: {GUID_IMAGE}, type: 3}}")
         lines.append("  m_Name: ")
         lines.append("  m_EditorClassIdentifier: ")
-        lines.append("  m_Material: {fileID: 0}")
-        lines.append(f"  m_Color: {c4(color)}")
+        lines.append(f"  m_Material: {{fileID: 0}}")
+        lines.append(f"  m_Color: {c4(n.image if n.image is not None else WHITE)}")
         lines.append(f"  m_RaycastTarget: {n.raycast}")
         lines.append("  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}")
         lines.append("  m_Maskable: 1")
@@ -212,13 +192,13 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append("    m_PersistentCalls:")
         lines.append("      m_Calls: []")
         lines.append(f"  m_Sprite: {n.sprite}")
-        lines.append(f"  m_Type: {n.image_type}")
-        lines.append(f"  m_PreserveAspect: {n.preserve}")
+        lines.append("  m_Type: 0")
+        lines.append("  m_PreserveAspect: 0")
         lines.append("  m_FillCenter: 1")
-        lines.append(f"  m_FillMethod: {n.fill_method}")
-        lines.append(f"  m_FillAmount: {n.fill_amount}")
+        lines.append("  m_FillMethod: 4")
+        lines.append("  m_FillAmount: 1")
         lines.append("  m_FillClockwise: 1")
-        lines.append(f"  m_FillOrigin: {n.fill_origin}")
+        lines.append("  m_FillOrigin: 0")
         lines.append("  m_UseSpriteMesh: 0")
         lines.append("  m_PixelsPerUnitMultiplier: 1")
 
@@ -243,8 +223,8 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append("  m_OnCullStateChanged:")
         lines.append("    m_PersistentCalls:")
         lines.append("      m_Calls: []")
-        lines.append("  m_FontData:")
-        lines.append(f"    m_Font: {FONT}")
+        lines.append(f"  m_FontData:")
+        lines.append("    m_Font: " + FONT)
         lines.append(f"    m_FontSize: {n.font_size}")
         lines.append(f"    m_FontStyle: {n.font_style}")
         lines.append("    m_BestFit: 0")
@@ -254,7 +234,7 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append("    m_AlignByGeometry: 0")
         lines.append("    m_RichText: 1")
         lines.append("    m_HorizontalOverflow: 0")
-        lines.append("    m_VerticalOverflow: 1")
+        lines.append("    m_VerticalOverflow: 0")
         lines.append("    m_LineSpacing: 1")
         lines.append(f"  m_Text: {n.text}")
 
@@ -271,7 +251,7 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append(f"  m_Script: {{fileID: 11500000, guid: {GUID_BUTTON}, type: 3}}")
         lines.append("  m_Name: ")
         lines.append("  m_EditorClassIdentifier: ")
-        lines.append("  m_Navigation:")
+        lines.append(f"  m_Navigation:")
         lines.append("    m_Mode: 3")
         lines.append("    m_WrapAround: 0")
         lines.append("    m_SelectOnUp: {fileID: 0}")
@@ -284,7 +264,7 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append("    m_HighlightedColor: {r: 0.96, g: 0.96, b: 0.96, a: 1}")
         lines.append("    m_PressedColor: {r: 0.78, g: 0.78, b: 0.78, a: 1}")
         lines.append("    m_SelectedColor: {r: 0.96, g: 0.96, b: 0.96, a: 1}")
-        lines.append("    m_DisabledColor: {r: 0.18, g: 0.16, b: 0.14, a: 0.55}")
+        lines.append("    m_DisabledColor: {r: 0.78, g: 0.78, b: 0.78, a: 0.5}")
         lines.append("    m_ColorMultiplier: 1")
         lines.append("    m_FadeDuration: 0.1")
         lines.append("  m_SpriteState:")
@@ -321,37 +301,6 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append("  m_EffectDistance: {x: 0, y: -6}")
         lines.append("  m_UseGraphicAlpha: 1")
 
-    if n.mask_id is not None:
-        lines.append(f"--- !u!114 &{n.mask_id}")
-        lines.append("MonoBehaviour:")
-        lines.append("  m_ObjectHideFlags: 0")
-        lines.append("  m_CorrespondingSourceObject: {fileID: 0}")
-        lines.append("  m_PrefabInstance: {fileID: 0}")
-        lines.append("  m_PrefabAsset: {fileID: 0}")
-        lines.append(f"  m_GameObject: {{fileID: {n.go}}}")
-        lines.append("  m_Enabled: 1")
-        lines.append("  m_EditorHideFlags: 0")
-        lines.append(f"  m_Script: {{fileID: 11500000, guid: {GUID_MASK}, type: 3}}")
-        lines.append("  m_Name: ")
-        lines.append("  m_EditorClassIdentifier: ")
-        lines.append("  m_ShowMaskGraphic: 1")
-
-    if n.script_id is not None and n.script_guid:
-        lines.append(f"--- !u!114 &{n.script_id}")
-        lines.append("MonoBehaviour:")
-        lines.append("  m_ObjectHideFlags: 0")
-        lines.append("  m_CorrespondingSourceObject: {fileID: 0}")
-        lines.append("  m_PrefabInstance: {fileID: 0}")
-        lines.append("  m_PrefabAsset: {fileID: 0}")
-        lines.append(f"  m_GameObject: {{fileID: {n.go}}}")
-        lines.append("  m_Enabled: 1")
-        lines.append("  m_EditorHideFlags: 0")
-        lines.append(f"  m_Script: {{fileID: 11500000, guid: {n.script_guid}, type: 3}}")
-        lines.append("  m_Name: ")
-        lines.append("  m_EditorClassIdentifier: ")
-        shadow_ref = n.sh_id if n.sh_id is not None else 0
-        lines.append(f"  cardShadow: {{fileID: {shadow_ref}}}")
-
     for ch in n.children:
         emit_node(lines, ch, n.rt)
 
@@ -377,239 +326,6 @@ def find_node(root: Node, name: str) -> Node | None:
         if found is not None:
             return found
     return None
-
-
-def host_badge(visible: bool) -> Node:
-    return img(
-        "HostBadge",
-        GOLD_BRIGHT,
-        active=1 if visible else 0,
-        amin=(0, 0.5),
-        amax=(0, 0.5),
-        pos=(460, 22),
-        size=(96, 34),
-        pivot=(0, 0.5),
-        children=[
-            img(
-                "HostBadgeInner",
-                GOLD,
-                amin=(0, 0),
-                amax=(1, 1),
-                pos=(0, 0),
-                size=(-4, -4),
-            ),
-            txt("HostLabel", "HOST", 16, GOLD_LABEL, 4, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(0, 0)),
-        ],
-    )
-
-
-def kick_button(visible: bool) -> Node:
-    return btn(
-        "KickButton",
-        "Kick",
-        (0.42, 0.14, 0.12, 0.92),
-        (1.0, 0.82, 0.78, 1.0),
-        label_size=18,
-        active=1 if visible else 0,
-        amin=(1, 0.5),
-        amax=(1, 0.5),
-        pos=(-36, 28),
-        size=(88, 40),
-        pivot=(1, 0.5),
-        interactable=0,
-        transition=0,
-    )
-
-
-def player_slot(
-    index: int,
-    occupied: bool,
-    pname: str,
-    country: str,
-    flag,
-    level: int,
-    ready_label: str,
-    ready_color,
-    online: bool,
-    show_host: bool,
-    show_kick: bool,
-) -> Node:
-    slot_h, gap = 148.0, 24.0
-    total = slot_h * 4 + gap * 3
-    y = (total * 0.5 - slot_h * 0.5) - index * (slot_h + gap)
-    kids: list[Node] = [
-        img("Fill", CARD if occupied else EMPTY_FILL, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
-        host_badge(show_host),
-    ]
-    if index != 0:
-        kids.append(kick_button(show_kick))
-    if occupied:
-        online_dot = img(
-            "OnlineIndicator",
-            ONLINE if online else READY_MUTED,
-            amin=(1, 0),
-            amax=(1, 0),
-            pos=(-6, 8),
-            size=(22, 22),
-            sprite=KNOB,
-            preserve=1,
-        )
-        avatar_img = img(
-            "AvatarImage",
-            AVATAR,
-            amin=(0, 0),
-            amax=(1, 1),
-            pos=(0, 0),
-            size=(-12, -12),
-            sprite=KNOB,
-            preserve=1,
-        )
-        avatar = img(
-            "Avatar",
-            GOLD_BRIGHT,
-            amin=(0, 0.5),
-            amax=(0, 0.5),
-            pos=(78, 0),
-            size=(96, 96),
-            sprite=KNOB,
-            preserve=1,
-            mask=True,
-            children=[avatar_img, online_dot],
-        )
-        kids.extend(
-            [
-                avatar,
-                txt(
-                    "PlayerName",
-                    pname,
-                    30,
-                    WHITE,
-                    3,
-                    amin=(0, 0.5),
-                    amax=(0, 0.5),
-                    pos=(148, 22),
-                    size=(300, 42),
-                    pivot=(0, 0.5),
-                ),
-                img(
-                    "CountryFlag",
-                    flag,
-                    amin=(0, 0.5),
-                    amax=(0, 0.5),
-                    pos=(148, -24),
-                    size=(40, 26),
-                    pivot=(0, 0.5),
-                ),
-                txt(
-                    "CountryCode",
-                    country,
-                    18,
-                    MUTED,
-                    3,
-                    amin=(0, 0.5),
-                    amax=(0, 0.5),
-                    pos=(196, -24),
-                    size=(80, 28),
-                    pivot=(0, 0.5),
-                ),
-                img(
-                    "LevelBadge",
-                    GOLD,
-                    amin=(0.5, 0.5),
-                    amax=(0.5, 0.5),
-                    pos=(72, 0),
-                    size=(78, 78),
-                    sprite=KNOB,
-                    preserve=1,
-                    children=[
-                        txt(
-                            "LevelText",
-                            f"Lv {level}",
-                            16,
-                            GOLD_LABEL,
-                            4,
-                            amin=(0, 0),
-                            amax=(1, 1),
-                            pos=(0, 0),
-                            size=(0, 0),
-                        )
-                    ],
-                ),
-                img(
-                    "ReadyStatus",
-                    ready_color,
-                    amin=(1, 0.5),
-                    amax=(1, 0.5),
-                    pos=(-200, 14),
-                    size=(24, 24),
-                    pivot=(1, 0.5),
-                    sprite=KNOB,
-                    preserve=1,
-                ),
-                txt(
-                    "ReadyLabel",
-                    ready_label,
-                    22,
-                    ready_color,
-                    5,
-                    amin=(1, 0.5),
-                    amax=(1, 0.5),
-                    pos=(-40, -16),
-                    size=(180, 34),
-                    pivot=(1, 0.5),
-                ),
-            ]
-        )
-    else:
-        kids.extend(
-            [
-                img(
-                    "EmptyPlusRing",
-                    (GOLD_BRIGHT[0], GOLD_BRIGHT[1], GOLD_BRIGHT[2], 0.28),
-                    amin=(0.5, 0.5),
-                    amax=(0.5, 0.5),
-                    pos=(-210, 0),
-                    size=(72, 72),
-                    sprite=KNOB,
-                    preserve=1,
-                    children=[
-                        txt(
-                            "EmptyPlusMark",
-                            "+",
-                            40,
-                            GOLD_BRIGHT,
-                            4,
-                            amin=(0, 0),
-                            amax=(1, 1),
-                            pos=(0, 0),
-                            size=(0, 0),
-                        )
-                    ],
-                ),
-                txt(
-                    "EmptySlotLabel",
-                    "+ Waiting for Player",
-                    28,
-                    (MUTED[0], MUTED[1], MUTED[2], 0.92),
-                    3,
-                    amin=(0.5, 0.5),
-                    amax=(0.5, 0.5),
-                    pos=(-150, 0),
-                    size=(520, 48),
-                    pivot=(0, 0.5),
-                ),
-            ]
-        )
-    return img(
-        f"PlayerSlot_{index}",
-        PANEL_BORDER if occupied else EMPTY_BORDER,
-        shadow=True,
-        amin=(0.5, 0.5),
-        amax=(0.5, 0.5),
-        pos=(0, y),
-        size=(960, 148),
-        children=kids,
-    )
 
 
 SCENE_HEADER = """%YAML 1.1
@@ -652,6 +368,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -738,543 +455,10 @@ NavMeshSettings:
   m_NavMeshData: {fileID: 0}
 """
 
-def map_card(
-    index: int,
-    map_name: str,
-    country_code: str,
-    flag_color,
-    difficulty: str,
-    difficulty_color,
-    description: str,
-    duration: str,
-    preview_top,
-    preview_bottom,
-    preview_accent,
-) -> Node:
-    card_w, card_h, gap = 500.0, 680.0, 36.0
-    x = (index - 1) * (card_w + gap)
-    vote = btn(
-        "VoteButton",
-        "Vote",
-        GOLD,
-        GOLD_LABEL,
-        label_size=28,
-        amin=(0.5, 0),
-        amax=(0.5, 0),
-        pos=(0, 26),
-        size=(280, 72),
-        pivot=(0.5, 0),
-        transition=0,
-    )
-    preview = img(
-        "MapPreview",
-        (GOLD[0], GOLD[1], GOLD[2], 0.40),
-        amin=(0.5, 1),
-        amax=(0.5, 1),
-        pos=(0, -22),
-        size=(card_w - 40, 300),
-        pivot=(0.5, 1),
-        children=[
-            img(
-                "PreviewTop",
-                preview_top,
-                amin=(0, 0),
-                amax=(1, 1),
-                pos=(0, 46.5),
-                size=(-6, -99),
-            ),
-            img(
-                "PreviewBottom",
-                preview_bottom,
-                amin=(0, 0),
-                amax=(1, 1),
-                pos=(0, -98.5),
-                size=(-6, -203),
-            ),
-            img(
-                "PreviewAccent",
-                preview_accent,
-                amin=(0, 0),
-                amax=(1, 0),
-                pos=(0, 3),
-                size=(-6, 28),
-                pivot=(0.5, 0),
-            ),
-            txt(
-                "PreviewCaption",
-                map_name.upper(),
-                18,
-                (1.0, 1.0, 1.0, 0.88),
-                4,
-                amin=(0, 0),
-                amax=(1, 0),
-                pos=(0, 4),
-                size=(-16, 26),
-                pivot=(0.5, 0),
-            ),
-        ],
-    )
-    meta = Node(
-        name="MetaRow",
-        amin=(0.5, 1),
-        amax=(0.5, 1),
-        pos=(0, -336),
-        size=(card_w - 48, 36),
-        pivot=(0.5, 1),
-        children=[
-            img(
-                "CountryFlag",
-                flag_color,
-                amin=(0, 0.5),
-                amax=(0, 0.5),
-                pos=(0, 0),
-                size=(44, 28),
-                pivot=(0, 0.5),
-            ),
-            txt(
-                "CountryCode",
-                country_code,
-                18,
-                MUTED,
-                3,
-                amin=(0, 0.5),
-                amax=(0, 0.5),
-                pos=(54, 0),
-                size=(70, 30),
-                pivot=(0, 0.5),
-            ),
-            img(
-                "DifficultyBadge",
-                (
-                    difficulty_color[0],
-                    difficulty_color[1],
-                    difficulty_color[2],
-                    0.22,
-                ),
-                amin=(1, 0.5),
-                amax=(1, 0.5),
-                pos=(0, 0),
-                size=(128, 30),
-                pivot=(1, 0.5),
-                children=[
-                    txt(
-                        "DifficultyText",
-                        difficulty,
-                        18,
-                        difficulty_color,
-                        4,
-                        amin=(0, 0),
-                        amax=(1, 1),
-                        pos=(0, 0),
-                        size=(0, 0),
-                    )
-                ],
-            ),
-        ],
-    )
-    checkmark = img(
-        "SelectedCheckmark",
-        GOLD_BRIGHT,
-        active=0,
-        amin=(1, 1),
-        amax=(1, 1),
-        pos=(-18, -18),
-        size=(52, 52),
-        pivot=(1, 1),
-        sprite=KNOB,
-        preserve=1,
-        children=[
-            txt(
-                "CheckMark",
-                "✓",
-                28,
-                GOLD_LABEL,
-                4,
-                amin=(0, 0),
-                amax=(1, 1),
-                pos=(0, 0),
-                size=(0, 0),
-            )
-        ],
-    )
-    locked = img(
-        "LockedRoot",
-        (0.04, 0.03, 0.03, 0.72),
-        active=0,
-        amin=(0, 0),
-        amax=(1, 1),
-        pos=(0, 0),
-        size=(-6, -6),
-        children=[
-            img(
-                "LockIcon",
-                GOLD,
-                amin=(0.5, 0.5),
-                amax=(0.5, 0.5),
-                pos=(0, 22),
-                size=(72, 72),
-                sprite=KNOB,
-                preserve=1,
-                children=[
-                    txt(
-                        "LockGlyph",
-                        "L",
-                        30,
-                        GOLD_LABEL,
-                        4,
-                        amin=(0, 0),
-                        amax=(1, 1),
-                        pos=(0, 0),
-                        size=(0, 0),
-                    )
-                ],
-            ),
-            txt(
-                "LockedLabel",
-                "Locked",
-                28,
-                GOLD_BRIGHT,
-                4,
-                amin=(0.5, 0.5),
-                amax=(0.5, 0.5),
-                pos=(0, -36),
-                size=(200, 36),
-            ),
-        ],
-    )
-    return img(
-        f"MapCard_{index}",
-        PANEL_BORDER,
-        shadow=True,
-        raycast=1,
-        script_guid=GUID_MAP_CARD_VISUAL,
-        amin=(0.5, 0.5),
-        amax=(0.5, 0.5),
-        pos=(x, 0),
-        size=(card_w, card_h),
-        children=[
-            img("Fill", CARD, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
-            preview,
-            meta,
-            txt(
-                "MapName",
-                map_name,
-                34,
-                GOLD_BRIGHT,
-                4,
-                amin=(0, 0.36),
-                amax=(1, 0.46),
-                pos=(0, 0),
-                size=(-40, 0),
-            ),
-            txt(
-                "Description",
-                description,
-                19,
-                MUTED,
-                1,
-                amin=(0, 0.22),
-                amax=(1, 0.36),
-                pos=(0, 0),
-                size=(-56, 0),
-            ),
-            txt(
-                "DurationText",
-                duration,
-                20,
-                GOLD,
-                4,
-                amin=(0, 0.155),
-                amax=(1, 0.22),
-                pos=(0, 0),
-                size=(-48, 0),
-            ),
-            vote,
-            checkmark,
-            locked,
-        ],
-    )
-
 
 def main() -> None:
     global _next
     _next = 10000
-
-    back = btn(
-        "BackButton",
-        "Back",
-        BUTTON_DARK,
-        GOLD_BRIGHT,
-        amin=(0, 1),
-        amax=(0, 1),
-        pos=(48, -52),
-        size=(168, 64),
-        pivot=(0, 1),
-    )
-
-    # Sprint 22.4 temporary placeholder nav — Next → WinningMapReveal
-    next_btn = btn(
-        "NextButton",
-        "Next",
-        GOLD,
-        GOLD_LABEL,
-        amin=(1, 0),
-        amax=(1, 0),
-        pos=(-48, 40),
-        size=(200, 64),
-        pivot=(1, 0),
-    )
-
-    timer_panel = img(
-        "TimerPanel",
-        PANEL_BORDER,
-        shadow=True,
-        amin=(0.5, 1),
-        amax=(0.5, 1),
-        pos=(0, -40),
-        size=(300, 118),
-        pivot=(0.5, 1),
-        children=[
-            img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
-            txt(
-                "TimerText",
-                "20s",
-                42,
-                GOLD_BRIGHT,
-                4,
-                amin=(0, 0.38),
-                amax=(1, 1),
-                pos=(0, -3),
-                size=(-32, -6),
-            ),
-            img(
-                "ProgressBarTrack",
-                (0.06, 0.05, 0.06, 0.95),
-                amin=(0.5, 0),
-                amax=(0.5, 0),
-                pos=(0, 16),
-                size=(240, 14),
-                pivot=(0.5, 0),
-                children=[
-                    img(
-                        "ProgressBarFill",
-                        GOLD,
-                        amin=(0, 0),
-                        amax=(1, 1),
-                        pos=(0, 0),
-                        size=(-4, -4),
-                        image_type=3,
-                        fill_method=0,
-                        fill_amount=1.0,
-                        fill_origin=0,
-                    ),
-                ],
-            ),
-        ],
-    )
-
-    def status_msg(name: str, message: str, active: int) -> Node:
-        return txt(
-            name,
-            message,
-            24,
-            MUTED,
-            4,
-            active=active,
-            amin=(0, 0),
-            amax=(1, 1),
-            pos=(0, 0),
-            size=(-48, -12),
-        )
-
-    status_panel = img(
-        "StatusPanel",
-        PANEL_BORDER,
-        shadow=True,
-        amin=(0.5, 1),
-        amax=(0.5, 1),
-        pos=(0, -168),
-        size=(920, 64),
-        pivot=(0.5, 1),
-        children=[
-            img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
-            status_msg("StatusText", "Players are voting...", 1),
-            status_msg("StatusMsg_WaitingForPlayers", "Waiting for players...", 0),
-            status_msg("StatusMsg_PlayersVoting", "Players are voting...", 0),
-            status_msg("StatusMsg_FinalizingResults", "Finalizing results...", 0),
-        ],
-    )
-
-    header = Node(
-        name="HeaderRoot",
-        amin=(0.5, 1),
-        amax=(0.5, 1),
-        pos=(0, -242),
-        size=(1400, 96),
-        pivot=(0.5, 1),
-        children=[
-            txt(
-                "TitleText",
-                "Choose Your Map",
-                44,
-                GOLD_BRIGHT,
-                4,
-                amin=(0, 0.42),
-                amax=(1, 1),
-                pos=(0, -1),
-                size=(-48, -2),
-            ),
-            txt(
-                "SubtitleText",
-                "Vote together to decide the next destination.",
-                22,
-                MUTED,
-                4,
-                amin=(0, 0),
-                amax=(1, 0.48),
-                pos=(0, 1),
-                size=(-80, -2),
-            ),
-        ],
-    )
-
-    cards = Node(
-        name="CardsRoot",
-        amin=(0.5, 0.5),
-        amax=(0.5, 0.5),
-        pos=(0, -36),
-        size=(1572, 680),
-        children=[
-            map_card(
-                0,
-                "Kuwait City",
-                "KW",
-                (0.00, 0.45, 0.28, 1.0),
-                "Medium",
-                CONNECTING,
-                "Neon towers and desert highways racing through the capital skyline.",
-                "Est. 3:30",
-                (0.78, 0.52, 0.30, 1.0),
-                (0.38, 0.24, 0.14, 1.0),
-                (0.95, 0.78, 0.42, 0.55),
-            ),
-            map_card(
-                1,
-                "Dubai Marina",
-                "AE",
-                (0.78, 0.12, 0.14, 1.0),
-                "Hard",
-                HARD_RED,
-                "Coastal expressways beside glass towers and glittering marina lights.",
-                "Est. 4:15",
-                (0.18, 0.42, 0.68, 1.0),
-                (0.08, 0.22, 0.40, 1.0),
-                (0.55, 0.82, 0.95, 0.50),
-            ),
-            map_card(
-                2,
-                "Muscat Coast",
-                "OM",
-                (0.72, 0.10, 0.16, 1.0),
-                "Easy",
-                SUCCESS,
-                "Mountain curves meeting turquoise Gulf waters at golden hour.",
-                "Est. 2:45",
-                (0.22, 0.58, 0.52, 1.0),
-                (0.52, 0.38, 0.24, 1.0),
-                (0.95, 0.72, 0.38, 0.48),
-            ),
-        ],
-    )
-
-    footer = img(
-        "FooterRoot",
-        PANEL_BORDER,
-        shadow=True,
-        amin=(0.5, 0),
-        amax=(0.5, 0),
-        pos=(0, 40),
-        size=(1400, 100),
-        pivot=(0.5, 0),
-        children=[
-            img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
-            Node(
-                name="StatsPanel",
-                amin=(0, 0),
-                amax=(1, 1),
-                pos=(0, 0),
-                size=(-24, -16),
-                children=[
-                    txt(
-                        "PlayersVotedText",
-                        "Players Voted 0/4",
-                        22,
-                        WHITE,
-                        4,
-                        amin=(0, 0),
-                        amax=(0.33, 1),
-                        pos=(0, 0),
-                        size=(-16, 0),
-                    ),
-                    txt(
-                        "RemainingVotesText",
-                        "Remaining Votes 4",
-                        22,
-                        WHITE,
-                        4,
-                        amin=(0.33, 0),
-                        amax=(0.66, 1),
-                        pos=(0, 0),
-                        size=(-16, 0),
-                    ),
-                    txt(
-                        "TotalVotesText",
-                        "Total Votes 0",
-                        22,
-                        WHITE,
-                        4,
-                        amin=(0.66, 0),
-                        amax=(1, 1),
-                        pos=(0, 0),
-                        size=(-16, 0),
-                    ),
-                ],
-            ),
-        ],
-    )
-
-    confirmation = img(
-        "VoteConfirmation",
-        (SUCCESS[0], SUCCESS[1], SUCCESS[2], 0.55),
-        shadow=True,
-        active=0,
-        amin=(0.5, 0),
-        amax=(0.5, 0),
-        pos=(0, 152),
-        size=(720, 52),
-        pivot=(0.5, 0),
-        children=[
-            img(
-                "Fill",
-                (0.08, 0.16, 0.10, 0.92),
-                amin=(0, 0),
-                amax=(1, 1),
-                pos=(0, 0),
-                size=(-6, -6),
-            ),
-            txt(
-                "ConfirmationText",
-                "✓ Your vote has been submitted.",
-                22,
-                SUCCESS,
-                4,
-                amin=(0, 0),
-                amax=(1, 1),
-                pos=(0, 0),
-                size=(-32, -8),
-            ),
-        ],
-    )
 
     bg = img(
         "Background",
@@ -1285,39 +469,236 @@ def main() -> None:
         size=(0, 0),
         sprite=BG_SPRITE,
     )
+    dim = img(
+        "DimOverlay",
+        DIM,
+        amin=(0, 0),
+        amax=(1, 1),
+        pos=(0, 0),
+        size=(0, 0),
+    )
     safe = Node(name="SafeArea", amin=(0, 0), amax=(1, 1), pos=(0, -9), size=(-96, -86))
 
+    status = Node(
+        name="StatusRoot",
+        amin=(0.5, 1),
+        amax=(0.5, 1),
+        pos=(0, -72),
+        size=(900, 110),
+        pivot=(0.5, 1),
+        children=[
+            txt(
+                "WinningMapLabel",
+                "Winning Map",
+                48,
+                GOLD_BRIGHT,
+                4,
+                amin=(0, 0.42),
+                amax=(1, 1),
+                pos=(0, -2),
+                size=(-32, -4),
+            ),
+            txt(
+                "PreparingText",
+                "Preparing Match...",
+                26,
+                MUTED,
+                4,
+                amin=(0, 0),
+                amax=(1, 0.48),
+                pos=(0, 2),
+                size=(-48, -4),
+            ),
+        ],
+    )
+
+    card_w, card_h = 720.0, 780.0
+    winning_card = img(
+        "WinningCardRoot",
+        CARD_BORDER,
+        shadow=True,
+        amin=(0.5, 0.5),
+        amax=(0.5, 0.5),
+        pos=(0, -12),
+        size=(card_w, card_h),
+        children=[
+            img(
+                "Glow",
+                GLOW_GOLD,
+                amin=(0.5, 0.5),
+                amax=(0.5, 0.5),
+                pos=(0, 0),
+                size=(card_w + 72, card_h + 72),
+            ),
+            img("Fill", CARD, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-8, -8)),
+            img(
+                "MapArtwork",
+                (GOLD[0], GOLD[1], GOLD[2], 0.45),
+                amin=(0.5, 1),
+                amax=(0.5, 1),
+                pos=(0, -28),
+                size=(card_w - 56, 360),
+                pivot=(0.5, 1),
+                children=[
+                    img(
+                        "PreviewTop",
+                        PREVIEW_TOP,
+                        amin=(0, 0),
+                        amax=(1, 1),
+                        pos=(0, 0),
+                        size=(-6, -113),
+                    ),
+                    img(
+                        "PreviewBottom",
+                        PREVIEW_BOTTOM,
+                        amin=(0, 0),
+                        amax=(1, 1),
+                        pos=(0, 0),
+                        size=(-6, -243),
+                    ),
+                    img(
+                        "PreviewAccent",
+                        PREVIEW_ACCENT,
+                        amin=(0, 0),
+                        amax=(1, 0),
+                        pos=(0, 3),
+                        size=(-6, 32),
+                        pivot=(0.5, 0),
+                    ),
+                ],
+            ),
+            Node(
+                name="MetaRow",
+                amin=(0.5, 1),
+                amax=(0.5, 1),
+                pos=(0, -408),
+                size=(card_w - 80, 40),
+                pivot=(0.5, 1),
+                children=[
+                    img(
+                        "CountryFlag",
+                        FLAG_KW,
+                        amin=(0.5, 0.5),
+                        amax=(0.5, 0.5),
+                        pos=(-18, 0),
+                        size=(56, 34),
+                        pivot=(1, 0.5),
+                    ),
+                    txt(
+                        "CountryCode",
+                        "KW",
+                        22,
+                        MUTED,
+                        3,
+                        amin=(0.5, 0.5),
+                        amax=(0.5, 0.5),
+                        pos=(18, 0),
+                        size=(80, 34),
+                        pivot=(0, 0.5),
+                    ),
+                ],
+            ),
+            txt(
+                "MapName",
+                "Kuwait City",
+                44,
+                GOLD_BRIGHT,
+                4,
+                amin=(0, 1),
+                amax=(1, 1),
+                pos=(0, -460),
+                size=(-48, 56),
+                pivot=(0.5, 1),
+            ),
+            txt(
+                "Description",
+                "Neon towers and desert highways racing through the capital skyline.",
+                24,
+                MUTED,
+                1,
+                amin=(0, 0),
+                amax=(1, 1),
+                pos=(0, 0),
+                size=(-96, -578),
+            ),
+        ],
+    )
+
+    confetti = img(
+        "ConfettiPlaceholder",
+        CONFETTI,
+        active=0,
+        amin=(0.5, 0.5),
+        amax=(0.5, 0.5),
+        pos=(0, 220),
+        size=(1100, 280),
+        children=[
+            img("Burst", CONFETTI, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(0, 0)),
+        ],
+    )
+
+    loading = img(
+        "LoadingProgressRoot",
+        PANEL_BORDER,
+        shadow=True,
+        amin=(0.5, 0),
+        amax=(0.5, 0),
+        pos=(0, 48),
+        size=(720, 56),
+        pivot=(0.5, 0),
+        children=[
+            img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
+            txt(
+                "LoadingProgressText",
+                "Loading... 0%",
+                24,
+                WHITE,
+                4,
+                amin=(0, 0),
+                amax=(1, 1),
+                pos=(0, 0),
+                size=(-32, -8),
+            ),
+        ],
+    )
+
+    continue_btn = btn(
+        "ContinueButton",
+        "Continue",
+        GOLD,
+        GOLD_LABEL,
+        amin=(1, 0),
+        amax=(1, 0),
+        pos=(-48, 130),
+        size=(280, 72),
+        pivot=(1, 0),
+    )
+
     canvas = Node(
-        name="MapVotingCanvas",
+        name="WinningMapRevealCanvas",
         amin=(0, 0),
         amax=(0, 0),
         pos=(0, 0),
         size=(0, 0),
         pivot=(0, 0),
         scale=(0, 0, 0),
-        children=[bg, safe, back, next_btn, timer_panel, status_panel, header, cards, footer, confirmation],
+        children=[bg, dim, safe, status, winning_card, confetti, loading, continue_btn],
     )
     canvas.prep()
 
-    card_nodes = [find_node(cards, f"MapCard_{i}") for i in range(3)]
-    vote_btns = [find_node(c, "VoteButton") for c in card_nodes]
-    checkmarks = [find_node(c, "SelectedCheckmark") for c in card_nodes]
-    for i, vb in enumerate(vote_btns):
-        if vb is None or vb.btn_id is None or vb.img_id is None:
-            raise RuntimeError(f"MapCard_{i} VoteButton missing")
-        if not vb.children or vb.children[0].txt_id is None:
-            raise RuntimeError(f"MapCard_{i} VoteButton Label missing")
-        if card_nodes[i] is None or card_nodes[i].script_id is None:
-            raise RuntimeError(f"MapCard_{i} MapCardVisual missing")
-        if checkmarks[i] is None:
-            raise RuntimeError(f"MapCard_{i} SelectedCheckmark missing")
-        if find_node(card_nodes[i], "LockedRoot") is None:
-            raise RuntimeError(f"MapCard_{i} LockedRoot missing")
+    glow = find_node(winning_card, "Glow")
+    if glow is None or glow.img_id is None:
+        raise RuntimeError("Glow missing")
+    if continue_btn.btn_id is None:
+        raise RuntimeError("ContinueButton missing")
+    if dim.img_id is None:
+        raise RuntimeError("DimOverlay missing")
 
     canvas_comp = nid()
     scaler_id = nid()
     ray_id = nid()
     ctrl_id = nid()
+    anim_id = nid()
 
     lines: list[str] = [SCENE_HEADER.rstrip()]
 
@@ -1417,7 +798,7 @@ def main() -> None:
         "  m_Enabled: 1",
     ]
 
-    canvas_comps = [canvas.rt, canvas_comp, scaler_id, ray_id, ctrl_id]
+    canvas_comps = [canvas.rt, canvas_comp, scaler_id, ray_id, ctrl_id, anim_id]
     lines.append(f"--- !u!1 &{canvas.go}")
     lines.append("GameObject:")
     lines.append("  m_ObjectHideFlags: 0")
@@ -1429,7 +810,7 @@ def main() -> None:
     for c in canvas_comps:
         lines.append(f"  - component: {{fileID: {c}}}")
     lines.append("  m_Layer: 0")
-    lines.append("  m_Name: MapVotingCanvas")
+    lines.append("  m_Name: WinningMapRevealCanvas")
     lines.append("  m_TagString: Untagged")
     lines.append("  m_Icon: {fileID: 0}")
     lines.append("  m_NavMeshLayer: 0")
@@ -1532,32 +913,26 @@ def main() -> None:
         f"  m_Script: {{fileID: 11500000, guid: {GUID_CONTROLLER}, type: 3}}",
         "  m_Name: ",
         "  m_EditorClassIdentifier: ",
-        f"  backButton: {{fileID: {back.btn_id}}}",
-        f"  nextButton: {{fileID: {next_btn.btn_id}}}",
-        "  voteButtons:",
-        f"  - {{fileID: {vote_btns[0].btn_id}}}",
-        f"  - {{fileID: {vote_btns[1].btn_id}}}",
-        f"  - {{fileID: {vote_btns[2].btn_id}}}",
-        "  cardBorders:",
-        f"  - {{fileID: {card_nodes[0].img_id}}}",
-        f"  - {{fileID: {card_nodes[1].img_id}}}",
-        f"  - {{fileID: {card_nodes[2].img_id}}}",
-        "  voteButtonImages:",
-        f"  - {{fileID: {vote_btns[0].img_id}}}",
-        f"  - {{fileID: {vote_btns[1].img_id}}}",
-        f"  - {{fileID: {vote_btns[2].img_id}}}",
-        "  voteButtonLabels:",
-        f"  - {{fileID: {vote_btns[0].children[0].txt_id}}}",
-        f"  - {{fileID: {vote_btns[1].children[0].txt_id}}}",
-        f"  - {{fileID: {vote_btns[2].children[0].txt_id}}}",
-        "  selectedCheckmarks:",
-        f"  - {{fileID: {checkmarks[0].go}}}",
-        f"  - {{fileID: {checkmarks[1].go}}}",
-        f"  - {{fileID: {checkmarks[2].go}}}",
-        "  cardVisuals:",
-        f"  - {{fileID: {card_nodes[0].script_id}}}",
-        f"  - {{fileID: {card_nodes[1].script_id}}}",
-        f"  - {{fileID: {card_nodes[2].script_id}}}",
+        f"  continueButton: {{fileID: {continue_btn.btn_id}}}",
+        f"--- !u!114 &{anim_id}",
+        "MonoBehaviour:",
+        "  m_ObjectHideFlags: 0",
+        "  m_CorrespondingSourceObject: {fileID: 0}",
+        "  m_PrefabInstance: {fileID: 0}",
+        "  m_PrefabAsset: {fileID: 0}",
+        f"  m_GameObject: {{fileID: {canvas.go}}}",
+        "  m_Enabled: 1",
+        "  m_EditorHideFlags: 0",
+        f"  m_Script: {{fileID: 11500000, guid: {GUID_ANIMATION}, type: 3}}",
+        "  m_Name: ",
+        "  m_EditorClassIdentifier: ",
+        f"  winningCard: {{fileID: {winning_card.rt}}}",
+        f"  dimOverlay: {{fileID: {dim.img_id}}}",
+        f"  glowImage: {{fileID: {glow.img_id}}}",
+        f"  canvasRoot: {{fileID: {canvas.rt}}}",
+        "  duration: 0.85",
+        "  dimTargetAlpha: 0.42",
+        "  glowTargetAlpha: 0.55",
     ]
 
     for ch in canvas.children:
