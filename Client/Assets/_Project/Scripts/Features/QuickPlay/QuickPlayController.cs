@@ -134,13 +134,15 @@ namespace GulfRun.Features.QuickPlay
         private void GoToLobby()
         {
             _navigatedToLobby = true;
+            // Sprint 21.1 temporary nav: premium LobbyScreen UI foundation.
+            // TODO(Sprint 21+): restore LoadLobby() when networking UI connects.
             if (SceneManager.Instance != null)
             {
-                SceneManager.Instance.LoadLobby();
+                SceneManager.Instance.LoadLobbyScreen();
                 return;
             }
 
-            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.LobbySceneName);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.LobbyScreenSceneName);
         }
 
         private void CancelAndReturn()

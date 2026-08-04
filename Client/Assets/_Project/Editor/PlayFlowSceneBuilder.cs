@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using GulfRun.Features.InviteFriends;
+using GulfRun.Features.LobbyScreen;
 using GulfRun.Features.MainMenu;
 using GulfRun.Features.PlayMenu;
 using GulfRun.Features.QuickPlay;
@@ -15,7 +16,7 @@ using CoreSceneManager = GulfRun.Core.Managers.SceneManager;
 namespace GulfRun.Editor
 {
     /// <summary>
-    /// Builds PlayMenu / QuickPlay / InviteFriends scenes, wires Main Menu Play Now,
+    /// Builds PlayMenu / QuickPlay / InviteFriends / LobbyScreen scenes, wires Main Menu Play Now,
     /// updates EditorBuildSettings, and validates hierarchy in batchmode.
     /// </summary>
     public static class PlayFlowSceneBuilder
@@ -23,6 +24,7 @@ namespace GulfRun.Editor
         private const string PlayMenuScenePath = "Assets/_Project/Scenes/PlayMenu.unity";
         private const string QuickPlayScenePath = "Assets/_Project/Scenes/QuickPlay.unity";
         private const string InviteFriendsScenePath = "Assets/_Project/Scenes/InviteFriends.unity";
+        private const string LobbyScreenScenePath = "Assets/_Project/Scenes/LobbyScreen.unity";
         private const string MainMenuScenePath = "Assets/_Project/Scenes/MainMenu.unity";
         private const string BackgroundGuid = "a18b0000000000000000000000000001";
 
@@ -35,6 +37,10 @@ namespace GulfRun.Editor
         private static readonly Color ButtonDark = new Color(0.12f, 0.10f, 0.09f, 0.92f);
         private static readonly Color CardFill = new Color(0.12f, 0.11f, 0.12f, 0.88f);
         private static readonly Color HighlightGold = new Color(0.90f, 0.71f, 0.25f, 0.12f);
+        private static readonly Color SuccessGreen = new Color(0.40f, 0.85f, 0.45f, 1f);
+        private static readonly Color ReadyMuted = new Color(0.55f, 0.55f, 0.55f, 1f);
+        private static readonly Color EmptySlotFill = new Color(0.10f, 0.09f, 0.10f, 0.55f);
+        private static readonly Color GoldButtonLabel = new Color(0.20f, 0.14f, 0.02f, 1f);
 
         private const string QuickPlaySubtitle = "Find and join a public multiplayer match instantly.";
         private const string InviteFriendsSubtitle = "Create a private room and play with your friends.";
@@ -44,6 +50,9 @@ namespace GulfRun.Editor
 
         [MenuItem("GulfRun/Play Flow/Polish Play Menu (Sprint 20.1)")]
         public static void PolishPlayMenuFromMenu() => PolishPlayMenuBatch();
+
+        [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.1)")]
+        public static void BuildLobbyScreenFromMenu() => BuildLobbyScreenBatch();
 
         public static void RunBatch()
         {
@@ -55,6 +64,7 @@ namespace GulfRun.Editor
                 BuildPlayMenuScene(failures);
                 BuildQuickPlayScene(failures);
                 BuildInviteFriendsScene(failures);
+                BuildLobbyScreenScene(failures);
                 EnsureBuildSettings(failures);
                 ValidateAll(failures);
             }
@@ -64,7 +74,40 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — PlayMenu/QuickPlay/InviteFriends built, Play wired, build settings OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — PlayMenu/QuickPlay/InviteFriends/LobbyScreen built, Play wired, build settings OK.");
+        }
+
+        /// <summary>
+        /// Sprint 21.1: build LobbyScreen UI foundation only. Does not rebuild
+        /// PlayMenu / QuickPlay / InviteFriends (preserves existing polish).
+        /// </summary>
+        public static void BuildLobbyScreenBatch()
+        {
+            var failures = new List<string>();
+
+            try
+            {
+                BuildLobbyScreenScene(failures);
+                EnsureBuildSettings(failures);
+                ValidateLobbyScreen(failures);
+
+                if (CoreSceneManager.LobbyScreenSceneName != "LobbyScreen")
+                {
+                    failures.Add("SceneManager.LobbyScreenSceneName mismatch.");
+                }
+
+                if (CoreSceneManager.LobbySceneName != "Lobby")
+                {
+                    failures.Add("SceneManager.LobbySceneName must remain Lobby (pre-race).");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                failures.Add("Unhandled: " + ex);
+                Debug.LogException(ex);
+            }
+
+            ExitWithFailures(failures, "[PlayFlow] PASS — LobbyScreen Sprint 21.1 UI foundation OK.");
         }
 
         /// <summary>
@@ -434,11 +477,310 @@ namespace GulfRun.Editor
             SaveScene(scene, InviteFriendsScenePath, failures);
         }
 
+        private static void BuildLobbyScreenScene(List<string> failures)
+        {
+            Sprite background = LoadBackground(failures);
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            EnsureEventSystem(scene);
+
+            GameObject canvasGo = CreateOverlayCanvas("LobbyScreenCanvas");
+            LobbyScreenController controller = canvasGo.AddComponent<LobbyScreenController>();
+            RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
+
+            Image bg = CreateUiImage("Background", canvasRt, stretch: true);
+            bg.sprite = background;
+            bg.preserveAspect = false;
+            bg.raycastTarget = false;
+
+            CreateSafeArea(canvasRt);
+
+            Button backButton = CreateLabeledButton("BackButton", canvasRt, "Back", 168f, 64f, ButtonDark, GoldBright);
+            PlaceTopLeft(backButton.GetComponent<RectTransform>(), new Vector2(48f, -40f));
+
+            // Header — room type, player count, room code
+            RectTransform headerRoot = CreateRect("HeaderRoot", canvasRt);
+            headerRoot.anchorMin = new Vector2(0.5f, 1f);
+            headerRoot.anchorMax = new Vector2(0.5f, 1f);
+            headerRoot.pivot = new Vector2(0.5f, 1f);
+            headerRoot.anchoredPosition = new Vector2(0f, -36f);
+            headerRoot.sizeDelta = new Vector2(1100f, 110f);
+
+            Image headerBorder = headerRoot.gameObject.AddComponent<Image>();
+            headerBorder.color = PanelBorder;
+            headerBorder.raycastTarget = false;
+            EnsureCardShadow(headerRoot.gameObject);
+
+            Image headerFill = CreateUiImage("Fill", headerRoot, stretch: true);
+            headerFill.color = PanelBg;
+            headerFill.raycastTarget = false;
+            headerFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            headerFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Text roomType = CreateUiText("RoomTypeText", headerRoot, "Public Lobby", 36, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
+            RectTransform roomTypeRt = roomType.rectTransform;
+            roomTypeRt.anchorMin = new Vector2(0f, 0.45f);
+            roomTypeRt.anchorMax = new Vector2(1f, 1f);
+            roomTypeRt.offsetMin = new Vector2(24f, 0f);
+            roomTypeRt.offsetMax = new Vector2(-24f, -8f);
+
+            Text playerCount = CreateUiText("PlayerCountText", headerRoot, "1/4", 24, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
+            RectTransform playerCountRt = playerCount.rectTransform;
+            playerCountRt.anchorMin = new Vector2(0f, 0f);
+            playerCountRt.anchorMax = new Vector2(0.5f, 0.5f);
+            playerCountRt.offsetMin = new Vector2(40f, 10f);
+            playerCountRt.offsetMax = new Vector2(-12f, -4f);
+
+            Text roomCode = CreateUiText("RoomCodeText", headerRoot, "GULF-4821", 24, FontStyle.Bold, Gold, TextAnchor.MiddleRight);
+            RectTransform roomCodeRt = roomCode.rectTransform;
+            roomCodeRt.anchorMin = new Vector2(0.5f, 0f);
+            roomCodeRt.anchorMax = new Vector2(1f, 0.5f);
+            roomCodeRt.offsetMin = new Vector2(12f, 10f);
+            roomCodeRt.offsetMax = new Vector2(-40f, -4f);
+
+            // Center — four vertical player slots (placeholder data)
+            RectTransform slotsRoot = CreateRect("SlotsRoot", canvasRt);
+            slotsRoot.anchorMin = new Vector2(0.5f, 0.5f);
+            slotsRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            slotsRoot.pivot = new Vector2(0.5f, 0.5f);
+            slotsRoot.anchoredPosition = new Vector2(0f, 10f);
+            slotsRoot.sizeDelta = new Vector2(920f, 620f);
+
+            CreatePlayerSlot(
+                "PlayerSlot_0",
+                slotsRoot,
+                0,
+                occupied: true,
+                playerName: "DesertFox",
+                countryCode: "KW",
+                flagColor: new Color(0.05f, 0.45f, 0.25f, 1f),
+                level: 12,
+                ready: true);
+
+            CreatePlayerSlot(
+                "PlayerSlot_1",
+                slotsRoot,
+                1,
+                occupied: false,
+                playerName: string.Empty,
+                countryCode: string.Empty,
+                flagColor: Color.clear,
+                level: 0,
+                ready: false);
+
+            CreatePlayerSlot(
+                "PlayerSlot_2",
+                slotsRoot,
+                2,
+                occupied: false,
+                playerName: string.Empty,
+                countryCode: string.Empty,
+                flagColor: Color.clear,
+                level: 0,
+                ready: false);
+
+            CreatePlayerSlot(
+                "PlayerSlot_3",
+                slotsRoot,
+                3,
+                occupied: false,
+                playerName: string.Empty,
+                countryCode: string.Empty,
+                flagColor: Color.clear,
+                level: 0,
+                ready: false);
+
+            // Footer — Ready (left), Lobby Status (center), Play disabled (right)
+            RectTransform footerRoot = CreateRect("FooterRoot", canvasRt);
+            footerRoot.anchorMin = new Vector2(0.5f, 0f);
+            footerRoot.anchorMax = new Vector2(0.5f, 0f);
+            footerRoot.pivot = new Vector2(0.5f, 0f);
+            footerRoot.anchoredPosition = new Vector2(0f, 48f);
+            footerRoot.sizeDelta = new Vector2(1400f, 100f);
+
+            Button readyButton = CreateLabeledButton("ReadyButton", footerRoot, "Ready", 280f, 80f, Gold, GoldButtonLabel);
+            RectTransform readyRt = readyButton.GetComponent<RectTransform>();
+            readyRt.anchorMin = new Vector2(0f, 0.5f);
+            readyRt.anchorMax = new Vector2(0f, 0.5f);
+            readyRt.pivot = new Vector2(0f, 0.5f);
+            readyRt.anchoredPosition = new Vector2(40f, 0f);
+            // Visual-only placeholder — no ready logic.
+            readyButton.transition = Selectable.Transition.None;
+
+            Text lobbyStatus = CreateUiText(
+                "LobbyStatusText",
+                footerRoot,
+                "Waiting for players...",
+                28,
+                FontStyle.Bold,
+                TextMuted,
+                TextAnchor.MiddleCenter);
+            RectTransform lobbyStatusRt = lobbyStatus.rectTransform;
+            lobbyStatusRt.anchorMin = new Vector2(0.5f, 0.5f);
+            lobbyStatusRt.anchorMax = new Vector2(0.5f, 0.5f);
+            lobbyStatusRt.pivot = new Vector2(0.5f, 0.5f);
+            lobbyStatusRt.anchoredPosition = Vector2.zero;
+            lobbyStatusRt.sizeDelta = new Vector2(520f, 64f);
+
+            Button playButton = CreateLabeledButton("PlayButton", footerRoot, "Play", 280f, 80f, ButtonDark, GoldBright);
+            RectTransform playRt = playButton.GetComponent<RectTransform>();
+            playRt.anchorMin = new Vector2(1f, 0.5f);
+            playRt.anchorMax = new Vector2(1f, 0.5f);
+            playRt.pivot = new Vector2(1f, 0.5f);
+            playRt.anchoredPosition = new Vector2(-40f, 0f);
+            playButton.interactable = false;
+            ColorBlock playColors = playButton.colors;
+            playColors.disabledColor = new Color(0.18f, 0.16f, 0.14f, 0.55f);
+            playButton.colors = playColors;
+            Text playLabel = playButton.GetComponentInChildren<Text>();
+            if (playLabel != null)
+            {
+                playLabel.color = new Color(GoldBright.r, GoldBright.g, GoldBright.b, 0.45f);
+            }
+
+            SerializedObject so = new SerializedObject(controller);
+            so.FindProperty("backButton").objectReferenceValue = backButton;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            SaveScene(scene, LobbyScreenScenePath, failures);
+        }
+
+        private static void CreatePlayerSlot(
+            string name,
+            RectTransform parent,
+            int index,
+            bool occupied,
+            string playerName,
+            string countryCode,
+            Color flagColor,
+            int level,
+            bool ready)
+        {
+            const float slotHeight = 132f;
+            const float gap = 16f;
+            float totalHeight = (slotHeight * 4f) + (gap * 3f);
+            float topY = totalHeight * 0.5f - slotHeight * 0.5f;
+            float y = topY - index * (slotHeight + gap);
+
+            RectTransform slot = CreateRect(name, parent);
+            slot.anchorMin = new Vector2(0.5f, 0.5f);
+            slot.anchorMax = new Vector2(0.5f, 0.5f);
+            slot.pivot = new Vector2(0.5f, 0.5f);
+            slot.anchoredPosition = new Vector2(0f, y);
+            slot.sizeDelta = new Vector2(900f, slotHeight);
+
+            Image border = slot.gameObject.AddComponent<Image>();
+            border.color = occupied ? PanelBorder : new Color(PanelBorder.r, PanelBorder.g, PanelBorder.b, 0.28f);
+            border.raycastTarget = false;
+            EnsureCardShadow(slot.gameObject);
+
+            Image fill = CreateUiImage("Fill", slot, stretch: true);
+            fill.color = occupied ? CardFill : EmptySlotFill;
+            fill.raycastTarget = false;
+            fill.rectTransform.offsetMin = new Vector2(4f, 4f);
+            fill.rectTransform.offsetMax = new Vector2(-4f, -4f);
+
+            if (!occupied)
+            {
+                Text empty = CreateUiText("EmptySlotLabel", slot, "Waiting for player...", 26, FontStyle.Bold, TextMuted, TextAnchor.MiddleCenter);
+                RectTransform emptyRt = empty.rectTransform;
+                emptyRt.anchorMin = Vector2.zero;
+                emptyRt.anchorMax = Vector2.one;
+                emptyRt.offsetMin = new Vector2(24f, 8f);
+                emptyRt.offsetMax = new Vector2(-24f, -8f);
+                return;
+            }
+
+            Image avatar = CreateUiImage("Avatar", slot, stretch: false);
+            avatar.sprite = GetBuiltinKnob();
+            avatar.color = GoldBright;
+            avatar.raycastTarget = false;
+            avatar.preserveAspect = true;
+            RectTransform avatarRt = avatar.rectTransform;
+            avatarRt.anchorMin = new Vector2(0f, 0.5f);
+            avatarRt.anchorMax = new Vector2(0f, 0.5f);
+            avatarRt.pivot = new Vector2(0.5f, 0.5f);
+            avatarRt.anchoredPosition = new Vector2(70f, 0f);
+            avatarRt.sizeDelta = new Vector2(84f, 84f);
+
+            Text nameText = CreateUiText("PlayerName", slot, playerName, 28, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
+            RectTransform nameRt = nameText.rectTransform;
+            nameRt.anchorMin = new Vector2(0f, 0.5f);
+            nameRt.anchorMax = new Vector2(0f, 0.5f);
+            nameRt.pivot = new Vector2(0f, 0.5f);
+            nameRt.anchoredPosition = new Vector2(130f, 18f);
+            nameRt.sizeDelta = new Vector2(320f, 40f);
+
+            Image flag = CreateUiImage("CountryFlag", slot, stretch: false);
+            flag.color = flagColor;
+            flag.raycastTarget = false;
+            RectTransform flagRt = flag.rectTransform;
+            flagRt.anchorMin = new Vector2(0f, 0.5f);
+            flagRt.anchorMax = new Vector2(0f, 0.5f);
+            flagRt.pivot = new Vector2(0f, 0.5f);
+            flagRt.anchoredPosition = new Vector2(130f, -22f);
+            flagRt.sizeDelta = new Vector2(36f, 24f);
+
+            Text country = CreateUiText("CountryCode", slot, countryCode, 18, FontStyle.Bold, TextMuted, TextAnchor.MiddleLeft);
+            RectTransform countryRt = country.rectTransform;
+            countryRt.anchorMin = new Vector2(0f, 0.5f);
+            countryRt.anchorMax = new Vector2(0f, 0.5f);
+            countryRt.pivot = new Vector2(0f, 0.5f);
+            countryRt.anchoredPosition = new Vector2(174f, -22f);
+            countryRt.sizeDelta = new Vector2(80f, 28f);
+
+            Image levelBadge = CreateUiImage("LevelBadge", slot, stretch: false);
+            levelBadge.sprite = GetBuiltinKnob();
+            levelBadge.color = Gold;
+            levelBadge.raycastTarget = false;
+            levelBadge.preserveAspect = true;
+            RectTransform levelBadgeRt = levelBadge.rectTransform;
+            levelBadgeRt.anchorMin = new Vector2(0.5f, 0.5f);
+            levelBadgeRt.anchorMax = new Vector2(0.5f, 0.5f);
+            levelBadgeRt.pivot = new Vector2(0.5f, 0.5f);
+            levelBadgeRt.anchoredPosition = new Vector2(80f, 0f);
+            levelBadgeRt.sizeDelta = new Vector2(72f, 72f);
+
+            Text levelText = CreateUiText("LevelText", levelBadgeRt, "Lv " + level, 16, FontStyle.Bold, GoldButtonLabel, TextAnchor.MiddleCenter);
+            RectTransform levelTextRt = levelText.rectTransform;
+            levelTextRt.anchorMin = Vector2.zero;
+            levelTextRt.anchorMax = Vector2.one;
+            levelTextRt.offsetMin = Vector2.zero;
+            levelTextRt.offsetMax = Vector2.zero;
+
+            Image readyDot = CreateUiImage("ReadyStatus", slot, stretch: false);
+            readyDot.sprite = GetBuiltinKnob();
+            readyDot.color = ready ? SuccessGreen : ReadyMuted;
+            readyDot.raycastTarget = false;
+            readyDot.preserveAspect = true;
+            RectTransform readyDotRt = readyDot.rectTransform;
+            readyDotRt.anchorMin = new Vector2(1f, 0.5f);
+            readyDotRt.anchorMax = new Vector2(1f, 0.5f);
+            readyDotRt.pivot = new Vector2(1f, 0.5f);
+            readyDotRt.anchoredPosition = new Vector2(-180f, 10f);
+            readyDotRt.sizeDelta = new Vector2(22f, 22f);
+
+            Text readyLabel = CreateUiText(
+                "ReadyLabel",
+                slot,
+                ready ? "Ready" : "Not Ready",
+                22,
+                FontStyle.Bold,
+                ready ? SuccessGreen : ReadyMuted,
+                TextAnchor.MiddleRight);
+            RectTransform readyLabelRt = readyLabel.rectTransform;
+            readyLabelRt.anchorMin = new Vector2(1f, 0.5f);
+            readyLabelRt.anchorMax = new Vector2(1f, 0.5f);
+            readyLabelRt.pivot = new Vector2(1f, 0.5f);
+            readyLabelRt.anchoredPosition = new Vector2(-36f, -14f);
+            readyLabelRt.sizeDelta = new Vector2(160f, 32f);
+        }
+
         private static void EnsureBuildSettings(List<string> failures)
         {
             InsertSceneAfter(PlayMenuScenePath, MainMenuScenePath, failures);
             InsertSceneAfter(QuickPlayScenePath, PlayMenuScenePath, failures);
             InsertSceneAfter(InviteFriendsScenePath, QuickPlayScenePath, failures);
+            InsertSceneAfter(LobbyScreenScenePath, InviteFriendsScenePath, failures);
         }
 
         private static void InsertSceneAfter(string scenePath, string afterPath, List<string> failures)
@@ -477,6 +819,7 @@ namespace GulfRun.Editor
             ValidatePlayMenu(failures);
             ValidateQuickPlay(failures);
             ValidateInviteFriends(failures);
+            ValidateLobbyScreen(failures);
             ValidateMainMenuWiring(failures);
 
             if (CoreSceneManager.PlayMenuSceneName != "PlayMenu")
@@ -492,6 +835,16 @@ namespace GulfRun.Editor
             if (CoreSceneManager.InviteFriendsSceneName != "InviteFriends")
             {
                 failures.Add("SceneManager.InviteFriendsSceneName mismatch.");
+            }
+
+            if (CoreSceneManager.LobbyScreenSceneName != "LobbyScreen")
+            {
+                failures.Add("SceneManager.LobbyScreenSceneName mismatch.");
+            }
+
+            if (CoreSceneManager.LobbySceneName != "Lobby")
+            {
+                failures.Add("SceneManager.LobbySceneName must remain Lobby (pre-race).");
             }
         }
 
@@ -566,6 +919,70 @@ namespace GulfRun.Editor
             RequireCanvasScaler(FindDeep(scene, "InviteFriendsCanvas"), failures);
             RequireInBuild(InviteFriendsScenePath, failures);
             RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
+        }
+
+        private static void ValidateLobbyScreen(List<string> failures)
+        {
+            Scene scene = EditorSceneManager.OpenScene(LobbyScreenScenePath, OpenSceneMode.Single);
+            Require(FindDeep(scene, "LobbyScreenCanvas"), "LobbyScreenCanvas", failures);
+            Require(FindDeep(scene, "Background"), "LobbyScreen Background", failures);
+            Require(FindDeep(scene, "SafeArea"), "LobbyScreen SafeArea", failures);
+            Require(FindDeep(scene, "BackButton"), "LobbyScreen BackButton", failures);
+            Require(FindDeep(scene, "HeaderRoot"), "HeaderRoot", failures);
+            Require(FindDeep(scene, "RoomTypeText"), "RoomTypeText", failures);
+            Require(FindDeep(scene, "PlayerCountText"), "PlayerCountText", failures);
+            Require(FindDeep(scene, "RoomCodeText"), "RoomCodeText", failures);
+            Require(FindDeep(scene, "SlotsRoot"), "SlotsRoot", failures);
+            Require(FindDeep(scene, "PlayerSlot_0"), "PlayerSlot_0", failures);
+            Require(FindDeep(scene, "PlayerSlot_1"), "PlayerSlot_1", failures);
+            Require(FindDeep(scene, "PlayerSlot_2"), "PlayerSlot_2", failures);
+            Require(FindDeep(scene, "PlayerSlot_3"), "PlayerSlot_3", failures);
+            Require(FindDeep(scene, "FooterRoot"), "FooterRoot", failures);
+            Require(FindDeep(scene, "ReadyButton"), "ReadyButton", failures);
+            Require(FindDeep(scene, "PlayButton"), "PlayButton", failures);
+            Require(FindDeep(scene, "LobbyStatusText"), "LobbyStatusText", failures);
+
+            GameObject occupied = FindDeep(scene, "PlayerSlot_0");
+            Require(occupied != null ? FindChildRecursive(occupied.transform, "Avatar")?.gameObject : null, "PlayerSlot_0 Avatar", failures);
+            Require(occupied != null ? FindChildRecursive(occupied.transform, "PlayerName")?.gameObject : null, "PlayerSlot_0 PlayerName", failures);
+            Require(occupied != null ? FindChildRecursive(occupied.transform, "CountryFlag")?.gameObject : null, "PlayerSlot_0 CountryFlag", failures);
+            Require(occupied != null ? FindChildRecursive(occupied.transform, "LevelBadge")?.gameObject : null, "PlayerSlot_0 LevelBadge", failures);
+            Require(occupied != null ? FindChildRecursive(occupied.transform, "ReadyStatus")?.gameObject : null, "PlayerSlot_0 ReadyStatus", failures);
+
+            GameObject empty = FindDeep(scene, "PlayerSlot_1");
+            Require(empty != null ? FindChildRecursive(empty.transform, "EmptySlotLabel")?.gameObject : null, "PlayerSlot_1 EmptySlotLabel", failures);
+
+            GameObject playButtonGo = FindDeep(scene, "PlayButton");
+            Button playButton = playButtonGo != null ? playButtonGo.GetComponent<Button>() : null;
+            if (playButton == null || playButton.interactable)
+            {
+                failures.Add("PlayButton must exist and be disabled (visual placeholder).");
+            }
+
+            Text roomType = FindDeep(scene, "RoomTypeText")?.GetComponent<Text>();
+            if (roomType == null || roomType.text != "Public Lobby")
+            {
+                failures.Add("RoomTypeText expected 'Public Lobby'.");
+            }
+
+            Text playerCount = FindDeep(scene, "PlayerCountText")?.GetComponent<Text>();
+            if (playerCount == null || playerCount.text != "1/4")
+            {
+                failures.Add("PlayerCountText expected '1/4'.");
+            }
+
+            Text roomCode = FindDeep(scene, "RoomCodeText")?.GetComponent<Text>();
+            if (roomCode == null || roomCode.text != "GULF-4821")
+            {
+                failures.Add("RoomCodeText expected 'GULF-4821'.");
+            }
+
+            RequireCanvasScaler(FindDeep(scene, "LobbyScreenCanvas"), failures);
+            RequireInBuild(LobbyScreenScenePath, failures);
+            RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
+
+            // Pre-race Lobby scene must remain untouched in build list.
+            RequireInBuild("Assets/_Project/Scenes/Lobby.unity", failures);
         }
 
         private static void ValidateMainMenuWiring(List<string> failures)

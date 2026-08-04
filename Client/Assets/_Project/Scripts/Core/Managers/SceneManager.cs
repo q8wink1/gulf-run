@@ -17,6 +17,7 @@ namespace GulfRun.Core.Managers
         public const string PlayMenuSceneName = "PlayMenu";
         public const string QuickPlaySceneName = "QuickPlay";
         public const string InviteFriendsSceneName = "InviteFriends";
+        public const string LobbyScreenSceneName = "LobbyScreen";
         public const string LobbySceneName = "Lobby";
         public const string MapVotingSceneName = "MapVoting";
         public const string LoadingSceneName = "Loading";
@@ -34,6 +35,9 @@ namespace GulfRun.Core.Managers
         public void LoadQuickPlay() => UnityEngine.SceneManagement.SceneManager.LoadScene(QuickPlaySceneName);
 
         public void LoadInviteFriends() => UnityEngine.SceneManagement.SceneManager.LoadScene(InviteFriendsSceneName);
+
+        /// <summary>Premium Lobby UI foundation (Sprint 21.1). Distinct from pre-race <see cref="LoadLobby"/>.</summary>
+        public void LoadLobbyScreen() => UnityEngine.SceneManagement.SceneManager.LoadScene(LobbyScreenSceneName);
 
         public void LoadLobby() => UnityEngine.SceneManagement.SceneManager.LoadScene(LobbySceneName);
 

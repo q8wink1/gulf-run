@@ -24,6 +24,9 @@ EditorBuildSettings:
     path: Assets/_Project/Scenes/InviteFriends.unity
     guid: 1f6136fca7264d74d8f3372f23bea0b1
   - enabled: 1
+    path: Assets/_Project/Scenes/LobbyScreen.unity
+    guid: b20c0000000000000000000000000073
+  - enabled: 1
     path: Assets/_Project/Scenes/Lobby.unity
     guid: 25d5769067284155896ef66e37cbb22a
   - enabled: 1
