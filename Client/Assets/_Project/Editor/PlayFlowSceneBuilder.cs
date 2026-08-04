@@ -62,7 +62,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Polish Play Menu (Sprint 20.1)")]
         public static void PolishPlayMenuFromMenu() => PolishPlayMenuBatch();
 
-        [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.2)")]
+        [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.3)")]
         public static void BuildLobbyScreenFromMenu() => BuildLobbyScreenBatch();
 
         public static void RunBatch()
@@ -89,8 +89,10 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 21.2: rebuild LobbyScreen with polished player-slot UI only.
-        /// Does not rebuild PlayMenu / QuickPlay / InviteFriends.
+        /// Sprint 21.3: rebuild LobbyScreen Ready System UI (status panel,
+        /// premium Ready button visual toggle, countdown placeholder, player
+        /// counter). Keeps Sprint 21.2 slot polish. Does not rebuild
+        /// PlayMenu / QuickPlay / InviteFriends.
         /// </summary>
         public static void BuildLobbyScreenBatch()
         {
@@ -118,7 +120,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — LobbyScreen Sprint 21.2 player slots UI OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — LobbyScreen Sprint 21.3 Ready System UI OK.");
         }
 
         /// <summary>
@@ -534,7 +536,7 @@ namespace GulfRun.Editor
             roomTypeRt.offsetMin = new Vector2(24f, 0f);
             roomTypeRt.offsetMax = new Vector2(-24f, -8f);
 
-            Text playerCount = CreateUiText("PlayerCountText", headerRoot, "3/4", 24, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
+            Text playerCount = CreateUiText("PlayerCountText", headerRoot, "Players: 3 / 4", 24, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
             RectTransform playerCountRt = playerCount.rectTransform;
             playerCountRt.anchorMin = new Vector2(0f, 0f);
             playerCountRt.anchorMax = new Vector2(0.5f, 0.5f);
@@ -553,8 +555,8 @@ namespace GulfRun.Editor
             slotsRoot.anchorMin = new Vector2(0.5f, 0.5f);
             slotsRoot.anchorMax = new Vector2(0.5f, 0.5f);
             slotsRoot.pivot = new Vector2(0.5f, 0.5f);
-            slotsRoot.anchoredPosition = new Vector2(0f, 8f);
-            slotsRoot.sizeDelta = new Vector2(980f, 680f);
+            slotsRoot.anchoredPosition = new Vector2(0f, 70f);
+            slotsRoot.sizeDelta = new Vector2(980f, 660f);
 
             // Mock hierarchy: host ready, guest not ready, connecting sample, empty waiting.
             CreatePlayerSlot(
@@ -609,37 +611,90 @@ namespace GulfRun.Editor
                 online: false,
                 showHostBadge: false);
 
-            // Footer — Ready (left), Lobby Status (center), Play disabled (right)
-            RectTransform footerRoot = CreateRect("FooterRoot", canvasRt);
-            footerRoot.anchorMin = new Vector2(0.5f, 0f);
-            footerRoot.anchorMax = new Vector2(0.5f, 0f);
-            footerRoot.pivot = new Vector2(0.5f, 0f);
-            footerRoot.anchoredPosition = new Vector2(0f, 48f);
-            footerRoot.sizeDelta = new Vector2(1400f, 100f);
+            // Status band above footer buttons (Sprint 21.3 Ready System UI)
+            RectTransform statusRoot = CreateRect("StatusRoot", canvasRt);
+            statusRoot.anchorMin = new Vector2(0.5f, 0f);
+            statusRoot.anchorMax = new Vector2(0.5f, 0f);
+            statusRoot.pivot = new Vector2(0.5f, 0f);
+            statusRoot.anchoredPosition = new Vector2(0f, 168f);
+            statusRoot.sizeDelta = new Vector2(1200f, 120f);
 
-            Button readyButton = CreateLabeledButton("ReadyButton", footerRoot, "Ready", 280f, 80f, Gold, GoldButtonLabel);
-            RectTransform readyRt = readyButton.GetComponent<RectTransform>();
-            readyRt.anchorMin = new Vector2(0f, 0.5f);
-            readyRt.anchorMax = new Vector2(0f, 0.5f);
-            readyRt.pivot = new Vector2(0f, 0.5f);
-            readyRt.anchoredPosition = new Vector2(40f, 0f);
-            // Visual-only placeholder — no ready logic.
-            readyButton.transition = Selectable.Transition.None;
+            RectTransform lobbyStatusPanel = CreateRect("LobbyStatusPanel", statusRoot);
+            lobbyStatusPanel.anchorMin = new Vector2(0.5f, 0.5f);
+            lobbyStatusPanel.anchorMax = new Vector2(0.5f, 0.5f);
+            lobbyStatusPanel.pivot = new Vector2(0.5f, 0.5f);
+            lobbyStatusPanel.anchoredPosition = new Vector2(0f, 12f);
+            lobbyStatusPanel.sizeDelta = new Vector2(980f, 88f);
 
+            Image statusBorder = lobbyStatusPanel.gameObject.AddComponent<Image>();
+            statusBorder.color = PanelBorder;
+            statusBorder.raycastTarget = false;
+            EnsureCardShadow(lobbyStatusPanel.gameObject);
+
+            Image statusFill = CreateUiImage("Fill", lobbyStatusPanel, stretch: true);
+            statusFill.color = PanelBg;
+            statusFill.raycastTarget = false;
+            statusFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            statusFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            // Primary active message; alternate copy kept as inactive placeholders.
             Text lobbyStatus = CreateUiText(
                 "LobbyStatusText",
-                footerRoot,
-                "Waiting for players...",
+                lobbyStatusPanel,
+                "Waiting for everyone to be Ready...",
                 28,
                 FontStyle.Bold,
                 TextMuted,
                 TextAnchor.MiddleCenter);
             RectTransform lobbyStatusRt = lobbyStatus.rectTransform;
-            lobbyStatusRt.anchorMin = new Vector2(0.5f, 0.5f);
-            lobbyStatusRt.anchorMax = new Vector2(0.5f, 0.5f);
-            lobbyStatusRt.pivot = new Vector2(0.5f, 0.5f);
-            lobbyStatusRt.anchoredPosition = Vector2.zero;
-            lobbyStatusRt.sizeDelta = new Vector2(520f, 64f);
+            lobbyStatusRt.anchorMin = new Vector2(0f, 0f);
+            lobbyStatusRt.anchorMax = new Vector2(1f, 1f);
+            lobbyStatusRt.offsetMin = new Vector2(24f, 8f);
+            lobbyStatusRt.offsetMax = new Vector2(-24f, -8f);
+
+            CreateInactiveStatusMessage(lobbyStatusPanel, "StatusMsg_WaitingForPlayers", "Waiting for players...");
+            CreateInactiveStatusMessage(lobbyStatusPanel, "StatusMsg_PlayersJoining", "Players joining...");
+            CreateInactiveStatusMessage(lobbyStatusPanel, "StatusMsg_WaitingReady", "Waiting for everyone to be Ready...");
+            CreateInactiveStatusMessage(lobbyStatusPanel, "StatusMsg_ReadyToStart", "Ready to Start");
+
+            Text countdown = CreateUiText(
+                "CountdownPlaceholder",
+                statusRoot,
+                "Starting in: 00:10",
+                30,
+                FontStyle.Bold,
+                GoldBright,
+                TextAnchor.MiddleCenter);
+            RectTransform countdownRt = countdown.rectTransform;
+            countdownRt.anchorMin = new Vector2(0.5f, 0f);
+            countdownRt.anchorMax = new Vector2(0.5f, 0f);
+            countdownRt.pivot = new Vector2(0.5f, 0f);
+            countdownRt.anchoredPosition = new Vector2(0f, -4f);
+            countdownRt.sizeDelta = new Vector2(420f, 40f);
+            countdown.gameObject.SetActive(false);
+
+            // Footer — Ready (left, premium), Play disabled (right)
+            RectTransform footerRoot = CreateRect("FooterRoot", canvasRt);
+            footerRoot.anchorMin = new Vector2(0.5f, 0f);
+            footerRoot.anchorMax = new Vector2(0.5f, 0f);
+            footerRoot.pivot = new Vector2(0.5f, 0f);
+            footerRoot.anchoredPosition = new Vector2(0f, 40f);
+            footerRoot.sizeDelta = new Vector2(1400f, 110f);
+
+            Button readyButton = CreateLabeledButton("ReadyButton", footerRoot, "Ready", 340f, 96f, Gold, GoldButtonLabel);
+            RectTransform readyRt = readyButton.GetComponent<RectTransform>();
+            readyRt.anchorMin = new Vector2(0f, 0.5f);
+            readyRt.anchorMax = new Vector2(0f, 0.5f);
+            readyRt.pivot = new Vector2(0f, 0.5f);
+            readyRt.anchoredPosition = new Vector2(40f, 0f);
+            readyButton.transition = Selectable.Transition.None;
+            Text readyLabel = readyButton.GetComponentInChildren<Text>();
+            if (readyLabel != null)
+            {
+                readyLabel.fontSize = 32;
+            }
+
+            Image readyImage = readyButton.GetComponent<Image>();
 
             Button playButton = CreateLabeledButton("PlayButton", footerRoot, "Play", 280f, 80f, ButtonDark, GoldBright);
             RectTransform playRt = playButton.GetComponent<RectTransform>();
@@ -657,11 +712,36 @@ namespace GulfRun.Editor
                 playLabel.color = new Color(GoldBright.r, GoldBright.g, GoldBright.b, 0.45f);
             }
 
+            // Optional local-slot chrome for Ready button visual demo (slot 0).
+            Transform slot0Tf = slotsRoot.Find("PlayerSlot_0");
+            Image localReadyStatus = slot0Tf != null
+                ? FindChildRecursive(slot0Tf, "ReadyStatus")?.GetComponent<Image>()
+                : null;
+            Text localReadyLabel = slot0Tf != null
+                ? FindChildRecursive(slot0Tf, "ReadyLabel")?.GetComponent<Text>()
+                : null;
+
             SerializedObject so = new SerializedObject(controller);
             so.FindProperty("backButton").objectReferenceValue = backButton;
+            so.FindProperty("readyButton").objectReferenceValue = readyButton;
+            so.FindProperty("readyButtonImage").objectReferenceValue = readyImage;
+            so.FindProperty("readyButtonLabel").objectReferenceValue = readyLabel;
+            so.FindProperty("localReadyStatus").objectReferenceValue = localReadyStatus;
+            so.FindProperty("localReadyLabel").objectReferenceValue = localReadyLabel;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             SaveScene(scene, LobbyScreenScenePath, failures);
+        }
+
+        private static void CreateInactiveStatusMessage(RectTransform parent, string name, string message)
+        {
+            Text text = CreateUiText(name, parent, message, 26, FontStyle.Bold, TextMuted, TextAnchor.MiddleCenter);
+            RectTransform rt = text.rectTransform;
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.offsetMin = new Vector2(24f, 8f);
+            rt.offsetMax = new Vector2(-24f, -8f);
+            text.gameObject.SetActive(false);
         }
 
         private static void CreatePlayerSlot(
@@ -1070,7 +1150,14 @@ namespace GulfRun.Editor
             Require(FindDeep(scene, "FooterRoot"), "FooterRoot", failures);
             Require(FindDeep(scene, "ReadyButton"), "ReadyButton", failures);
             Require(FindDeep(scene, "PlayButton"), "PlayButton", failures);
+            Require(FindDeep(scene, "StatusRoot"), "StatusRoot", failures);
+            Require(FindDeep(scene, "LobbyStatusPanel"), "LobbyStatusPanel", failures);
             Require(FindDeep(scene, "LobbyStatusText"), "LobbyStatusText", failures);
+            Require(FindDeep(scene, "StatusMsg_WaitingForPlayers"), "StatusMsg_WaitingForPlayers", failures);
+            Require(FindDeep(scene, "StatusMsg_PlayersJoining"), "StatusMsg_PlayersJoining", failures);
+            Require(FindDeep(scene, "StatusMsg_WaitingReady"), "StatusMsg_WaitingReady", failures);
+            Require(FindDeep(scene, "StatusMsg_ReadyToStart"), "StatusMsg_ReadyToStart", failures);
+            Require(FindDeep(scene, "CountdownPlaceholder"), "CountdownPlaceholder", failures);
 
             GameObject occupied = FindDeep(scene, "PlayerSlot_0");
             Require(occupied != null ? FindChildRecursive(occupied.transform, "Avatar")?.gameObject : null, "PlayerSlot_0 Avatar", failures);
@@ -1136,6 +1223,30 @@ namespace GulfRun.Editor
                 failures.Add("PlayButton must exist and be disabled (visual placeholder).");
             }
 
+            GameObject countdownGo = FindDeep(scene, "CountdownPlaceholder");
+            if (countdownGo == null || countdownGo.activeSelf)
+            {
+                failures.Add("CountdownPlaceholder must exist and be inactive by default.");
+            }
+
+            Text countdown = countdownGo != null ? countdownGo.GetComponent<Text>() : null;
+            if (countdown == null || countdown.text != "Starting in: 00:10")
+            {
+                failures.Add("CountdownPlaceholder expected 'Starting in: 00:10'.");
+            }
+
+            Text lobbyStatus = FindDeep(scene, "LobbyStatusText")?.GetComponent<Text>();
+            if (lobbyStatus == null || lobbyStatus.text != "Waiting for everyone to be Ready...")
+            {
+                failures.Add("LobbyStatusText expected 'Waiting for everyone to be Ready...'.");
+            }
+
+            GameObject joiningMsg = FindDeep(scene, "StatusMsg_PlayersJoining");
+            if (joiningMsg == null || joiningMsg.activeSelf)
+            {
+                failures.Add("StatusMsg_PlayersJoining must exist and be inactive (example copy).");
+            }
+
             Text roomType = FindDeep(scene, "RoomTypeText")?.GetComponent<Text>();
             if (roomType == null || roomType.text != "Public Lobby")
             {
@@ -1143,15 +1254,41 @@ namespace GulfRun.Editor
             }
 
             Text playerCount = FindDeep(scene, "PlayerCountText")?.GetComponent<Text>();
-            if (playerCount == null || playerCount.text != "3/4")
+            if (playerCount == null || playerCount.text != "Players: 3 / 4")
             {
-                failures.Add("PlayerCountText expected '3/4'.");
+                failures.Add("PlayerCountText expected 'Players: 3 / 4'.");
             }
 
             Text roomCode = FindDeep(scene, "RoomCodeText")?.GetComponent<Text>();
             if (roomCode == null || roomCode.text != "GULF-4821")
             {
                 failures.Add("RoomCodeText expected 'GULF-4821'.");
+            }
+
+            GameObject readyButtonGo = FindDeep(scene, "ReadyButton");
+            RectTransform readyRt = readyButtonGo != null ? readyButtonGo.GetComponent<RectTransform>() : null;
+            if (readyRt == null || readyRt.sizeDelta.x < 320f || readyRt.sizeDelta.y < 90f)
+            {
+                failures.Add("ReadyButton expected large premium size (>= 320x90).");
+            }
+
+            LobbyScreenController controller = FindDeep(scene, "LobbyScreenCanvas")?.GetComponent<LobbyScreenController>();
+            if (controller == null)
+            {
+                failures.Add("LobbyScreenCanvas missing LobbyScreenController.");
+            }
+            else
+            {
+                SerializedObject so = new SerializedObject(controller);
+                if (so.FindProperty("readyButton").objectReferenceValue == null)
+                {
+                    failures.Add("LobbyScreenController.readyButton must be wired.");
+                }
+
+                if (so.FindProperty("readyButtonLabel").objectReferenceValue == null)
+                {
+                    failures.Add("LobbyScreenController.readyButtonLabel must be wired.");
+                }
             }
 
             RequireCanvasScaler(FindDeep(scene, "LobbyScreenCanvas"), failures);
