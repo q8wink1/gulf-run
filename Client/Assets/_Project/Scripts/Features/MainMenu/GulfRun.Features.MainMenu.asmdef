@@ -3,8 +3,7 @@
     "rootNamespace": "GulfRun.Features.MainMenu",
     "references": [
         "GulfRun.Core",
-        "GulfRun.Domain",
-        "UnityEngine.UI"
+        "GulfRun.Domain"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

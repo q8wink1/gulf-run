@@ -23,8 +23,6 @@ namespace GulfRun.Core.Managers
     /// and the new <c>Features.MainMenu.Bottom.PrivateRoomPanelView</c>); the
     /// Lobby scene itself calls <see cref="LoadGameplay"/> once its Auto
     /// Start countdown reaches GO.
-    /// Character Selection adds <see cref="LoadCharacterSelection"/> — Main Menu
-    /// Play Now opens the Character Selection UI scene before matchmaking.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class SceneManager : Singleton<SceneManager>
@@ -33,9 +31,6 @@ namespace GulfRun.Core.Managers
         public const string IntroSceneName = "Intro";
 
         public const string MainMenuSceneName = "MainMenu";
-
-        /// <summary>Character Selection UI scene — entered from Main Menu Play Now before matchmaking.</summary>
-        public const string CharacterSelectionSceneName = "CharacterSelection";
 
         /// <summary>Sprint 15: the Pre-Race Lobby scene, entered once a Quick Play match is found or a Private Room is created/joined.</summary>
         public const string LobbySceneName = "Lobby";
@@ -52,10 +47,6 @@ namespace GulfRun.Core.Managers
 
         /// <summary>Sprint 14 (Boot startup): the very first scene load after Boot finishes initializing — the GulfRun Brand Intro.</summary>
         public void LoadIntro() => UnityEngine.SceneManagement.SceneManager.LoadScene(IntroSceneName);
-
-        /// <summary>Main Menu Play Now → Character Selection (UI layout only; unlock/select gameplay comes later).</summary>
-        public void LoadCharacterSelection() =>
-            UnityEngine.SceneManagement.SceneManager.LoadScene(CharacterSelectionSceneName);
 
         /// <summary>Sprint 15 (Quick Play match found / Private Room created or joined): leaves Main Menu for the Pre-Race Lobby scene.</summary>
         public void LoadLobby() => UnityEngine.SceneManagement.SceneManager.LoadScene(LobbySceneName);
