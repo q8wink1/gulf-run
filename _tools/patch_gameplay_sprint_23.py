@@ -6,6 +6,8 @@ Modes:
   --player   Sprint 23.4 Runner player + ground plane
   --camera   Sprint 23.5 RunnerCameraFollow + CameraShake stubs
   --all      All of the above (default)
+
+Sprint 23.6 endless track: run `_tools/patch_gameplay_sprint_23_6_track.py` separately.
 """
 
 from __future__ import annotations

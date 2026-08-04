@@ -11,7 +11,8 @@ namespace GulfRun.Domain
     /// change every match" and "boxes respawn using configurable rules"
     /// true for free (chunks are procedurally generated/recycled, and the
     /// category's <c>BaseSpawnChance</c>/per-entry weights are the
-    /// configurable respawn rules).
+    /// configurable respawn rules). <see cref="Npc"/> was added in Sprint 23.6
+    /// for 3D track marker placeholders (not spawned yet).
     /// </summary>
     public enum SpawnCategory
     {
@@ -19,6 +20,8 @@ namespace GulfRun.Domain
         Coin,
         PowerUp,
         Decoration,
-        ItemBox
+        ItemBox,
+        /// <summary>Sprint 23.6 track markers — NPC placeholders; not spawned yet.</summary>
+        Npc
     }
 }

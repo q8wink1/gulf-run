@@ -96,7 +96,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Build Gameplay HUD (Sprint 23.3)")]
         public static void BuildGameplayHudFromMenu() => BuildGameplayHudBatch();
 
-        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4/23.5)")]
+        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4/23.5/23.6)")]
         public static void ValidateGameplayRunnerFromMenu() => ValidateGameplayRunnerBatch();
 
         public static void RunBatch()
@@ -320,7 +320,7 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 23.4 / 23.5: validate runner player + camera follow wiring on Gameplay.
+        /// Sprint 23.4 / 23.5 / 23.6: validate runner, camera follow, and endless track on Gameplay.
         /// </summary>
         public static void ValidateGameplayRunnerBatch()
         {
@@ -336,7 +336,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera Sprint 23.4/23.5 OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track Sprint 23.4/23.5/23.6 OK.");
         }
 
         /// <summary>
@@ -3992,7 +3992,6 @@ namespace GulfRun.Editor
             Scene scene = EditorSceneManager.OpenScene(GameplayScenePath, OpenSceneMode.Single);
             GameObject player = FindDeep(scene, "RunnerPlayer");
             Require(player, "RunnerPlayer", failures);
-            Require(FindDeep(scene, "RunnerGround"), "RunnerGround", failures);
 
             if (player != null)
             {
@@ -4035,6 +4034,19 @@ namespace GulfRun.Editor
                     failures.Add("SideScrollCameraFollow should be disabled while RunnerCameraFollow is active.");
                 }
             }
+
+            GameObject track = FindDeep(scene, "EndlessTrackGenerator");
+            Require(track, "EndlessTrackGenerator", failures);
+            if (track != null)
+            {
+                var generator = track.GetComponent<GulfRun.Features.Gameplay.EndlessTrackGenerator>();
+                if (generator == null)
+                {
+                    failures.Add("EndlessTrackGenerator missing EndlessTrackGenerator component.");
+                }
+            }
+
+            Require(FindDeep(scene, "ObjectPoolManager"), "ObjectPoolManager", failures);
         }
 
         private static void ValidateMainMenuWiring(List<string> failures)
