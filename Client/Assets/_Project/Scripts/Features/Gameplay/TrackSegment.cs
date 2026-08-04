@@ -9,8 +9,8 @@ namespace GulfRun.Features.Gameplay
     /// Sprint 23.6 — modular endless-track piece (+Z). Root marks the entry /
     /// start edge; content spans forward for <see cref="Length"/>. Exit is at
     /// local Z = Length so segments connect seamlessly. Spawn markers are
-    /// placeholders only (no content spawning yet). Sprint 23.9 adds obstacle
-    /// marker query hooks for future placement without spawning.
+    /// placeholders for content categories. Sprint 23.10 executes Obstacle markers
+    /// via SpawnManager + ObjectPoolManager; other categories remain plan-only.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class TrackSegment : MonoBehaviour, IPoolable

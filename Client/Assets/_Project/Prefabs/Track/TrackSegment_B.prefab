@@ -37,6 +37,8 @@ Transform:
   - {fileID: 400050}
   - {fileID: 400060}
   - {fileID: 100101}
+  - {fileID: 100151}
+  - {fileID: 100161}
   - {fileID: 100111}
   - {fileID: 100121}
   - {fileID: 100131}
@@ -60,6 +62,8 @@ MonoBehaviour:
   exitPoint: {fileID: 400020}
   spawnMarkers:
   - {fileID: 100102}
+  - {fileID: 100152}
+  - {fileID: 100162}
   - {fileID: 100112}
   - {fileID: 100122}
   - {fileID: 100132}
@@ -506,7 +510,7 @@ Transform:
   m_GameObject: {fileID: 100100}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.0, y: 0.5, z: 12.0}
+  m_LocalPosition: {x: 0.0, y: 0.5, z: 16.0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -525,6 +529,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   category: 0
+  lane: 1
+  resolveLaneFromTransformX: 1
+  laneSpacing: 2.2
+  laneCenterX: 0
 --- !u!1 &100110
 GameObject:
   m_ObjectHideFlags: 0
@@ -705,3 +713,101 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   category: 5
+--- !u!1 &100150
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100151}
+  - component: {fileID: 100152}
+  m_Layer: 0
+  m_Name: SpawnMarker_Obstacle_Left
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100151
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100150}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.2, y: 0.5, z: 8.0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 400000}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &100152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20c00000000000000000000000000c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: 0
+  lane: 0
+  resolveLaneFromTransformX: 1
+  laneSpacing: 2.2
+  laneCenterX: 0
+--- !u!1 &100160
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 100161}
+  - component: {fileID: 100162}
+  m_Layer: 0
+  m_Name: SpawnMarker_Obstacle_Right
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &100161
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100160}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.2, y: 0.5, z: 28.0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 400000}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &100162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20c00000000000000000000000000c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: 0
+  lane: 2
+  resolveLaneFromTransformX: 1
+  laneSpacing: 2.2
+  laneCenterX: 0

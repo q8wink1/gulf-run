@@ -1,3 +1,4 @@
+using System;
 using GulfRun.Core.Pooling;
 using GulfRun.Domain;
 using UnityEngine;
@@ -5,8 +6,9 @@ using UnityEngine;
 namespace GulfRun.Features.Gameplay
 {
     /// <summary>
-    /// Sprint 23.9 — base obstacle behaviour. Owns collider, visual, type, and lane.
-    /// No collision consequences, damage, or spawn execution. Pool-ready via <see cref="IPoolable"/>.
+    /// Sprint 23.9 / 23.10 — base obstacle behaviour. Owns collider, visual, type,
+    /// and lane. Pool-ready via <see cref="IPoolable"/>. Player trigger hits raise
+    /// placeholder events (no damage / speed penalty here).
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(BoxCollider))]
@@ -32,6 +34,14 @@ namespace GulfRun.Features.Gameplay
         [SerializeField] private Collider obstacleCollider;
         [SerializeField] private Transform visualModel;
 
+        private bool _hitThisLife;
+
+        /// <summary>Raised when any pooled obstacle reports a player hit.</summary>
+        public static event Action<Obstacle, RunnerPlayerController> AnyHit;
+
+        /// <summary>Raised for this instance on player trigger enter.</summary>
+        public event Action<Obstacle, RunnerPlayerController> Hit;
+
         public abstract ObstacleType Type { get; }
 
         public ObstacleData Data => data;
@@ -41,10 +51,12 @@ namespace GulfRun.Features.Gameplay
         public bool IsObstacleEnabled => obstacleEnabled;
         public Vector3 PlacementEulerAngles => placementEulerAngles;
         public Vector3 PlacementScale => placementScale;
+        public bool HasHitThisLife => _hitThisLife;
 
         protected virtual void Awake()
         {
             EnsureComponents();
+            EnsureTriggerCollider();
             ApplyInspectorPlacement(snapLaneX: true);
             ApplyEnabledState();
         }
@@ -52,6 +64,7 @@ namespace GulfRun.Features.Gameplay
         protected virtual void OnValidate()
         {
             EnsureComponents();
+            EnsureTriggerCollider();
             if (placementScale.x < 0.05f || placementScale.y < 0.05f || placementScale.z < 0.05f)
             {
                 placementScale = new Vector3(
@@ -97,7 +110,7 @@ namespace GulfRun.Features.Gameplay
 
         /// <summary>
         /// Configures this instance from a <see cref="SpawnManager"/> plan.
-        /// Does not Instantiate — callers already own the instance (future pool Get).
+        /// Does not Instantiate — callers already own the instance (pool Get).
         /// </summary>
         public void ApplyPlannedSlot(in PlannedSpawnSlot slot, RunnerLane plannedLane)
         {
@@ -105,6 +118,7 @@ namespace GulfRun.Features.Gameplay
             transform.SetPositionAndRotation(slot.WorldPosition, slot.WorldRotation);
             ApplyLaneX();
             transform.localScale = placementScale;
+            _hitThisLife = false;
             ApplyEnabledState();
         }
 
@@ -121,12 +135,36 @@ namespace GulfRun.Features.Gameplay
 
         public virtual void OnSpawned()
         {
+            _hitThisLife = false;
             ApplyEnabledState();
         }
 
         public virtual void OnDespawned()
         {
-            // Keep components wired; pool deactivates the GameObject.
+            _hitThisLife = false;
+        }
+
+        protected virtual void OnTriggerEnter(Collider other)
+        {
+            if (!obstacleEnabled || _hitThisLife || other == null)
+            {
+                return;
+            }
+
+            RunnerPlayerController player = other.GetComponentInParent<RunnerPlayerController>();
+            if (player == null && other.CompareTag("Player"))
+            {
+                player = other.GetComponent<RunnerPlayerController>();
+            }
+
+            if (player == null)
+            {
+                return;
+            }
+
+            _hitThisLife = true;
+            Hit?.Invoke(this, player);
+            AnyHit?.Invoke(this, player);
         }
 
         protected void EnsureComponents()
@@ -144,6 +182,16 @@ namespace GulfRun.Features.Gameplay
                     visualModel = child;
                 }
             }
+        }
+
+        protected void EnsureTriggerCollider()
+        {
+            if (obstacleCollider == null)
+            {
+                return;
+            }
+
+            obstacleCollider.isTrigger = true;
         }
 
         protected void ApplyLaneX()
@@ -227,7 +275,6 @@ namespace GulfRun.Features.Gameplay
 
             Gizmos.matrix = prev;
 
-            // Lane tick on the ground.
             Gizmos.color = new Color(color.r, color.g, color.b, 0.9f);
             Vector3 lanePoint = transform.position;
             lanePoint.x = RunnerLaneMath.LaneX(lane, laneCenterX, laneSpacing);

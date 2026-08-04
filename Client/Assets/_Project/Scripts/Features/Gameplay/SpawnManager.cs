@@ -8,15 +8,11 @@ using UnityEngine;
 namespace GulfRun.Features.Gameplay
 {
     /// <summary>
-    /// Sprint 23.7 — centralized track spawn planner. Discovers
-    /// <see cref="TrackSpawnMarker"/>s when segments activate, evaluates each
-    /// category group independently (probability / density / spacing), and
-    /// stores <see cref="PlannedSpawnSlot"/>s only. Does not Instantiate or
-    /// pool gameplay content yet; designed so a future sprint can call
-    /// <see cref="ObjectPoolManager"/> at planned poses.
-    /// Sprint 23.9 adds <see cref="ObstacleCatalog"/> WarmPools / execute stubs
-    /// without placing obstacles.
-    /// Distinct from <c>Features.Multiplayer.Spawning.SpawnManager</c> (player slots).
+    /// Sprint 23.7 / 23.10 — track spawn planner + obstacle pool execution.
+    /// Discovers <see cref="TrackSpawnMarker"/>s when segments activate, plans
+    /// slots, and for Obstacle category immediately pool-Gets catalog prefabs
+    /// at marker lanes. Coins / power-ups remain plan-only.
+    /// Distinct from <c>Features.Multiplayer.Spawning.SpawnManager</c>.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class SpawnManager : SceneSingleton<SpawnManager>
@@ -25,9 +21,17 @@ namespace GulfRun.Features.Gameplay
         [Tooltip("Map-specific spawn groups (swap Kuwait / Dubai / Doha / Muscat assets).")]
         [SerializeField] private SpawnProfile spawnProfile;
 
-        [Header("Obstacle Foundation (Sprint 23.9)")]
-        [Tooltip("Prefab / data catalog for obstacle WarmPools hooks. Does not spawn.")]
+        [Header("Obstacle Gameplay (Sprint 23.10)")]
+        [Tooltip("Prefab / data catalog for obstacle WarmPools + weighted pick.")]
         [SerializeField] private ObstacleCatalog obstacleCatalog;
+
+        [Tooltip("Prepared session difficulty filter — no spacing/weight balancing yet.")]
+        [SerializeField] private ObstacleDifficultyLevel obstacleDifficulty = ObstacleDifficultyLevel.Medium;
+
+        [Tooltip(
+            "When true, Obstacle plans are pool-executed on segment register. " +
+            "Sprint 23.10 always executes for playability (RaceManager Running gate can come later).")]
+        [SerializeField] private bool executeObstaclePlans = true;
 
         [Header("Wiring")]
         [Tooltip("Source of SegmentActivated / SegmentReleased. Auto-finds if unset.")]
@@ -44,13 +48,19 @@ namespace GulfRun.Features.Gameplay
         private readonly Dictionary<SpawnCategory, float> _lastAcceptedZ = new Dictionary<SpawnCategory, float>(8);
         private readonly Dictionary<SpawnCategory, int> _plannedCounts = new Dictionary<SpawnCategory, int>(8);
         private readonly List<TrackSpawnMarker> _markerScratch = new List<TrackSpawnMarker>(32);
+        private readonly Dictionary<int, List<GameObject>> _liveObstaclesBySegment =
+            new Dictionary<int, List<GameObject>>(16);
+        private readonly List<PlannedSpawnSlot> _executeScratch = new List<PlannedSpawnSlot>(16);
 
-        private System.Random _rng;
+        private SeededRandom _rng;
         private int _rngSeedApplied = int.MinValue;
         private EndlessTrackGenerator _subscribedGenerator;
+        private bool _poolsWarmed;
 
         public SpawnProfile Profile => spawnProfile;
         public ObstacleCatalog ObstacleCatalog => obstacleCatalog;
+        public ObstacleDifficultyLevel ObstacleDifficulty => obstacleDifficulty;
+        public bool ExecuteObstaclePlans => executeObstaclePlans;
         public IReadOnlyList<PlannedSpawnSlot> PlannedSlots => _planned;
         public IReadOnlyDictionary<SpawnCategory, int> PlannedCounts => _plannedCounts;
         public int PlannedCount => _planned.Count;
@@ -70,11 +80,13 @@ namespace GulfRun.Features.Gameplay
         private void Start()
         {
             SubscribeGenerator(ResolveGenerator());
+            WarmPools(transform);
         }
 
         private void OnDisable()
         {
             UnsubscribeGenerator();
+            ReleaseAllLiveObstacles();
         }
 
         /// <summary>Swap map profile at runtime (future map catalog).</summary>
@@ -84,22 +96,30 @@ namespace GulfRun.Features.Gameplay
             ClearAllPlans();
         }
 
-        /// <summary>Assigns obstacle prefab catalog without executing spawns.</summary>
+        /// <summary>Assigns obstacle prefab catalog.</summary>
         public void SetObstacleCatalog(ObstacleCatalog catalog)
         {
             obstacleCatalog = catalog;
+            _poolsWarmed = false;
         }
 
-        /// <summary>Clears every planned slot and spacing cursors.</summary>
+        /// <summary>Prepared difficulty tier (filter only — no balancing).</summary>
+        public void SetObstacleDifficulty(ObstacleDifficultyLevel difficulty)
+        {
+            obstacleDifficulty = difficulty;
+        }
+
+        /// <summary>Clears planned slots, spacing cursors, and releases live obstacles.</summary>
         public void ClearAllPlans()
         {
+            ReleaseAllLiveObstacles();
             _planned.Clear();
             ResetCategoryState();
         }
 
         /// <summary>
-        /// Registers markers from an activated segment and dry-runs category groups.
-        /// Safe to call from <see cref="EndlessTrackGenerator"/> events.
+        /// Registers markers from an activated segment, plans groups, then executes
+        /// Obstacle category via object pool (when enabled).
         /// </summary>
         public void RegisterSegment(TrackSegment segment)
         {
@@ -142,17 +162,29 @@ namespace GulfRun.Features.Gameplay
                 SortMarkersByWorldZ(_markerScratch);
                 EvaluateGroup(settings, segmentId);
             }
+
+            if (executeObstaclePlans)
+            {
+                ExecuteObstaclePlansForSegment(segmentId);
+            }
         }
 
-        /// <summary>Drops planned slots that belonged to a recycled segment.</summary>
+        /// <summary>Drops plans and releases pooled obstacles for a recycled segment.</summary>
         public void UnregisterSegment(TrackSegment segment)
         {
-            if (segment == null || _planned.Count == 0)
+            if (segment == null)
             {
                 return;
             }
 
             int segmentId = segment.GetInstanceID();
+            ReleaseLiveObstacles(segmentId);
+
+            if (_planned.Count == 0)
+            {
+                return;
+            }
+
             for (int i = _planned.Count - 1; i >= 0; i--)
             {
                 if (_planned[i].SegmentInstanceId != segmentId)
@@ -171,7 +203,6 @@ namespace GulfRun.Features.Gameplay
 
         /// <summary>
         /// Copies planned slots for one category into <paramref name="buffer"/> (cleared first).
-        /// Zero allocation beyond the caller's list growth.
         /// </summary>
         public void CopyPlannedSlots(SpawnCategory category, List<PlannedSpawnSlot> buffer)
         {
@@ -190,17 +221,17 @@ namespace GulfRun.Features.Gameplay
             }
         }
 
-        /// <summary>
-        /// Future pool warm-up. Preloads obstacle catalog prefabs when assigned;
-        /// still does not place any content on the track.
-        /// </summary>
+        /// <summary>Preloads obstacle catalog prefabs into <see cref="ObjectPoolManager"/>.</summary>
         public void WarmPools(Transform poolParent = null)
         {
             ObjectPoolManager pools = ObjectPoolManager.Instance;
-            if (obstacleCatalog != null && pools != null)
+            if (obstacleCatalog == null || pools == null)
             {
-                obstacleCatalog.WarmPools(pools, poolParent);
+                return;
             }
+
+            obstacleCatalog.WarmPools(pools, poolParent != null ? poolParent : transform);
+            _poolsWarmed = true;
         }
 
         /// <summary>Resolves a prefab for <paramref name="data"/> from the obstacle catalog.</summary>
@@ -211,19 +242,51 @@ namespace GulfRun.Features.Gameplay
         }
 
         /// <summary>
-        /// Future: spawn pooled content at a planned slot. Always returns false this sprint.
+        /// Pool-Gets <paramref name="prefab"/> at the planned pose. Non-obstacle
+        /// categories are not executed this sprint.
         /// </summary>
         public bool TryExecutePlannedSlot(in PlannedSpawnSlot slot, GameObject prefab, Transform parent = null)
         {
-            _ = slot;
-            _ = prefab;
-            _ = parent;
-            return false;
+            if (prefab == null || slot.Category != SpawnCategory.Obstacle)
+            {
+                return false;
+            }
+
+            ObjectPoolManager pools = ObjectPoolManager.Instance;
+            if (pools == null)
+            {
+                return false;
+            }
+
+            if (!_poolsWarmed)
+            {
+                WarmPools(transform);
+            }
+
+            Transform poolParent = parent != null ? parent : transform;
+            GameObject instance = pools.Get(prefab, slot.WorldPosition, slot.WorldRotation, poolParent);
+            if (instance == null)
+            {
+                return false;
+            }
+
+            Obstacle obstacle = instance.GetComponent<Obstacle>();
+            if (obstacle != null)
+            {
+                obstacle.ApplyPlannedSlot(slot, slot.Lane);
+            }
+            else
+            {
+                instance.transform.SetPositionAndRotation(slot.WorldPosition, slot.WorldRotation);
+            }
+
+            TrackLiveObstacle(slot.SegmentInstanceId, instance);
+            return true;
         }
 
         /// <summary>
-        /// Future obstacle execute path: resolve catalog prefab then pool-Get at the plan.
-        /// Always returns false this sprint (no random / no Instantiate).
+        /// Resolves catalog prefab for <paramref name="data"/> (or weighted pick when null),
+        /// then pool-Gets at the planned lane pose.
         /// </summary>
         public bool TryExecuteObstacleSlot(
             in PlannedSpawnSlot slot,
@@ -236,16 +299,143 @@ namespace GulfRun.Features.Gameplay
                 return false;
             }
 
-            if (!TryGetObstaclePrefab(data, out GameObject prefab) || prefab == null)
+            GameObject prefab = null;
+            ObstacleData resolvedData = data;
+
+            if (resolvedData != null)
+            {
+                if (!TryGetObstaclePrefab(resolvedData, out prefab) || prefab == null)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (obstacleCatalog == null ||
+                    !obstacleCatalog.TryPickEntry(_rng, obstacleDifficulty, out ObstacleCatalogEntry entry) ||
+                    entry == null ||
+                    entry.Prefab == null)
+                {
+                    return false;
+                }
+
+                prefab = entry.Prefab;
+                resolvedData = entry.Data;
+            }
+
+            PlannedSpawnSlot laneSlot = new PlannedSpawnSlot(
+                slot.Category,
+                slot.WorldPosition,
+                slot.WorldRotation,
+                slot.SegmentInstanceId,
+                slot.MarkerInstanceId,
+                lane);
+
+            if (!TryExecutePlannedSlot(laneSlot, prefab, parent))
             {
                 return false;
             }
 
-            // Prefab + lane reserved for a future pool Get + IObstaclePlacementTarget.ApplyPlannedSlot.
-            _ = lane;
-            _ = parent;
-            _ = prefab;
-            return false;
+            if (resolvedData != null &&
+                _liveObstaclesBySegment.TryGetValue(slot.SegmentInstanceId, out List<GameObject> list) &&
+                list != null &&
+                list.Count > 0)
+            {
+                GameObject last = list[list.Count - 1];
+                Obstacle obstacle = last != null ? last.GetComponent<Obstacle>() : null;
+                if (obstacle != null && obstacle.Data != resolvedData)
+                {
+                    obstacle.BindData(resolvedData);
+                }
+            }
+
+            return true;
+        }
+
+        private void ExecuteObstaclePlansForSegment(int segmentId)
+        {
+            if (obstacleCatalog == null)
+            {
+                return;
+            }
+
+            EnsureRng();
+            _executeScratch.Clear();
+            for (int i = 0; i < _planned.Count; i++)
+            {
+                PlannedSpawnSlot slot = _planned[i];
+                if (slot.SegmentInstanceId == segmentId && slot.Category == SpawnCategory.Obstacle)
+                {
+                    _executeScratch.Add(slot);
+                }
+            }
+
+            for (int i = 0; i < _executeScratch.Count; i++)
+            {
+                PlannedSpawnSlot slot = _executeScratch[i];
+                if (!obstacleCatalog.TryPickEntry(_rng, obstacleDifficulty, out ObstacleCatalogEntry entry) ||
+                    entry == null)
+                {
+                    continue;
+                }
+
+                TryExecuteObstacleSlot(slot, entry.Data, slot.Lane, transform);
+            }
+        }
+
+        private void TrackLiveObstacle(int segmentId, GameObject instance)
+        {
+            if (!_liveObstaclesBySegment.TryGetValue(segmentId, out List<GameObject> list) || list == null)
+            {
+                list = new List<GameObject>(4);
+                _liveObstaclesBySegment[segmentId] = list;
+            }
+
+            list.Add(instance);
+        }
+
+        private void ReleaseLiveObstacles(int segmentId)
+        {
+            if (!_liveObstaclesBySegment.TryGetValue(segmentId, out List<GameObject> list) || list == null)
+            {
+                return;
+            }
+
+            ObjectPoolManager pools = ObjectPoolManager.Instance;
+            for (int i = 0; i < list.Count; i++)
+            {
+                GameObject instance = list[i];
+                if (instance == null)
+                {
+                    continue;
+                }
+
+                if (pools != null)
+                {
+                    pools.Release(instance);
+                }
+                else
+                {
+                    instance.SetActive(false);
+                }
+            }
+
+            list.Clear();
+            _liveObstaclesBySegment.Remove(segmentId);
+        }
+
+        private void ReleaseAllLiveObstacles()
+        {
+            if (_liveObstaclesBySegment.Count == 0)
+            {
+                return;
+            }
+
+            List<int> keys = new List<int>(_liveObstaclesBySegment.Keys);
+            for (int i = 0; i < keys.Count; i++)
+            {
+                ReleaseLiveObstacles(keys[i]);
+            }
         }
 
         private void EvaluateGroup(SpawnGroupSettings settings, int segmentId)
@@ -290,12 +480,14 @@ namespace GulfRun.Features.Gameplay
                     continue;
                 }
 
+                RunnerLane lane = marker.ResolveLane();
                 PlannedSpawnSlot slot = new PlannedSpawnSlot(
                     category,
                     markerTransform.position,
                     markerTransform.rotation,
                     segmentId,
-                    marker.GetInstanceID());
+                    marker.GetInstanceID(),
+                    lane);
 
                 _planned.Add(slot);
                 lastZ = z;
@@ -311,7 +503,7 @@ namespace GulfRun.Features.Gameplay
                 if (logPlans)
                 {
                     Debug.Log(
-                        $"SpawnManager plan {category} @ {slot.WorldPosition} (profile={spawnProfile.ProfileId})",
+                        $"SpawnManager plan {category} lane={lane} @ {slot.WorldPosition} (profile={spawnProfile.ProfileId})",
                         this);
                 }
             }
@@ -413,13 +605,13 @@ namespace GulfRun.Features.Gameplay
 
             _rngSeedApplied = randomSeed;
             int seed = randomSeed != 0 ? randomSeed : Environment.TickCount;
-            _rng = new System.Random(seed);
+            _rng = new SeededRandom(seed);
         }
 
         private float NextFloat()
         {
             EnsureRng();
-            return (float)_rng.NextDouble();
+            return _rng.NextFloat01();
         }
 
         private void ResetCategoryState()

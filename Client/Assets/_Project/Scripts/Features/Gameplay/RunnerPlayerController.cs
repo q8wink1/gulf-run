@@ -52,6 +52,8 @@ namespace GulfRun.Features.Gameplay
                 bodyCollider = GetComponent<CapsuleCollider>();
             }
 
+            EnsureKinematicBody();
+
             if (config != null && _input != null)
             {
                 _input.SetSwipeThreshold(config.SwipeThresholdPixels);
@@ -61,6 +63,23 @@ namespace GulfRun.Features.Gameplay
             _lane = startingLane;
             _targetLane = startingLane;
             ApplyLaneXImmediate(_lane);
+        }
+
+        /// <summary>
+        /// Sprint 23.10 — kinematic Rigidbody so obstacle trigger colliders register
+        /// hits while the motor remains transform-based.
+        /// </summary>
+        private void EnsureKinematicBody()
+        {
+            Rigidbody body = GetComponent<Rigidbody>();
+            if (body == null)
+            {
+                body = gameObject.AddComponent<Rigidbody>();
+            }
+
+            body.isKinematic = true;
+            body.useGravity = false;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         }
 
         private void OnEnable()

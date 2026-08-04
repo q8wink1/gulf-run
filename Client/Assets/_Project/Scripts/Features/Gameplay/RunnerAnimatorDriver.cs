@@ -17,6 +17,7 @@ namespace GulfRun.Features.Gameplay
         private static readonly int VerticalVelocityHash = Animator.StringToHash("VerticalVelocity");
         private static readonly int JumpTriggerHash = Animator.StringToHash("JumpTrigger");
         private static readonly int SlideTriggerHash = Animator.StringToHash("SlideTrigger");
+        private static readonly int HitTriggerHash = Animator.StringToHash("HitTrigger");
 
         [SerializeField] private RunnerPlayerController runner;
         [SerializeField] private Animator animator;
@@ -25,6 +26,18 @@ namespace GulfRun.Features.Gameplay
         private CharacterAnimationState _currentAnim = CharacterAnimationState.Idle;
 
         public CharacterAnimationState CurrentAnim => _currentAnim;
+
+        /// <summary>
+        /// Sprint 23.10 — placeholder hit cue. Fires Animator HitTrigger when present;
+        /// no locomotion change / penalty.
+        /// </summary>
+        public void PrepareHit()
+        {
+            if (animator != null)
+            {
+                animator.SetTrigger(HitTriggerHash);
+            }
+        }
 
         private void Awake()
         {

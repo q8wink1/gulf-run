@@ -4455,6 +4455,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnProfile: {fileID: 11400000, guid: b20c00000000000000000000000000cd, type: 2}
   obstacleCatalog: {fileID: 11400000, guid: b20c00000000000000000000000000e1, type: 2}
+  obstacleDifficulty: 1
+  executeObstaclePlans: 1
   trackGenerator: {fileID: 520000003}
   randomSeed: 0
   logPlans: 0
@@ -4471,6 +4473,7 @@ GameObject:
   m_Component:
   - component: {fileID: 540000002}
   - component: {fileID: 540000003}
+  - component: {fileID: 540000004}
   m_Layer: 0
   m_Name: RaceManager
   m_TagString: Untagged
@@ -4511,6 +4514,8 @@ MonoBehaviour:
   spawnManager: {fileID: 530000003}
   hud: {fileID: 510000006}
   obstacleCatalog: {fileID: 11400000, guid: b20c00000000000000000000000000e1, type: 2}
+  obstacleGameplayBridge: {fileID: 540000004}
+  obstacleDifficulty: 1
   initialSpeed: 12
   maximumSpeed: 28
   speedIncreaseRate: 0.35
@@ -4526,6 +4531,36 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onRaceFinish:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &540000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 540000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20c00000000000000000000000000e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  raceManager: {fileID: 540000003}
+  animatorDriver: {fileID: 510000138}
+  cameraShake: {fileID: 510000149}
+  applyLightCameraShake: 1
+  hitShakeIntensity: 0.18
+  hitShakeDuration: 0.12
+  onHitAnimation:
+    m_PersistentCalls:
+      m_Calls: []
+  onCameraShake:
+    m_PersistentCalls:
+      m_Calls: []
+  onSoundEffect:
+    m_PersistentCalls:
+      m_Calls: []
+  onSpeedReduction:
     m_PersistentCalls:
       m_Calls: []
 # --- END SPRINT-23.8-RACE-MANAGER ---

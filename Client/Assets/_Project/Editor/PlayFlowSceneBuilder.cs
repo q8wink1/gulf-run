@@ -96,7 +96,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Build Gameplay HUD (Sprint 23.3)")]
         public static void BuildGameplayHudFromMenu() => BuildGameplayHudBatch();
 
-        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.9)")]
+        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.10)")]
         public static void ValidateGameplayRunnerFromMenu() => ValidateGameplayRunnerBatch();
 
         public static void RunBatch()
@@ -320,7 +320,7 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 23.4–23.9: validate runner, camera, track, spawn manager, race manager, and obstacle catalog hooks.
+        /// Sprint 23.4–23.10: validate runner, camera, track, spawn, race, and obstacle gameplay.
         /// </summary>
         public static void ValidateGameplayRunnerBatch()
         {
@@ -336,7 +336,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn + Race + Obstacles Sprint 23.4–23.9 OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn + Race + Obstacles Sprint 23.4–23.10 OK.");
         }
 
         /// <summary>
@@ -4057,7 +4057,11 @@ namespace GulfRun.Editor
                 }
                 else if (spawnManager.ObstacleCatalog == null)
                 {
-                    failures.Add("GameplaySpawnManager missing ObstacleCatalog (Sprint 23.9).");
+                    failures.Add("GameplaySpawnManager missing ObstacleCatalog (Sprint 23.10).");
+                }
+                else if (!spawnManager.ExecuteObstaclePlans)
+                {
+                    failures.Add("GameplaySpawnManager executeObstaclePlans should be enabled (Sprint 23.10).");
                 }
             }
 
@@ -4072,7 +4076,12 @@ namespace GulfRun.Editor
                 }
                 else if (raceManager.ObstacleCatalog == null)
                 {
-                    failures.Add("RaceManager missing ObstacleCatalog (Sprint 23.9).");
+                    failures.Add("RaceManager missing ObstacleCatalog (Sprint 23.10).");
+                }
+
+                if (raceGo.GetComponent<GulfRun.Features.Gameplay.ObstacleGameplayBridge>() == null)
+                {
+                    failures.Add("RaceManager missing ObstacleGameplayBridge (Sprint 23.10).");
                 }
             }
 

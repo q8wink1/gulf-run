@@ -7,8 +7,7 @@ using UnityEngine;
 namespace GulfRun.Features.Gameplay
 {
     /// <summary>
-    /// Sprint 23.9 — one catalog row: authoring data + prefab + pool preload count.
-    /// Prefabs are hooks for <see cref="SpawnManager.WarmPools"/>; nothing is spawned yet.
+    /// Sprint 23.9 / 23.10 — one catalog row: authoring data + prefab + pool preload.
     /// </summary>
     [Serializable]
     public sealed class ObstacleCatalogEntry
@@ -24,8 +23,8 @@ namespace GulfRun.Features.Gameplay
     }
 
     /// <summary>
-    /// Sprint 23.9 — map / session obstacle prefab catalog for SpawnManager / RaceManager.
-    /// Weighted selection and random spawn are intentionally not implemented.
+    /// Sprint 23.9 / 23.10 — map / session obstacle prefab catalog.
+    /// Weighted pick + difficulty filter feed SpawnManager pool execution.
     /// </summary>
     [CreateAssetMenu(
         fileName = "ObstacleCatalog",
@@ -33,6 +32,8 @@ namespace GulfRun.Features.Gameplay
     public sealed class ObstacleCatalog : ScriptableObject
     {
         [SerializeField] private List<ObstacleCatalogEntry> entries = new List<ObstacleCatalogEntry>();
+
+        [NonSerialized] private List<WeightedOption<ObstacleCatalogEntry>> _pickScratch;
 
         public IReadOnlyList<ObstacleCatalogEntry> Entries => entries;
 
@@ -83,8 +84,71 @@ namespace GulfRun.Features.Gameplay
         }
 
         /// <summary>
+        /// Weighted pick among entries whose data difficulty fits the session tier.
+        /// Balancing of weights / spacing is deferred — filter only.
+        /// </summary>
+        public bool TryPickEntry(
+            IRandomSource random,
+            ObstacleDifficultyLevel difficulty,
+            out ObstacleCatalogEntry entry)
+        {
+            entry = null;
+            if (entries == null || entries.Count == 0 || random == null)
+            {
+                return false;
+            }
+
+            int maxDifficulty = ObstacleDifficultyLevelRules.MaxObstacleDataDifficulty(difficulty);
+            if (_pickScratch == null)
+            {
+                _pickScratch = new List<WeightedOption<ObstacleCatalogEntry>>(8);
+            }
+
+            _pickScratch.Clear();
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                ObstacleCatalogEntry candidate = entries[i];
+                if (candidate == null || candidate.Prefab == null || candidate.Data == null)
+                {
+                    continue;
+                }
+
+                if (candidate.Data.Difficulty > maxDifficulty)
+                {
+                    continue;
+                }
+
+                float weight = candidate.Data.SpawnWeight;
+                if (weight <= 0f)
+                {
+                    continue;
+                }
+
+                _pickScratch.Add(new WeightedOption<ObstacleCatalogEntry>(candidate, weight));
+            }
+
+            if (_pickScratch.Count == 0)
+            {
+                // Fallback: any valid prefab entry (difficulty prep may leave Easy empty).
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    ObstacleCatalogEntry candidate = entries[i];
+                    if (candidate == null || candidate.Prefab == null || candidate.Data == null)
+                    {
+                        continue;
+                    }
+
+                    float weight = candidate.Data.SpawnWeight > 0f ? candidate.Data.SpawnWeight : 1f;
+                    _pickScratch.Add(new WeightedOption<ObstacleCatalogEntry>(candidate, weight));
+                }
+            }
+
+            return WeightedSelector.TrySelect(_pickScratch, random, out entry) && entry != null;
+        }
+
+        /// <summary>
         /// Preloads pooled instances for each entry. Safe no-op when pool manager missing.
-        /// Does not place obstacles on the track.
         /// </summary>
         public void WarmPools(ObjectPoolManager pools, Transform parent = null)
         {

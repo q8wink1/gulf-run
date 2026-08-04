@@ -4,9 +4,9 @@ using UnityEngine;
 namespace GulfRun.Features.Gameplay
 {
     /// <summary>
-    /// Sprint 23.7 — dry-run spawn plan for one marker. Holds transform data only;
-    /// future sprints may <c>ObjectPoolManager.Get</c> at this pose. Never owns a
-    /// live gameplay instance.
+    /// Sprint 23.7 / 23.10 — spawn plan for one marker. Holds transform + lane;
+    /// SpawnManager may <c>ObjectPoolManager.Get</c> at this pose for obstacles.
+    /// Never owns a live gameplay instance.
     /// </summary>
     public readonly struct PlannedSpawnSlot
     {
@@ -15,19 +15,22 @@ namespace GulfRun.Features.Gameplay
         public readonly Quaternion WorldRotation;
         public readonly int SegmentInstanceId;
         public readonly int MarkerInstanceId;
+        public readonly RunnerLane Lane;
 
         public PlannedSpawnSlot(
             SpawnCategory category,
             Vector3 worldPosition,
             Quaternion worldRotation,
             int segmentInstanceId,
-            int markerInstanceId)
+            int markerInstanceId,
+            RunnerLane lane = RunnerLane.Center)
         {
             Category = category;
             WorldPosition = worldPosition;
             WorldRotation = worldRotation;
             SegmentInstanceId = segmentInstanceId;
             MarkerInstanceId = markerInstanceId;
+            Lane = lane;
         }
     }
 }

@@ -9,10 +9,10 @@ using UnityEngine.Events;
 namespace GulfRun.Features.Gameplay
 {
     /// <summary>
-    /// Sprint 23.8 — central race flow coordinator. Owns session state,
-    /// speed targets, and system references so Features can subscribe without
-    /// owning finish / obstacle damage / coin / multiplayer logic yet.
-    /// Sprint 23.9 adds an optional <see cref="ObstacleCatalog"/> ref (no spawn).
+    /// Sprint 23.8 / 23.10 — central race flow coordinator. Owns session state,
+    /// speed targets, and system references. Obstacles spawn via SpawnManager on
+    /// segment activate (playable without StartRace); hit feedback is routed
+    /// through <see cref="ObstacleGameplayBridge"/> (events only — no penalties).
     /// Starts in <see cref="RaceState.Waiting"/>; callers invoke
     /// <see cref="BeginCountdown"/> / <see cref="StartRace"/> later.
     /// </summary>
@@ -26,9 +26,15 @@ namespace GulfRun.Features.Gameplay
         [SerializeField] private SpawnManager spawnManager;
         [SerializeField] private GameplayHudController hud;
 
-        [Header("Obstacle Foundation (Sprint 23.9)")]
-        [Tooltip("Optional catalog ref for future race orchestration. No spawn / damage.")]
+        [Header("Obstacle Gameplay (Sprint 23.10)")]
+        [Tooltip("Catalog mirrored on SpawnManager for race-flow access.")]
         [SerializeField] private ObstacleCatalog obstacleCatalog;
+
+        [Tooltip("Optional hit-feedback bridge (anim / shake / sfx / speed stubs).")]
+        [SerializeField] private ObstacleGameplayBridge obstacleGameplayBridge;
+
+        [Tooltip("Prepared difficulty pushed to SpawnManager — no balancing yet.")]
+        [SerializeField] private ObstacleDifficultyLevel obstacleDifficulty = ObstacleDifficultyLevel.Medium;
 
         [Header("Speed (future progressive run)")]
         [Tooltip("Baseline race speed used for TargetSpeed reset and player scale.")]
@@ -74,6 +80,8 @@ namespace GulfRun.Features.Gameplay
         public SpawnManager SpawnManager => spawnManager;
         public GameplayHudController Hud => hud;
         public ObstacleCatalog ObstacleCatalog => obstacleCatalog;
+        public ObstacleGameplayBridge ObstacleGameplayBridge => obstacleGameplayBridge;
+        public ObstacleDifficultyLevel ObstacleDifficulty => obstacleDifficulty;
 
         /// <summary>C# event for Features subscribers (preferred over UnityEvent).</summary>
         public event Action OnRaceStart;
@@ -92,6 +100,28 @@ namespace GulfRun.Features.Gameplay
             _currentSpeed = 0f;
             _state = RaceState.Waiting;
             _isPaused = false;
+            ApplyObstacleDifficultyToSpawn();
+        }
+
+        private void Start()
+        {
+            if (obstacleGameplayBridge == null)
+            {
+                obstacleGameplayBridge = GetComponent<ObstacleGameplayBridge>();
+            }
+
+            ApplyObstacleDifficultyToSpawn();
+            if (spawnManager != null)
+            {
+                spawnManager.WarmPools(spawnManager.transform);
+            }
+        }
+
+        /// <summary>Prepared difficulty only — no spawn spacing/weight balancing.</summary>
+        public void SetObstacleDifficulty(ObstacleDifficultyLevel difficulty)
+        {
+            obstacleDifficulty = difficulty;
+            ApplyObstacleDifficultyToSpawn();
         }
 
         private void Update()
@@ -130,6 +160,12 @@ namespace GulfRun.Features.Gameplay
             _targetSpeed = Mathf.Clamp(initialSpeed, 0f, maximumSpeed);
             _currentSpeed = _targetSpeed;
             EnsureTimeScaleRunning();
+            ApplyObstacleDifficultyToSpawn();
+            if (spawnManager != null)
+            {
+                spawnManager.WarmPools(spawnManager.transform);
+            }
+
             SetState(RaceState.Running);
             TryApplySpeedToPlayer();
             RaiseStart();
@@ -229,6 +265,20 @@ namespace GulfRun.Features.Gameplay
             }
 
             ApplySpeedToPlayer();
+        }
+
+        private void ApplyObstacleDifficultyToSpawn()
+        {
+            if (spawnManager == null)
+            {
+                return;
+            }
+
+            spawnManager.SetObstacleDifficulty(obstacleDifficulty);
+            if (obstacleCatalog != null && spawnManager.ObstacleCatalog == null)
+            {
+                spawnManager.SetObstacleCatalog(obstacleCatalog);
+            }
         }
 
         private void EnsureTimeScaleRunning()

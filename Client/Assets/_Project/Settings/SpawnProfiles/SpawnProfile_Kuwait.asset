@@ -16,10 +16,10 @@ MonoBehaviour:
   groups:
   - category: 0
     enabled: 1
-    spawnProbability: 0.55
-    spawnDensity: 0.7
-    minimumSpacing: 8.0
-    maximumSpacing: 22.0
+    spawnProbability: 0.7
+    spawnDensity: 0.85
+    minimumSpacing: 6.0
+    maximumSpacing: 18.0
   - category: 1
     enabled: 1
     spawnProbability: 0.75
