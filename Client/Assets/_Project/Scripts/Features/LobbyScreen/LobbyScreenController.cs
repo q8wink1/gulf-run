@@ -7,8 +7,8 @@ namespace GulfRun.Features.LobbyScreen
 {
     /// <summary>
     /// Premium Lobby UI (Sprint 21.1–21.5). Back → Play Menu.
-    /// Ready / Play prepared toggles are local visual demos only — no
-    /// SessionManager, matchmaking, kick, host permissions, or network sync.
+    /// Ready is a local visual demo only. Play Start Match (Sprint 22.1) loads
+    /// MapVoting UI-only — no SessionManager, matchmaking, kick, or network sync.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class LobbyScreenController : MonoBehaviour
@@ -69,8 +69,8 @@ namespace GulfRun.Features.LobbyScreen
                 readyButtonLabel.color = ReadyIdleLabel;
             }
 
-            // Default Play: disabled "Waiting for Players..." (Sprint 21.4).
-            ApplyPlayPreparedVisual(false);
+            // Sprint 22.1 temporary Host preview: Start Match → MapVoting (UI-only).
+            ApplyPlayPreparedVisual(true);
         }
 
         private void OnDestroy()
@@ -99,14 +99,20 @@ namespace GulfRun.Features.LobbyScreen
 
         private void OnPlayClicked()
         {
-            // Optional local demo: prepared chrome only when already interactable.
-            // Default scene keeps Play disabled; ContextMenu can flip prepared state.
+            // Sprint 22.1 temporary nav — LoadMapVoting only when Start Match is prepared.
+            // No SessionManager.RequestHostStart, ready checks, or matchmaking.
             if (playButton == null || !playButton.interactable)
             {
                 return;
             }
 
-            ApplyPlayPreparedVisual(!_playPreparedVisual);
+            if (SceneManager.Instance != null)
+            {
+                SceneManager.Instance.LoadMapVoting();
+                return;
+            }
+
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.MapVotingSceneName);
         }
 
         private void ApplyReadyVisual(bool ready)

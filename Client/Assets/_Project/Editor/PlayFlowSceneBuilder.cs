@@ -3,6 +3,7 @@ using System.IO;
 using GulfRun.Features.InviteFriends;
 using GulfRun.Features.LobbyScreen;
 using GulfRun.Features.MainMenu;
+using GulfRun.Features.MapVotingScreen;
 using GulfRun.Features.PlayMenu;
 using GulfRun.Features.QuickPlay;
 using UnityEditor;
@@ -25,6 +26,7 @@ namespace GulfRun.Editor
         private const string QuickPlayScenePath = "Assets/_Project/Scenes/QuickPlay.unity";
         private const string InviteFriendsScenePath = "Assets/_Project/Scenes/InviteFriends.unity";
         private const string LobbyScreenScenePath = "Assets/_Project/Scenes/LobbyScreen.unity";
+        private const string MapVotingScenePath = "Assets/_Project/Scenes/MapVoting.unity";
         private const string MainMenuScenePath = "Assets/_Project/Scenes/MainMenu.unity";
         private const string BackgroundGuid = "a18b0000000000000000000000000001";
 
@@ -64,6 +66,9 @@ namespace GulfRun.Editor
 
         [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.5)")]
         public static void BuildLobbyScreenFromMenu() => BuildLobbyScreenBatch();
+
+        [MenuItem("GulfRun/Play Flow/Build Map Voting Screen (Sprint 22.1)")]
+        public static void BuildMapVotingScreenFromMenu() => BuildMapVotingScreenBatch();
 
         public static void RunBatch()
         {
@@ -121,6 +126,35 @@ namespace GulfRun.Editor
             }
 
             ExitWithFailures(failures, "[PlayFlow] PASS — LobbyScreen Sprint 21.5 Final Polish OK.");
+        }
+
+        /// <summary>
+        /// Sprint 22.1: rebuild MapVoting as premium UI-only foundation (three map
+        /// cards, timer/players/votes placeholders). No vote logic, countdown,
+        /// networking, or SessionManager. Does not rebuild LobbyScreen / PlayMenu.
+        /// </summary>
+        public static void BuildMapVotingScreenBatch()
+        {
+            var failures = new List<string>();
+
+            try
+            {
+                BuildMapVotingScreenScene(failures);
+                EnsureBuildSettings(failures);
+                ValidateMapVotingScreen(failures);
+
+                if (CoreSceneManager.MapVotingSceneName != "MapVoting")
+                {
+                    failures.Add("SceneManager.MapVotingSceneName mismatch.");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                failures.Add("Unhandled: " + ex);
+                Debug.LogException(ex);
+            }
+
+            ExitWithFailures(failures, "[PlayFlow] PASS — MapVoting Sprint 22.1 UI foundation OK.");
         }
 
         /// <summary>
@@ -815,6 +849,308 @@ namespace GulfRun.Editor
             SaveScene(scene, LobbyScreenScenePath, failures);
         }
 
+        private static void BuildMapVotingScreenScene(List<string> failures)
+        {
+            Sprite background = LoadBackground(failures);
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            EnsureEventSystem(scene);
+
+            GameObject canvasGo = CreateOverlayCanvas("MapVotingCanvas");
+            MapVotingScreenController controller = canvasGo.AddComponent<MapVotingScreenController>();
+            RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
+
+            Image bg = CreateUiImage("Background", canvasRt, stretch: true);
+            bg.sprite = background;
+            bg.preserveAspect = false;
+            bg.raycastTarget = false;
+
+            CreateSafeArea(canvasRt);
+
+            Button backButton = CreateLabeledButton("BackButton", canvasRt, "Back", 168f, 64f, ButtonDark, GoldBright);
+            PlaceTopLeft(backButton.GetComponent<RectTransform>(), new Vector2(48f, -52f));
+
+            // Header — title + subtitle
+            RectTransform headerRoot = CreateRect("HeaderRoot", canvasRt);
+            headerRoot.anchorMin = new Vector2(0.5f, 1f);
+            headerRoot.anchorMax = new Vector2(0.5f, 1f);
+            headerRoot.pivot = new Vector2(0.5f, 1f);
+            headerRoot.anchoredPosition = new Vector2(0f, -56f);
+            headerRoot.sizeDelta = new Vector2(1400f, 120f);
+
+            Text title = CreateUiText(
+                "TitleText",
+                headerRoot,
+                "Choose Your Map",
+                48,
+                FontStyle.Bold,
+                GoldBright,
+                TextAnchor.MiddleCenter);
+            RectTransform titleRt = title.rectTransform;
+            titleRt.anchorMin = new Vector2(0f, 0.42f);
+            titleRt.anchorMax = new Vector2(1f, 1f);
+            titleRt.offsetMin = new Vector2(24f, 0f);
+            titleRt.offsetMax = new Vector2(-24f, -4f);
+
+            Text subtitle = CreateUiText(
+                "SubtitleText",
+                headerRoot,
+                "Vote together to decide the next destination.",
+                24,
+                FontStyle.Normal,
+                TextMuted,
+                TextAnchor.MiddleCenter);
+            RectTransform subtitleRt = subtitle.rectTransform;
+            subtitleRt.anchorMin = new Vector2(0f, 0f);
+            subtitleRt.anchorMax = new Vector2(1f, 0.48f);
+            subtitleRt.offsetMin = new Vector2(40f, 4f);
+            subtitleRt.offsetMax = new Vector2(-40f, 0f);
+
+            // Center — three large Gulf map cards
+            const float cardWidth = 500f;
+            const float cardHeight = 620f;
+            const float cardGap = 36f;
+            float cardsWidth = (cardWidth * 3f) + (cardGap * 2f);
+            RectTransform cardsRoot = CreateRect("CardsRoot", canvasRt);
+            cardsRoot.anchorMin = new Vector2(0.5f, 0.5f);
+            cardsRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            cardsRoot.pivot = new Vector2(0.5f, 0.5f);
+            cardsRoot.anchoredPosition = new Vector2(0f, 8f);
+            cardsRoot.sizeDelta = new Vector2(cardsWidth, cardHeight);
+
+            var voteButtons = new Button[3];
+            var cardBorders = new Image[3];
+            var voteImages = new Image[3];
+            var voteLabels = new Text[3];
+
+            CreateMapCard(
+                "MapCard_0",
+                cardsRoot,
+                0,
+                "Kuwait City",
+                "Neon towers and desert highways through the capital skyline.",
+                new Color(0.72f, 0.48f, 0.28f, 1f),
+                new Color(0.42f, 0.28f, 0.16f, 1f),
+                cardWidth,
+                cardHeight,
+                cardGap,
+                out voteButtons[0],
+                out cardBorders[0],
+                out voteImages[0],
+                out voteLabels[0]);
+
+            CreateMapCard(
+                "MapCard_1",
+                cardsRoot,
+                1,
+                "Dubai Marina",
+                "Coastal expressways beside glass towers and marina lights.",
+                new Color(0.22f, 0.48f, 0.68f, 1f),
+                new Color(0.12f, 0.28f, 0.42f, 1f),
+                cardWidth,
+                cardHeight,
+                cardGap,
+                out voteButtons[1],
+                out cardBorders[1],
+                out voteImages[1],
+                out voteLabels[1]);
+
+            CreateMapCard(
+                "MapCard_2",
+                cardsRoot,
+                2,
+                "Muscat Coast",
+                "Mountain curves meeting turquoise Gulf waters at dusk.",
+                new Color(0.28f, 0.58f, 0.52f, 1f),
+                new Color(0.55f, 0.42f, 0.28f, 1f),
+                cardWidth,
+                cardHeight,
+                cardGap,
+                out voteButtons[2],
+                out cardBorders[2],
+                out voteImages[2],
+                out voteLabels[2]);
+
+            // Bottom — timer / players / votes placeholders (static copy only)
+            RectTransform footerRoot = CreateRect("FooterRoot", canvasRt);
+            footerRoot.anchorMin = new Vector2(0.5f, 0f);
+            footerRoot.anchorMax = new Vector2(0.5f, 0f);
+            footerRoot.pivot = new Vector2(0.5f, 0f);
+            footerRoot.anchoredPosition = new Vector2(0f, 40f);
+            footerRoot.sizeDelta = new Vector2(1400f, 120f);
+
+            Image footerBorder = footerRoot.gameObject.AddComponent<Image>();
+            footerBorder.color = PanelBorder;
+            footerBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(footerRoot.gameObject);
+
+            Image footerFill = CreateUiImage("Fill", footerRoot, stretch: true);
+            footerFill.color = PanelBg;
+            footerFill.raycastTarget = false;
+            footerFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            footerFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Text timerText = CreateUiText(
+                "TimerText",
+                footerRoot,
+                "20 Seconds Remaining",
+                28,
+                FontStyle.Bold,
+                GoldBright,
+                TextAnchor.MiddleCenter);
+            RectTransform timerRt = timerText.rectTransform;
+            timerRt.anchorMin = new Vector2(0f, 0.48f);
+            timerRt.anchorMax = new Vector2(1f, 1f);
+            timerRt.offsetMin = new Vector2(28f, 0f);
+            timerRt.offsetMax = new Vector2(-28f, -8f);
+
+            Text playersText = CreateUiText(
+                "PlayersText",
+                footerRoot,
+                "Total Players 4/4",
+                22,
+                FontStyle.Bold,
+                TextPrimary,
+                TextAnchor.MiddleLeft);
+            RectTransform playersRt = playersText.rectTransform;
+            playersRt.anchorMin = new Vector2(0f, 0f);
+            playersRt.anchorMax = new Vector2(0.5f, 0.52f);
+            playersRt.offsetMin = new Vector2(48f, 10f);
+            playersRt.offsetMax = new Vector2(-12f, -6f);
+
+            Text votesText = CreateUiText(
+                "VotesText",
+                footerRoot,
+                "Current Votes 0",
+                22,
+                FontStyle.Bold,
+                TextPrimary,
+                TextAnchor.MiddleRight);
+            RectTransform votesRt = votesText.rectTransform;
+            votesRt.anchorMin = new Vector2(0.5f, 0f);
+            votesRt.anchorMax = new Vector2(1f, 0.52f);
+            votesRt.offsetMin = new Vector2(12f, 10f);
+            votesRt.offsetMax = new Vector2(-48f, -6f);
+
+            SerializedObject so = new SerializedObject(controller);
+            so.FindProperty("backButton").objectReferenceValue = backButton;
+            SerializedProperty voteButtonsProp = so.FindProperty("voteButtons");
+            SerializedProperty cardBordersProp = so.FindProperty("cardBorders");
+            SerializedProperty voteImagesProp = so.FindProperty("voteButtonImages");
+            SerializedProperty voteLabelsProp = so.FindProperty("voteButtonLabels");
+            voteButtonsProp.arraySize = 3;
+            cardBordersProp.arraySize = 3;
+            voteImagesProp.arraySize = 3;
+            voteLabelsProp.arraySize = 3;
+            for (int i = 0; i < 3; i++)
+            {
+                voteButtonsProp.GetArrayElementAtIndex(i).objectReferenceValue = voteButtons[i];
+                cardBordersProp.GetArrayElementAtIndex(i).objectReferenceValue = cardBorders[i];
+                voteImagesProp.GetArrayElementAtIndex(i).objectReferenceValue = voteImages[i];
+                voteLabelsProp.GetArrayElementAtIndex(i).objectReferenceValue = voteLabels[i];
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            SaveScene(scene, MapVotingScenePath, failures);
+        }
+
+        private static void CreateMapCard(
+            string name,
+            RectTransform parent,
+            int index,
+            string mapName,
+            string description,
+            Color previewTop,
+            Color previewBottom,
+            float cardWidth,
+            float cardHeight,
+            float cardGap,
+            out Button voteButton,
+            out Image cardBorder,
+            out Image voteImage,
+            out Text voteLabel)
+        {
+            float x = (index - 1) * (cardWidth + cardGap);
+            RectTransform card = CreateRect(name, parent);
+            card.anchorMin = new Vector2(0.5f, 0.5f);
+            card.anchorMax = new Vector2(0.5f, 0.5f);
+            card.pivot = new Vector2(0.5f, 0.5f);
+            card.anchoredPosition = new Vector2(x, 0f);
+            card.sizeDelta = new Vector2(cardWidth, cardHeight);
+
+            cardBorder = card.gameObject.AddComponent<Image>();
+            cardBorder.color = PanelBorder;
+            cardBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(card.gameObject);
+
+            Image fill = CreateUiImage("Fill", card, stretch: true);
+            fill.color = CardFill;
+            fill.raycastTarget = false;
+            fill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            fill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            // Large map preview placeholder — stacked colored panels (artwork later).
+            RectTransform previewRoot = CreateRect("MapPreview", card);
+            previewRoot.anchorMin = new Vector2(0.5f, 1f);
+            previewRoot.anchorMax = new Vector2(0.5f, 1f);
+            previewRoot.pivot = new Vector2(0.5f, 1f);
+            previewRoot.anchoredPosition = new Vector2(0f, -28f);
+            previewRoot.sizeDelta = new Vector2(cardWidth - 48f, 280f);
+
+            Image previewBorder = previewRoot.gameObject.AddComponent<Image>();
+            previewBorder.color = new Color(Gold.r, Gold.g, Gold.b, 0.35f);
+            previewBorder.raycastTarget = false;
+
+            Image previewTopImg = CreateUiImage("PreviewTop", previewRoot, stretch: true);
+            previewTopImg.color = previewTop;
+            previewTopImg.raycastTarget = false;
+            previewTopImg.rectTransform.offsetMin = new Vector2(3f, 90f);
+            previewTopImg.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Image previewBottomImg = CreateUiImage("PreviewBottom", previewRoot, stretch: true);
+            previewBottomImg.color = previewBottom;
+            previewBottomImg.raycastTarget = false;
+            previewBottomImg.rectTransform.offsetMin = new Vector2(3f, 3f);
+            previewBottomImg.rectTransform.offsetMax = new Vector2(-3f, -188f);
+
+            Text nameText = CreateUiText("MapName", card, mapName, 32, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
+            RectTransform nameRt = nameText.rectTransform;
+            nameRt.anchorMin = new Vector2(0f, 0.38f);
+            nameRt.anchorMax = new Vector2(1f, 0.48f);
+            nameRt.offsetMin = new Vector2(20f, 0f);
+            nameRt.offsetMax = new Vector2(-20f, 0f);
+
+            Text descText = CreateUiText(
+                "Description",
+                card,
+                description,
+                20,
+                FontStyle.Normal,
+                TextMuted,
+                TextAnchor.UpperCenter);
+            descText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            descText.verticalOverflow = VerticalWrapMode.Overflow;
+            RectTransform descRt = descText.rectTransform;
+            descRt.anchorMin = new Vector2(0f, 0.18f);
+            descRt.anchorMax = new Vector2(1f, 0.38f);
+            descRt.offsetMin = new Vector2(28f, 0f);
+            descRt.offsetMax = new Vector2(-28f, 0f);
+
+            voteButton = CreateLabeledButton("VoteButton", card, "Vote", 280f, 72f, Gold, GoldButtonLabel);
+            RectTransform voteRt = voteButton.GetComponent<RectTransform>();
+            voteRt.anchorMin = new Vector2(0.5f, 0f);
+            voteRt.anchorMax = new Vector2(0.5f, 0f);
+            voteRt.pivot = new Vector2(0.5f, 0f);
+            voteRt.anchoredPosition = new Vector2(0f, 28f);
+            voteButton.transition = Selectable.Transition.None;
+            voteImage = voteButton.GetComponent<Image>();
+            voteLabel = voteButton.GetComponentInChildren<Text>();
+            if (voteLabel != null)
+            {
+                voteLabel.fontSize = 28;
+            }
+        }
+
         private static void CreateInactiveStatusMessage(RectTransform parent, string name, string message)
         {
             Text text = CreateUiText(name, parent, message, 26, FontStyle.Bold, TextMuted, TextAnchor.MiddleCenter);
@@ -1136,6 +1472,7 @@ namespace GulfRun.Editor
             InsertSceneAfter(QuickPlayScenePath, PlayMenuScenePath, failures);
             InsertSceneAfter(InviteFriendsScenePath, QuickPlayScenePath, failures);
             InsertSceneAfter(LobbyScreenScenePath, InviteFriendsScenePath, failures);
+            InsertSceneAfter(MapVotingScenePath, LobbyScreenScenePath, failures);
         }
 
         private static void InsertSceneAfter(string scenePath, string afterPath, List<string> failures)
@@ -1559,6 +1896,132 @@ namespace GulfRun.Editor
 
             // Pre-race Lobby scene must remain untouched in build list.
             RequireInBuild("Assets/_Project/Scenes/Lobby.unity", failures);
+        }
+
+        private static void ValidateMapVotingScreen(List<string> failures)
+        {
+            Scene scene = EditorSceneManager.OpenScene(MapVotingScenePath, OpenSceneMode.Single);
+            Require(FindDeep(scene, "MapVotingCanvas"), "MapVotingCanvas", failures);
+            Require(FindDeep(scene, "Background"), "MapVoting Background", failures);
+            Require(FindDeep(scene, "SafeArea"), "MapVoting SafeArea", failures);
+            Require(FindDeep(scene, "BackButton"), "MapVoting BackButton", failures);
+            Require(FindDeep(scene, "HeaderRoot"), "MapVoting HeaderRoot", failures);
+            Require(FindDeep(scene, "TitleText"), "MapVoting TitleText", failures);
+            Require(FindDeep(scene, "SubtitleText"), "MapVoting SubtitleText", failures);
+            Require(FindDeep(scene, "CardsRoot"), "MapVoting CardsRoot", failures);
+            Require(FindDeep(scene, "MapCard_0"), "MapCard_0", failures);
+            Require(FindDeep(scene, "MapCard_1"), "MapCard_1", failures);
+            Require(FindDeep(scene, "MapCard_2"), "MapCard_2", failures);
+            Require(FindDeep(scene, "FooterRoot"), "MapVoting FooterRoot", failures);
+            Require(FindDeep(scene, "TimerText"), "MapVoting TimerText", failures);
+            Require(FindDeep(scene, "PlayersText"), "MapVoting PlayersText", failures);
+            Require(FindDeep(scene, "VotesText"), "MapVoting VotesText", failures);
+
+            Text title = FindDeep(scene, "TitleText")?.GetComponent<Text>();
+            if (title == null || title.text != "Choose Your Map")
+            {
+                failures.Add("MapVoting TitleText must read 'Choose Your Map'.");
+            }
+
+            Text subtitle = FindDeep(scene, "SubtitleText")?.GetComponent<Text>();
+            if (subtitle == null || subtitle.text != "Vote together to decide the next destination.")
+            {
+                failures.Add("MapVoting SubtitleText copy mismatch.");
+            }
+
+            Text timer = FindDeep(scene, "TimerText")?.GetComponent<Text>();
+            if (timer == null || timer.text != "20 Seconds Remaining")
+            {
+                failures.Add("MapVoting TimerText must read '20 Seconds Remaining'.");
+            }
+
+            Text players = FindDeep(scene, "PlayersText")?.GetComponent<Text>();
+            if (players == null || players.text != "Total Players 4/4")
+            {
+                failures.Add("MapVoting PlayersText must read 'Total Players 4/4'.");
+            }
+
+            Text votes = FindDeep(scene, "VotesText")?.GetComponent<Text>();
+            if (votes == null || votes.text != "Current Votes 0")
+            {
+                failures.Add("MapVoting VotesText must read 'Current Votes 0'.");
+            }
+
+            string[] expectedNames = { "Kuwait City", "Dubai Marina", "Muscat Coast" };
+            for (int i = 0; i < 3; i++)
+            {
+                GameObject card = FindDeep(scene, "MapCard_" + i);
+                if (card == null)
+                {
+                    continue;
+                }
+
+                Require(FindChildRecursive(card.transform, "MapPreview")?.gameObject, "MapCard_" + i + " MapPreview", failures);
+                Require(FindChildRecursive(card.transform, "MapName")?.gameObject, "MapCard_" + i + " MapName", failures);
+                Require(FindChildRecursive(card.transform, "Description")?.gameObject, "MapCard_" + i + " Description", failures);
+                Require(FindChildRecursive(card.transform, "VoteButton")?.gameObject, "MapCard_" + i + " VoteButton", failures);
+
+                Text mapName = FindChildRecursive(card.transform, "MapName")?.GetComponent<Text>();
+                if (mapName == null || mapName.text != expectedNames[i])
+                {
+                    failures.Add("MapCard_" + i + " MapName expected '" + expectedNames[i] + "'.");
+                }
+            }
+
+            // Old OnGUI vote session must not be active on this UI-only scene.
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                if (root.name == "MapVotingUI" && root.activeInHierarchy)
+                {
+                    failures.Add("Legacy MapVotingUI must not remain active on MapVoting scene.");
+                }
+            }
+
+            GameObject safeAreaGo = FindDeep(scene, "SafeArea");
+            if (safeAreaGo != null)
+            {
+                RectTransform safeRt = safeAreaGo.GetComponent<RectTransform>();
+                if (safeRt == null ||
+                    safeRt.sizeDelta != new Vector2(-96f, -86f) ||
+                    !Mathf.Approximately(safeRt.anchoredPosition.y, -9f))
+                {
+                    failures.Add("MapVoting SafeArea expected Main Menu insets (sizeDelta -96/-86, y -9).");
+                }
+            }
+
+            MapVotingScreenController controller = FindDeep(scene, "MapVotingCanvas")?.GetComponent<MapVotingScreenController>();
+            if (controller == null)
+            {
+                failures.Add("MapVotingCanvas missing MapVotingScreenController.");
+            }
+            else
+            {
+                SerializedObject so = new SerializedObject(controller);
+                if (so.FindProperty("backButton").objectReferenceValue == null)
+                {
+                    failures.Add("MapVotingScreenController.backButton must be wired.");
+                }
+
+                SerializedProperty voteButtons = so.FindProperty("voteButtons");
+                if (voteButtons == null || voteButtons.arraySize != 3)
+                {
+                    failures.Add("MapVotingScreenController.voteButtons must have 3 entries.");
+                }
+                else
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        if (voteButtons.GetArrayElementAtIndex(i).objectReferenceValue == null)
+                        {
+                            failures.Add("MapVotingScreenController.voteButtons[" + i + "] must be wired.");
+                        }
+                    }
+                }
+            }
+
+            RequireCanvasScaler(FindDeep(scene, "MapVotingCanvas"), failures);
+            RequireInBuild(MapVotingScenePath, failures);
+            RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
         }
 
         private static void ValidateMainMenuWiring(List<string> failures)

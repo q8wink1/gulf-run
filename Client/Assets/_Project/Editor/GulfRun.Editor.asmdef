@@ -13,6 +13,7 @@
         "GulfRun.Features.QuickPlay",
         "GulfRun.Features.InviteFriends",
         "GulfRun.Features.LobbyScreen",
+        "GulfRun.Features.MapVotingScreen",
         "UnityEngine.UI"
     ],
     "includePlatforms": [
