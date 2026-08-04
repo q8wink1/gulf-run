@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace GulfRun.Features.MapVotingScreen
 {
     /// <summary>
-    /// Premium Map Voting UI (Sprint 22.2). Back → LobbyScreen.
+    /// Premium Map Voting UI (Sprint 22.3 HUD + 22.2 cards). Back → LobbyScreen.
     /// Vote buttons are local visual highlight only — no countdown, vote
     /// counting, networking, SessionManager, or matchmaking.
     /// </summary>

@@ -67,7 +67,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.5)")]
         public static void BuildLobbyScreenFromMenu() => BuildLobbyScreenBatch();
 
-        [MenuItem("GulfRun/Play Flow/Build Map Voting Screen (Sprint 22.2)")]
+        [MenuItem("GulfRun/Play Flow/Build Map Voting Screen (Sprint 22.3)")]
         public static void BuildMapVotingScreenFromMenu() => BuildMapVotingScreenBatch();
 
         public static void RunBatch()
@@ -129,9 +129,10 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 22.2: rebuild MapVoting premium map cards (flag, difficulty,
-        /// duration, selected/hover/locked visuals). No vote logic, countdown,
-        /// networking, or SessionManager. Does not rebuild LobbyScreen / PlayMenu.
+        /// Sprint 22.3: rebuild MapVoting Voting HUD (TimerPanel, StatusPanel,
+        /// Stats footer, VoteConfirmation) on top of Sprint 22.2 premium cards.
+        /// No vote counting, countdown logic, networking, or SessionManager.
+        /// Does not rebuild LobbyScreen / PlayMenu / Main Menu.
         /// </summary>
         public static void BuildMapVotingScreenBatch()
         {
@@ -154,7 +155,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — MapVoting Sprint 22.2 premium map cards OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — MapVoting Sprint 22.3 Voting HUD UI OK.");
         }
 
         /// <summary>
@@ -869,19 +870,110 @@ namespace GulfRun.Editor
             Button backButton = CreateLabeledButton("BackButton", canvasRt, "Back", 168f, 64f, ButtonDark, GoldBright);
             PlaceTopLeft(backButton.GetComponent<RectTransform>(), new Vector2(48f, -52f));
 
-            // Header — title + subtitle
+            // Sprint 22.3 — Voting Timer (top-center premium panel, static placeholder)
+            RectTransform timerPanel = CreateRect("TimerPanel", canvasRt);
+            timerPanel.anchorMin = new Vector2(0.5f, 1f);
+            timerPanel.anchorMax = new Vector2(0.5f, 1f);
+            timerPanel.pivot = new Vector2(0.5f, 1f);
+            timerPanel.anchoredPosition = new Vector2(0f, -40f);
+            timerPanel.sizeDelta = new Vector2(300f, 118f);
+
+            Image timerBorder = timerPanel.gameObject.AddComponent<Image>();
+            timerBorder.color = PanelBorder;
+            timerBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(timerPanel.gameObject);
+
+            Image timerFill = CreateUiImage("Fill", timerPanel, stretch: true);
+            timerFill.color = PanelBg;
+            timerFill.raycastTarget = false;
+            timerFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            timerFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Text timerText = CreateUiText(
+                "TimerText",
+                timerPanel,
+                "20s",
+                42,
+                FontStyle.Bold,
+                GoldBright,
+                TextAnchor.MiddleCenter);
+            RectTransform timerTextRt = timerText.rectTransform;
+            timerTextRt.anchorMin = new Vector2(0f, 0.38f);
+            timerTextRt.anchorMax = new Vector2(1f, 1f);
+            timerTextRt.offsetMin = new Vector2(16f, 0f);
+            timerTextRt.offsetMax = new Vector2(-16f, -6f);
+
+            RectTransform progressTrack = CreateRect("ProgressBarTrack", timerPanel);
+            progressTrack.anchorMin = new Vector2(0.5f, 0f);
+            progressTrack.anchorMax = new Vector2(0.5f, 0f);
+            progressTrack.pivot = new Vector2(0.5f, 0f);
+            progressTrack.anchoredPosition = new Vector2(0f, 16f);
+            progressTrack.sizeDelta = new Vector2(240f, 14f);
+
+            Image progressTrackImg = progressTrack.gameObject.AddComponent<Image>();
+            progressTrackImg.color = new Color(0.06f, 0.05f, 0.06f, 0.95f);
+            progressTrackImg.raycastTarget = false;
+
+            Image progressFill = CreateUiImage("ProgressBarFill", progressTrack, stretch: true);
+            progressFill.color = Gold;
+            progressFill.raycastTarget = false;
+            progressFill.type = Image.Type.Filled;
+            progressFill.fillMethod = Image.FillMethod.Horizontal;
+            progressFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            progressFill.fillAmount = 1f; // static placeholder — no countdown logic
+            progressFill.rectTransform.offsetMin = new Vector2(2f, 2f);
+            progressFill.rectTransform.offsetMax = new Vector2(-2f, -2f);
+
+            // Sprint 22.3 — Current Status (below timer; visual placeholders only)
+            RectTransform statusPanel = CreateRect("StatusPanel", canvasRt);
+            statusPanel.anchorMin = new Vector2(0.5f, 1f);
+            statusPanel.anchorMax = new Vector2(0.5f, 1f);
+            statusPanel.pivot = new Vector2(0.5f, 1f);
+            statusPanel.anchoredPosition = new Vector2(0f, -168f);
+            statusPanel.sizeDelta = new Vector2(920f, 64f);
+
+            Image statusBorder = statusPanel.gameObject.AddComponent<Image>();
+            statusBorder.color = PanelBorder;
+            statusBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(statusPanel.gameObject);
+
+            Image statusFill = CreateUiImage("Fill", statusPanel, stretch: true);
+            statusFill.color = PanelBg;
+            statusFill.raycastTarget = false;
+            statusFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            statusFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Text statusText = CreateUiText(
+                "StatusText",
+                statusPanel,
+                "Players are voting...",
+                24,
+                FontStyle.Bold,
+                TextMuted,
+                TextAnchor.MiddleCenter);
+            RectTransform statusTextRt = statusText.rectTransform;
+            statusTextRt.anchorMin = new Vector2(0f, 0f);
+            statusTextRt.anchorMax = new Vector2(1f, 1f);
+            statusTextRt.offsetMin = new Vector2(24f, 6f);
+            statusTextRt.offsetMax = new Vector2(-24f, -6f);
+
+            CreateInactiveStatusMessage(statusPanel, "StatusMsg_WaitingForPlayers", "Waiting for players...");
+            CreateInactiveStatusMessage(statusPanel, "StatusMsg_PlayersVoting", "Players are voting...");
+            CreateInactiveStatusMessage(statusPanel, "StatusMsg_FinalizingResults", "Finalizing results...");
+
+            // Header — title + subtitle (below Voting HUD)
             RectTransform headerRoot = CreateRect("HeaderRoot", canvasRt);
             headerRoot.anchorMin = new Vector2(0.5f, 1f);
             headerRoot.anchorMax = new Vector2(0.5f, 1f);
             headerRoot.pivot = new Vector2(0.5f, 1f);
-            headerRoot.anchoredPosition = new Vector2(0f, -56f);
-            headerRoot.sizeDelta = new Vector2(1400f, 120f);
+            headerRoot.anchoredPosition = new Vector2(0f, -242f);
+            headerRoot.sizeDelta = new Vector2(1400f, 96f);
 
             Text title = CreateUiText(
                 "TitleText",
                 headerRoot,
                 "Choose Your Map",
-                48,
+                44,
                 FontStyle.Bold,
                 GoldBright,
                 TextAnchor.MiddleCenter);
@@ -889,23 +981,23 @@ namespace GulfRun.Editor
             titleRt.anchorMin = new Vector2(0f, 0.42f);
             titleRt.anchorMax = new Vector2(1f, 1f);
             titleRt.offsetMin = new Vector2(24f, 0f);
-            titleRt.offsetMax = new Vector2(-24f, -4f);
+            titleRt.offsetMax = new Vector2(-24f, -2f);
 
             Text subtitle = CreateUiText(
                 "SubtitleText",
                 headerRoot,
                 "Vote together to decide the next destination.",
-                24,
+                22,
                 FontStyle.Normal,
                 TextMuted,
                 TextAnchor.MiddleCenter);
             RectTransform subtitleRt = subtitle.rectTransform;
             subtitleRt.anchorMin = new Vector2(0f, 0f);
             subtitleRt.anchorMax = new Vector2(1f, 0.48f);
-            subtitleRt.offsetMin = new Vector2(40f, 4f);
+            subtitleRt.offsetMin = new Vector2(40f, 2f);
             subtitleRt.offsetMax = new Vector2(-40f, 0f);
 
-            // Center — three equal premium Gulf map cards
+            // Center — three equal premium Gulf map cards (Sprint 22.2 preserved)
             const float cardWidth = 500f;
             const float cardHeight = 680f;
             const float cardGap = 36f;
@@ -914,7 +1006,7 @@ namespace GulfRun.Editor
             cardsRoot.anchorMin = new Vector2(0.5f, 0.5f);
             cardsRoot.anchorMax = new Vector2(0.5f, 0.5f);
             cardsRoot.pivot = new Vector2(0.5f, 0.5f);
-            cardsRoot.anchoredPosition = new Vector2(0f, 8f);
+            cardsRoot.anchoredPosition = new Vector2(0f, -36f);
             cardsRoot.sizeDelta = new Vector2(cardsWidth, cardHeight);
 
             var voteButtons = new Button[3];
@@ -996,13 +1088,13 @@ namespace GulfRun.Editor
                 out selectedCheckmarks[2],
                 out cardVisuals[2]);
 
-            // Bottom — timer / players / votes placeholders (static copy only)
+            // Bottom — voting statistics placeholders (static copy only)
             RectTransform footerRoot = CreateRect("FooterRoot", canvasRt);
             footerRoot.anchorMin = new Vector2(0.5f, 0f);
             footerRoot.anchorMax = new Vector2(0.5f, 0f);
             footerRoot.pivot = new Vector2(0.5f, 0f);
             footerRoot.anchoredPosition = new Vector2(0f, 40f);
-            footerRoot.sizeDelta = new Vector2(1400f, 120f);
+            footerRoot.sizeDelta = new Vector2(1400f, 100f);
 
             Image footerBorder = footerRoot.gameObject.AddComponent<Image>();
             footerBorder.color = PanelBorder;
@@ -1015,47 +1107,87 @@ namespace GulfRun.Editor
             footerFill.rectTransform.offsetMin = new Vector2(3f, 3f);
             footerFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
 
-            Text timerText = CreateUiText(
-                "TimerText",
-                footerRoot,
-                "20 Seconds Remaining",
-                28,
+            RectTransform statsRoot = CreateRect("StatsPanel", footerRoot);
+            statsRoot.anchorMin = Vector2.zero;
+            statsRoot.anchorMax = Vector2.one;
+            statsRoot.offsetMin = new Vector2(12f, 8f);
+            statsRoot.offsetMax = new Vector2(-12f, -8f);
+
+            Text playersVoted = CreateUiText(
+                "PlayersVotedText",
+                statsRoot,
+                "Players Voted 0/4",
+                22,
                 FontStyle.Bold,
-                GoldBright,
+                TextPrimary,
                 TextAnchor.MiddleCenter);
-            RectTransform timerRt = timerText.rectTransform;
-            timerRt.anchorMin = new Vector2(0f, 0.48f);
-            timerRt.anchorMax = new Vector2(1f, 1f);
-            timerRt.offsetMin = new Vector2(28f, 0f);
-            timerRt.offsetMax = new Vector2(-28f, -8f);
+            RectTransform playersVotedRt = playersVoted.rectTransform;
+            playersVotedRt.anchorMin = new Vector2(0f, 0f);
+            playersVotedRt.anchorMax = new Vector2(0.33f, 1f);
+            playersVotedRt.offsetMin = new Vector2(8f, 0f);
+            playersVotedRt.offsetMax = new Vector2(-8f, 0f);
 
-            Text playersText = CreateUiText(
-                "PlayersText",
-                footerRoot,
-                "Total Players 4/4",
+            Text remainingVotes = CreateUiText(
+                "RemainingVotesText",
+                statsRoot,
+                "Remaining Votes 4",
                 22,
                 FontStyle.Bold,
                 TextPrimary,
-                TextAnchor.MiddleLeft);
-            RectTransform playersRt = playersText.rectTransform;
-            playersRt.anchorMin = new Vector2(0f, 0f);
-            playersRt.anchorMax = new Vector2(0.5f, 0.52f);
-            playersRt.offsetMin = new Vector2(48f, 10f);
-            playersRt.offsetMax = new Vector2(-12f, -6f);
+                TextAnchor.MiddleCenter);
+            RectTransform remainingVotesRt = remainingVotes.rectTransform;
+            remainingVotesRt.anchorMin = new Vector2(0.33f, 0f);
+            remainingVotesRt.anchorMax = new Vector2(0.66f, 1f);
+            remainingVotesRt.offsetMin = new Vector2(8f, 0f);
+            remainingVotesRt.offsetMax = new Vector2(-8f, 0f);
 
-            Text votesText = CreateUiText(
-                "VotesText",
-                footerRoot,
-                "Current Votes 0",
+            Text totalVotes = CreateUiText(
+                "TotalVotesText",
+                statsRoot,
+                "Total Votes 0",
                 22,
                 FontStyle.Bold,
                 TextPrimary,
-                TextAnchor.MiddleRight);
-            RectTransform votesRt = votesText.rectTransform;
-            votesRt.anchorMin = new Vector2(0.5f, 0f);
-            votesRt.anchorMax = new Vector2(1f, 0.52f);
-            votesRt.offsetMin = new Vector2(12f, 10f);
-            votesRt.offsetMax = new Vector2(-48f, -6f);
+                TextAnchor.MiddleCenter);
+            RectTransform totalVotesRt = totalVotes.rectTransform;
+            totalVotesRt.anchorMin = new Vector2(0.66f, 0f);
+            totalVotesRt.anchorMax = new Vector2(1f, 1f);
+            totalVotesRt.offsetMin = new Vector2(8f, 0f);
+            totalVotesRt.offsetMax = new Vector2(-8f, 0f);
+
+            // Vote confirmation — hidden by default (no vote-submit logic)
+            RectTransform confirmation = CreateRect("VoteConfirmation", canvasRt);
+            confirmation.anchorMin = new Vector2(0.5f, 0f);
+            confirmation.anchorMax = new Vector2(0.5f, 0f);
+            confirmation.pivot = new Vector2(0.5f, 0f);
+            confirmation.anchoredPosition = new Vector2(0f, 152f);
+            confirmation.sizeDelta = new Vector2(720f, 52f);
+            confirmation.gameObject.SetActive(false);
+
+            Image confirmBorder = confirmation.gameObject.AddComponent<Image>();
+            confirmBorder.color = new Color(SuccessGreen.r, SuccessGreen.g, SuccessGreen.b, 0.55f);
+            confirmBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(confirmation.gameObject);
+
+            Image confirmFill = CreateUiImage("Fill", confirmation, stretch: true);
+            confirmFill.color = new Color(0.08f, 0.16f, 0.10f, 0.92f);
+            confirmFill.raycastTarget = false;
+            confirmFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            confirmFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Text confirmText = CreateUiText(
+                "ConfirmationText",
+                confirmation,
+                "✓ Your vote has been submitted.",
+                22,
+                FontStyle.Bold,
+                SuccessGreen,
+                TextAnchor.MiddleCenter);
+            RectTransform confirmTextRt = confirmText.rectTransform;
+            confirmTextRt.anchorMin = Vector2.zero;
+            confirmTextRt.anchorMax = Vector2.one;
+            confirmTextRt.offsetMin = new Vector2(16f, 4f);
+            confirmTextRt.offsetMax = new Vector2(-16f, -4f);
 
             SerializedObject so = new SerializedObject(controller);
             so.FindProperty("backButton").objectReferenceValue = backButton;
@@ -2108,6 +2240,15 @@ namespace GulfRun.Editor
             Require(FindDeep(scene, "Background"), "MapVoting Background", failures);
             Require(FindDeep(scene, "SafeArea"), "MapVoting SafeArea", failures);
             Require(FindDeep(scene, "BackButton"), "MapVoting BackButton", failures);
+            Require(FindDeep(scene, "TimerPanel"), "MapVoting TimerPanel", failures);
+            Require(FindDeep(scene, "TimerText"), "MapVoting TimerText", failures);
+            Require(FindDeep(scene, "ProgressBarTrack"), "MapVoting ProgressBarTrack", failures);
+            Require(FindDeep(scene, "ProgressBarFill"), "MapVoting ProgressBarFill", failures);
+            Require(FindDeep(scene, "StatusPanel"), "MapVoting StatusPanel", failures);
+            Require(FindDeep(scene, "StatusText"), "MapVoting StatusText", failures);
+            Require(FindDeep(scene, "StatusMsg_WaitingForPlayers"), "MapVoting StatusMsg_WaitingForPlayers", failures);
+            Require(FindDeep(scene, "StatusMsg_PlayersVoting"), "MapVoting StatusMsg_PlayersVoting", failures);
+            Require(FindDeep(scene, "StatusMsg_FinalizingResults"), "MapVoting StatusMsg_FinalizingResults", failures);
             Require(FindDeep(scene, "HeaderRoot"), "MapVoting HeaderRoot", failures);
             Require(FindDeep(scene, "TitleText"), "MapVoting TitleText", failures);
             Require(FindDeep(scene, "SubtitleText"), "MapVoting SubtitleText", failures);
@@ -2116,9 +2257,12 @@ namespace GulfRun.Editor
             Require(FindDeep(scene, "MapCard_1"), "MapCard_1", failures);
             Require(FindDeep(scene, "MapCard_2"), "MapCard_2", failures);
             Require(FindDeep(scene, "FooterRoot"), "MapVoting FooterRoot", failures);
-            Require(FindDeep(scene, "TimerText"), "MapVoting TimerText", failures);
-            Require(FindDeep(scene, "PlayersText"), "MapVoting PlayersText", failures);
-            Require(FindDeep(scene, "VotesText"), "MapVoting VotesText", failures);
+            Require(FindDeep(scene, "StatsPanel"), "MapVoting StatsPanel", failures);
+            Require(FindDeep(scene, "PlayersVotedText"), "MapVoting PlayersVotedText", failures);
+            Require(FindDeep(scene, "RemainingVotesText"), "MapVoting RemainingVotesText", failures);
+            Require(FindDeep(scene, "TotalVotesText"), "MapVoting TotalVotesText", failures);
+            Require(FindDeep(scene, "VoteConfirmation"), "MapVoting VoteConfirmation", failures);
+            Require(FindDeep(scene, "ConfirmationText"), "MapVoting ConfirmationText", failures);
 
             Text title = FindDeep(scene, "TitleText")?.GetComponent<Text>();
             if (title == null || title.text != "Choose Your Map")
@@ -2133,21 +2277,69 @@ namespace GulfRun.Editor
             }
 
             Text timer = FindDeep(scene, "TimerText")?.GetComponent<Text>();
-            if (timer == null || timer.text != "20 Seconds Remaining")
+            if (timer == null || timer.text != "20s")
             {
-                failures.Add("MapVoting TimerText must read '20 Seconds Remaining'.");
+                failures.Add("MapVoting TimerText must read '20s'.");
             }
 
-            Text players = FindDeep(scene, "PlayersText")?.GetComponent<Text>();
-            if (players == null || players.text != "Total Players 4/4")
+            Text status = FindDeep(scene, "StatusText")?.GetComponent<Text>();
+            if (status == null || status.text != "Players are voting...")
             {
-                failures.Add("MapVoting PlayersText must read 'Total Players 4/4'.");
+                failures.Add("MapVoting StatusText must read 'Players are voting...'.");
             }
 
-            Text votes = FindDeep(scene, "VotesText")?.GetComponent<Text>();
-            if (votes == null || votes.text != "Current Votes 0")
+            Text playersVoted = FindDeep(scene, "PlayersVotedText")?.GetComponent<Text>();
+            if (playersVoted == null || playersVoted.text != "Players Voted 0/4")
             {
-                failures.Add("MapVoting VotesText must read 'Current Votes 0'.");
+                failures.Add("MapVoting PlayersVotedText must read 'Players Voted 0/4'.");
+            }
+
+            Text remainingVotes = FindDeep(scene, "RemainingVotesText")?.GetComponent<Text>();
+            if (remainingVotes == null || remainingVotes.text != "Remaining Votes 4")
+            {
+                failures.Add("MapVoting RemainingVotesText must read 'Remaining Votes 4'.");
+            }
+
+            Text totalVotes = FindDeep(scene, "TotalVotesText")?.GetComponent<Text>();
+            if (totalVotes == null || totalVotes.text != "Total Votes 0")
+            {
+                failures.Add("MapVoting TotalVotesText must read 'Total Votes 0'.");
+            }
+
+            Text confirmation = FindDeep(scene, "ConfirmationText")?.GetComponent<Text>();
+            if (confirmation == null || confirmation.text != "✓ Your vote has been submitted.")
+            {
+                failures.Add("MapVoting ConfirmationText copy mismatch.");
+            }
+
+            GameObject voteConfirmation = FindDeep(scene, "VoteConfirmation");
+            if (voteConfirmation != null && voteConfirmation.activeSelf)
+            {
+                failures.Add("MapVoting VoteConfirmation must start inactive.");
+            }
+
+            GameObject waitingMsg = FindDeep(scene, "StatusMsg_WaitingForPlayers");
+            if (waitingMsg != null && waitingMsg.activeSelf)
+            {
+                failures.Add("MapVoting StatusMsg_WaitingForPlayers must start inactive.");
+            }
+
+            GameObject votingMsg = FindDeep(scene, "StatusMsg_PlayersVoting");
+            if (votingMsg != null && votingMsg.activeSelf)
+            {
+                failures.Add("MapVoting StatusMsg_PlayersVoting must start inactive.");
+            }
+
+            GameObject finalizingMsg = FindDeep(scene, "StatusMsg_FinalizingResults");
+            if (finalizingMsg != null && finalizingMsg.activeSelf)
+            {
+                failures.Add("MapVoting StatusMsg_FinalizingResults must start inactive.");
+            }
+
+            Image progressFill = FindDeep(scene, "ProgressBarFill")?.GetComponent<Image>();
+            if (progressFill == null || progressFill.type != Image.Type.Filled)
+            {
+                failures.Add("MapVoting ProgressBarFill must use Image.Type.Filled placeholder.");
             }
 
             string[] expectedNames = { "Kuwait City", "Dubai Marina", "Muscat Coast" };

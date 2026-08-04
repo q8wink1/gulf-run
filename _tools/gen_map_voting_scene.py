@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate MapVoting.unity (Sprint 22.2 Premium Map Cards) without Unity batchmode."""
+"""Generate MapVoting.unity (Sprint 22.3 Voting HUD UI) without Unity batchmode."""
 
 from __future__ import annotations
 
@@ -84,6 +84,10 @@ class Node:
     interactable: int = 1
     transition: int = 1
     script_guid: str | None = None
+    image_type: int = 0  # 0 Simple, 1 Sliced, 2 Tiled, 3 Filled
+    fill_method: int = 0  # Horizontal
+    fill_amount: float = 1.0
+    fill_origin: int = 0
     # ids for optional components
     cr: int = field(default_factory=nid)
     img_id: int | None = None
@@ -208,13 +212,13 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append("    m_PersistentCalls:")
         lines.append("      m_Calls: []")
         lines.append(f"  m_Sprite: {n.sprite}")
-        lines.append("  m_Type: 0")
+        lines.append(f"  m_Type: {n.image_type}")
         lines.append(f"  m_PreserveAspect: {n.preserve}")
         lines.append("  m_FillCenter: 1")
-        lines.append("  m_FillMethod: 4")
-        lines.append("  m_FillAmount: 1")
+        lines.append(f"  m_FillMethod: {n.fill_method}")
+        lines.append(f"  m_FillAmount: {n.fill_amount}")
         lines.append("  m_FillClockwise: 1")
-        lines.append("  m_FillOrigin: 0")
+        lines.append(f"  m_FillOrigin: {n.fill_origin}")
         lines.append("  m_UseSpriteMesh: 0")
         lines.append("  m_PixelsPerUnitMultiplier: 1")
 
@@ -1008,35 +1012,115 @@ def main() -> None:
         pivot=(0, 1),
     )
 
+    timer_panel = img(
+        "TimerPanel",
+        PANEL_BORDER,
+        shadow=True,
+        amin=(0.5, 1),
+        amax=(0.5, 1),
+        pos=(0, -40),
+        size=(300, 118),
+        pivot=(0.5, 1),
+        children=[
+            img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
+            txt(
+                "TimerText",
+                "20s",
+                42,
+                GOLD_BRIGHT,
+                4,
+                amin=(0, 0.38),
+                amax=(1, 1),
+                pos=(0, -3),
+                size=(-32, -6),
+            ),
+            img(
+                "ProgressBarTrack",
+                (0.06, 0.05, 0.06, 0.95),
+                amin=(0.5, 0),
+                amax=(0.5, 0),
+                pos=(0, 16),
+                size=(240, 14),
+                pivot=(0.5, 0),
+                children=[
+                    img(
+                        "ProgressBarFill",
+                        GOLD,
+                        amin=(0, 0),
+                        amax=(1, 1),
+                        pos=(0, 0),
+                        size=(-4, -4),
+                        image_type=3,
+                        fill_method=0,
+                        fill_amount=1.0,
+                        fill_origin=0,
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    def status_msg(name: str, message: str, active: int) -> Node:
+        return txt(
+            name,
+            message,
+            24,
+            MUTED,
+            4,
+            active=active,
+            amin=(0, 0),
+            amax=(1, 1),
+            pos=(0, 0),
+            size=(-48, -12),
+        )
+
+    status_panel = img(
+        "StatusPanel",
+        PANEL_BORDER,
+        shadow=True,
+        amin=(0.5, 1),
+        amax=(0.5, 1),
+        pos=(0, -168),
+        size=(920, 64),
+        pivot=(0.5, 1),
+        children=[
+            img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
+            status_msg("StatusText", "Players are voting...", 1),
+            status_msg("StatusMsg_WaitingForPlayers", "Waiting for players...", 0),
+            status_msg("StatusMsg_PlayersVoting", "Players are voting...", 0),
+            status_msg("StatusMsg_FinalizingResults", "Finalizing results...", 0),
+        ],
+    )
+
     header = Node(
         name="HeaderRoot",
         amin=(0.5, 1),
         amax=(0.5, 1),
-        pos=(0, -56),
-        size=(1400, 120),
+        pos=(0, -242),
+        size=(1400, 96),
         pivot=(0.5, 1),
         children=[
             txt(
                 "TitleText",
                 "Choose Your Map",
-                48,
+                44,
                 GOLD_BRIGHT,
                 4,
                 amin=(0, 0.42),
                 amax=(1, 1),
-                pos=(0, -2),
-                size=(-48, -4),
+                pos=(0, -1),
+                size=(-48, -2),
             ),
             txt(
                 "SubtitleText",
                 "Vote together to decide the next destination.",
-                24,
+                22,
                 MUTED,
                 4,
                 amin=(0, 0),
                 amax=(1, 0.48),
-                pos=(0, 2),
-                size=(-80, -4),
+                pos=(0, 1),
+                size=(-80, -2),
             ),
         ],
     )
@@ -1045,7 +1129,7 @@ def main() -> None:
         name="CardsRoot",
         amin=(0.5, 0.5),
         amax=(0.5, 0.5),
-        pos=(0, 8),
+        pos=(0, -36),
         size=(1572, 680),
         children=[
             map_card(
@@ -1097,44 +1181,84 @@ def main() -> None:
         amin=(0.5, 0),
         amax=(0.5, 0),
         pos=(0, 40),
-        size=(1400, 120),
+        size=(1400, 100),
         pivot=(0.5, 0),
         children=[
             img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
-            txt(
-                "TimerText",
-                "20 Seconds Remaining",
-                28,
-                GOLD_BRIGHT,
-                4,
-                amin=(0, 0.48),
-                amax=(1, 1),
-                pos=(0, -4),
-                size=(-56, -8),
-            ),
-            txt(
-                "PlayersText",
-                "Total Players 4/4",
-                22,
-                WHITE,
-                3,
+            Node(
+                name="StatsPanel",
                 amin=(0, 0),
-                amax=(0.5, 0.52),
-                pos=(18, 2),
-                size=(-60, -16),
-                pivot=(0, 0.5),
+                amax=(1, 1),
+                pos=(0, 0),
+                size=(-24, -16),
+                children=[
+                    txt(
+                        "PlayersVotedText",
+                        "Players Voted 0/4",
+                        22,
+                        WHITE,
+                        4,
+                        amin=(0, 0),
+                        amax=(0.33, 1),
+                        pos=(0, 0),
+                        size=(-16, 0),
+                    ),
+                    txt(
+                        "RemainingVotesText",
+                        "Remaining Votes 4",
+                        22,
+                        WHITE,
+                        4,
+                        amin=(0.33, 0),
+                        amax=(0.66, 1),
+                        pos=(0, 0),
+                        size=(-16, 0),
+                    ),
+                    txt(
+                        "TotalVotesText",
+                        "Total Votes 0",
+                        22,
+                        WHITE,
+                        4,
+                        amin=(0.66, 0),
+                        amax=(1, 1),
+                        pos=(0, 0),
+                        size=(-16, 0),
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    confirmation = img(
+        "VoteConfirmation",
+        (SUCCESS[0], SUCCESS[1], SUCCESS[2], 0.55),
+        shadow=True,
+        active=0,
+        amin=(0.5, 0),
+        amax=(0.5, 0),
+        pos=(0, 152),
+        size=(720, 52),
+        pivot=(0.5, 0),
+        children=[
+            img(
+                "Fill",
+                (0.08, 0.16, 0.10, 0.92),
+                amin=(0, 0),
+                amax=(1, 1),
+                pos=(0, 0),
+                size=(-6, -6),
             ),
             txt(
-                "VotesText",
-                "Current Votes 0",
+                "ConfirmationText",
+                "✓ Your vote has been submitted.",
                 22,
-                WHITE,
-                5,
-                amin=(0.5, 0),
-                amax=(1, 0.52),
-                pos=(-18, 2),
-                size=(-60, -16),
-                pivot=(1, 0.5),
+                SUCCESS,
+                4,
+                amin=(0, 0),
+                amax=(1, 1),
+                pos=(0, 0),
+                size=(-32, -8),
             ),
         ],
     )
@@ -1158,7 +1282,7 @@ def main() -> None:
         size=(0, 0),
         pivot=(0, 0),
         scale=(0, 0, 0),
-        children=[bg, safe, back, header, cards, footer],
+        children=[bg, safe, back, timer_panel, status_panel, header, cards, footer, confirmation],
     )
     canvas.prep()
 
