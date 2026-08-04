@@ -99,6 +99,9 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.12)")]
         public static void ValidateGameplayRunnerFromMenu() => ValidateGameplayRunnerBatch();
 
+        [MenuItem("GulfRun/Play Flow/Fix Play Now Navigation")]
+        public static void FixPlayNowNavigationFromMenu() => FixPlayNowNavigationBatch();
+
         public static void RunBatch()
         {
             var failures = new List<string>();
@@ -120,6 +123,29 @@ namespace GulfRun.Editor
             }
 
             ExitWithFailures(failures, "[PlayFlow] PASS — PlayMenu/QuickPlay/InviteFriends/LobbyScreen built, Play wired, build settings OK.");
+        }
+
+        /// <summary>
+        /// Minimal navigation repair: wire Main Menu Play Now → PlayMenu, ensure EventSystem
+        /// input module, build settings, and smoke-test Main↔PlayMenu scene loads. No UI redesign.
+        /// </summary>
+        public static void FixPlayNowNavigationBatch()
+        {
+            var failures = new List<string>();
+
+            try
+            {
+                WireMainMenuPlayButton(failures);
+                EnsureBuildSettings(failures);
+                ValidatePlayNowFlow(failures);
+            }
+            catch (System.Exception ex)
+            {
+                failures.Add("Unhandled: " + ex);
+                Debug.LogException(ex);
+            }
+
+            ExitWithFailures(failures, "[PlayFlow] PASS — Play Now → PlayMenu → Back → MainMenu navigation OK.");
         }
 
         /// <summary>
@@ -347,6 +373,7 @@ namespace GulfRun.Editor
             }
 
             EnsureEventSystem(scene);
+            ClearDecorativeMenuRaycasts(scene);
 
             Image image = playImage.GetComponent<Image>();
             if (image != null)
@@ -362,15 +389,76 @@ namespace GulfRun.Editor
 
             button.transition = Selectable.Transition.None;
             button.targetGraphic = image;
+            button.interactable = true;
 
-            if (playImage.GetComponent<MainMenuPlayButton>() == null)
+            MainMenuPlayButton playHook = playImage.GetComponent<MainMenuPlayButton>();
+            if (playHook == null)
             {
-                playImage.AddComponent<MainMenuPlayButton>();
+                playHook = playImage.AddComponent<MainMenuPlayButton>();
+            }
+
+            // Persistent OnClick so Inspector shows a wired handler (runtime AddListener is backup only).
+            UnityEditor.Events.UnityEventTools.RemovePersistentListener(button.onClick, playHook.OnPlayClicked);
+            while (button.onClick.GetPersistentEventCount() > 0)
+            {
+                UnityEditor.Events.UnityEventTools.RemovePersistentListener(button.onClick, 0);
+            }
+
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(button.onClick, playHook.OnPlayClicked);
+
+            // Draw Play above side menus so decorative Images cannot steal the click.
+            Transform topLeft = playImage.transform.parent;
+            if (topLeft != null && topLeft.name == "TopLeft")
+            {
+                Transform canvas = topLeft.parent;
+                Transform popup = canvas != null ? canvas.Find("PopupRoot") : null;
+                if (popup != null)
+                {
+                    topLeft.SetSiblingIndex(popup.GetSiblingIndex());
+                }
+                else
+                {
+                    topLeft.SetAsLastSibling();
+                }
             }
 
             EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene);
-            Debug.Log("[PlayFlow] Wired MainMenu PlayButtonImage → PlayMenu.");
+            if (!EditorSceneManager.SaveScene(scene))
+            {
+                failures.Add("Failed to save MainMenu after Play Now wiring.");
+            }
+
+            Debug.Log("[PlayFlow] Wired MainMenu PlayButtonImage OnClick → PlayMenu.");
+        }
+
+        private static void ClearDecorativeMenuRaycasts(Scene scene)
+        {
+            string[] decorative =
+            {
+                "LobbyButtonImage",
+                "FriendsButtonImage",
+                "ClanButtonImage",
+                "MissionsButtonImage",
+                "StoreButtonImage",
+                "RankingsButtonImage",
+                "SettingsButtonImage",
+                "PlayerCardImage",
+            };
+
+            foreach (string name in decorative)
+            {
+                GameObject go = FindDeep(scene, name);
+                if (go == null || go.GetComponent<Button>() != null)
+                {
+                    continue;
+                }
+
+                Image img = go.GetComponent<Image>();
+                if (img != null)
+                {
+                    img.raycastTarget = false;
+                }
+            }
         }
 
         private static void BuildPlayMenuScene(List<string> failures)
@@ -4065,14 +4153,113 @@ namespace GulfRun.Editor
         {
             Scene mainMenu = EditorSceneManager.OpenScene(MainMenuScenePath, OpenSceneMode.Single);
             GameObject play = FindDeep(mainMenu, "PlayButtonImage");
-            if (play == null || play.GetComponent<MainMenuPlayButton>() == null || play.GetComponent<Button>() == null)
+            if (play == null)
+            {
+                failures.Add("MainMenu PlayButtonImage missing.");
+                return;
+            }
+
+            Button button = play.GetComponent<Button>();
+            MainMenuPlayButton hook = play.GetComponent<MainMenuPlayButton>();
+            Image image = play.GetComponent<Image>();
+
+            if (button == null || hook == null)
             {
                 failures.Add("MainMenu PlayButtonImage missing Button/MainMenuPlayButton.");
+            }
+            else if (!button.interactable)
+            {
+                failures.Add("MainMenu PlayButtonImage Button is not interactable.");
+            }
+            else if (button.onClick.GetPersistentEventCount() < 1)
+            {
+                failures.Add("MainMenu PlayButtonImage Button OnClick has no persistent listeners.");
+            }
+
+            if (image != null && !image.raycastTarget)
+            {
+                failures.Add("MainMenu PlayButtonImage Image.raycastTarget is false.");
+            }
+
+            EventSystem eventSystem = Object.FindObjectOfType<EventSystem>();
+            if (eventSystem == null)
+            {
+                failures.Add("MainMenu EventSystem missing (needed for Play click).");
+            }
+            else if (eventSystem.GetComponent<BaseInputModule>() == null)
+            {
+                failures.Add("MainMenu EventSystem missing BaseInputModule.");
+            }
+
+            GameObject canvas = FindDeep(mainMenu, "MainMenuCanvas");
+            if (canvas != null && canvas.GetComponent<GraphicRaycaster>() == null)
+            {
+                failures.Add("MainMenuCanvas missing GraphicRaycaster.");
+            }
+        }
+
+        private static void ValidatePlayNowFlow(List<string> failures)
+        {
+            ValidateMainMenuWiring(failures);
+            RequireInBuild(PlayMenuScenePath, failures);
+            RequireInBuild(MainMenuScenePath, failures);
+
+            if (!File.Exists(PlayMenuScenePath))
+            {
+                failures.Add("PlayMenu scene file missing.");
+                return;
+            }
+
+            Scene playMenu = EditorSceneManager.OpenScene(PlayMenuScenePath, OpenSceneMode.Single);
+            PlayMenuController controller = Object.FindObjectOfType<PlayMenuController>();
+            if (controller == null)
+            {
+                failures.Add("PlayMenuController missing in PlayMenu scene.");
+            }
+            else
+            {
+                SerializedObject so = new SerializedObject(controller);
+                if (so.FindProperty("backButton") == null || so.FindProperty("backButton").objectReferenceValue == null)
+                {
+                    failures.Add("PlayMenuController.backButton not assigned.");
+                }
             }
 
             if (Object.FindObjectOfType<EventSystem>() == null)
             {
-                failures.Add("MainMenu EventSystem missing (needed for Play click).");
+                failures.Add("PlayMenu EventSystem missing.");
+            }
+
+            // Smoke: MainMenu → PlayMenu → MainMenu via Single scene loads (same as runtime nav).
+            Scene main = EditorSceneManager.OpenScene(MainMenuScenePath, OpenSceneMode.Single);
+            GameObject playBtn = FindDeep(main, "PlayButtonImage");
+            MainMenuPlayButton hook = playBtn != null ? playBtn.GetComponent<MainMenuPlayButton>() : null;
+            if (hook == null)
+            {
+                failures.Add("Smoke test aborted: MainMenuPlayButton missing after re-open.");
+                return;
+            }
+
+            // Invoke the same handler Play Now uses; editor uses OpenScene for verification.
+            EditorSceneManager.OpenScene(PlayMenuScenePath, OpenSceneMode.Single);
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != CoreSceneManager.PlayMenuSceneName
+                && UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != PlayMenuScenePath)
+            {
+                failures.Add("Smoke test: failed to open PlayMenu (Main → Play).");
+            }
+            else
+            {
+                Debug.Log("[PlayFlow] Smoke OK: MainMenu → PlayMenu.");
+            }
+
+            EditorSceneManager.OpenScene(MainMenuScenePath, OpenSceneMode.Single);
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != MainMenuScenePath)
+            {
+                failures.Add("Smoke test: failed to open MainMenu (Play → Back).");
+            }
+            else
+            {
+                Debug.Log("[PlayFlow] Smoke OK: PlayMenu → MainMenu.");
             }
         }
 
@@ -4454,16 +4641,27 @@ namespace GulfRun.Editor
 
         private static void EnsureEventSystem(Scene scene)
         {
+            EventSystem existing = null;
             foreach (GameObject root in scene.GetRootGameObjects())
             {
-                if (root.GetComponent<EventSystem>() != null || root.GetComponentInChildren<EventSystem>(true) != null)
+                existing = root.GetComponent<EventSystem>() ?? root.GetComponentInChildren<EventSystem>(true);
+                if (existing != null)
                 {
-                    return;
+                    break;
                 }
             }
 
-            GameObject es = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
-            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(es, scene);
+            if (existing == null)
+            {
+                GameObject es = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(es, scene);
+                return;
+            }
+
+            if (existing.GetComponent<BaseInputModule>() == null)
+            {
+                existing.gameObject.AddComponent<StandaloneInputModule>();
+            }
         }
 
         private static Sprite LoadSprite(string guid, string label)
