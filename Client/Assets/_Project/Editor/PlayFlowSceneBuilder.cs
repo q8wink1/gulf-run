@@ -36,8 +36,14 @@ namespace GulfRun.Editor
         private static readonly Color CardFill = new Color(0.12f, 0.11f, 0.12f, 0.88f);
         private static readonly Color HighlightGold = new Color(0.90f, 0.71f, 0.25f, 0.12f);
 
+        private const string QuickPlaySubtitle = "Find and join a public multiplayer match instantly.";
+        private const string InviteFriendsSubtitle = "Create a private room and play with your friends.";
+
         [MenuItem("GulfRun/Play Flow/Build Scenes + Wire Play")]
         public static void RunFromMenu() => RunBatch();
+
+        [MenuItem("GulfRun/Play Flow/Polish Play Menu (Sprint 20.1)")]
+        public static void PolishPlayMenuFromMenu() => PolishPlayMenuBatch();
 
         public static void RunBatch()
         {
@@ -58,9 +64,38 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
+            ExitWithFailures(failures, "[PlayFlow] PASS — PlayMenu/QuickPlay/InviteFriends built, Play wired, build settings OK.");
+        }
+
+        /// <summary>
+        /// Sprint 20.1: polish PlayMenu copy + card icons only. Does not rebuild
+        /// QuickPlay / InviteFriends (preserves later lobby wiring).
+        /// </summary>
+        public static void PolishPlayMenuBatch()
+        {
+            var failures = new List<string>();
+
+            try
+            {
+                PolishPlayMenuScene(failures);
+                EnsureBuildSettings(failures);
+                ValidatePlayMenu(failures);
+                ValidateMainMenuWiring(failures);
+            }
+            catch (System.Exception ex)
+            {
+                failures.Add("Unhandled: " + ex);
+                Debug.LogException(ex);
+            }
+
+            ExitWithFailures(failures, "[PlayFlow] PASS — PlayMenu Sprint 20.1 polish (copy + icons) OK.");
+        }
+
+        private static void ExitWithFailures(List<string> failures, string passMessage)
+        {
             if (failures.Count == 0)
             {
-                Debug.Log("[PlayFlow] PASS — PlayMenu/QuickPlay/InviteFriends built, Play wired, build settings OK.");
+                Debug.Log(passMessage);
                 EditorApplication.Exit(0);
             }
             else
@@ -142,15 +177,17 @@ namespace GulfRun.Editor
                 "QuickPlayCard",
                 cardsRoot,
                 "Quick Play",
-                "Instantly search for an available random multiplayer room.",
-                new Vector2(-360f, 0f));
+                QuickPlaySubtitle,
+                new Vector2(-360f, 0f),
+                ModeCardIconStyle.Lightning);
 
             Button invite = CreateModeCard(
                 "InviteFriendsCard",
                 cardsRoot,
                 "Invite Friends",
-                "Create a private room and invite friends.",
-                new Vector2(360f, 0f));
+                InviteFriendsSubtitle,
+                new Vector2(360f, 0f),
+                ModeCardIconStyle.Friends);
 
             SerializedObject so = new SerializedObject(controller);
             so.FindProperty("backButton").objectReferenceValue = backButton;
@@ -466,8 +503,29 @@ namespace GulfRun.Editor
             Require(FindDeep(scene, "SafeArea"), "PlayMenu SafeArea", failures);
             Require(FindDeep(scene, "BackButton"), "PlayMenu BackButton", failures);
             Require(FindDeep(scene, "CardsRoot"), "CardsRoot", failures);
-            Require(FindDeep(scene, "QuickPlayCard"), "QuickPlayCard", failures);
-            Require(FindDeep(scene, "InviteFriendsCard"), "InviteFriendsCard", failures);
+            GameObject quickPlayCard = FindDeep(scene, "QuickPlayCard");
+            GameObject inviteFriendsCard = FindDeep(scene, "InviteFriendsCard");
+            Require(quickPlayCard, "QuickPlayCard", failures);
+            Require(inviteFriendsCard, "InviteFriendsCard", failures);
+            Require(quickPlayCard != null ? FindChildRecursive(quickPlayCard.transform, "Icon")?.gameObject : null, "QuickPlayCard Icon", failures);
+            Require(inviteFriendsCard != null ? FindChildRecursive(inviteFriendsCard.transform, "Icon")?.gameObject : null, "InviteFriendsCard Icon", failures);
+
+            Text qpText = quickPlayCard != null
+                ? FindChildRecursive(quickPlayCard.transform, "Description")?.GetComponent<Text>()
+                : null;
+            Text ifText = inviteFriendsCard != null
+                ? FindChildRecursive(inviteFriendsCard.transform, "Description")?.GetComponent<Text>()
+                : null;
+            if (qpText == null || qpText.text != QuickPlaySubtitle)
+            {
+                failures.Add("QuickPlayCard subtitle mismatch.");
+            }
+
+            if (ifText == null || ifText.text != InviteFriendsSubtitle)
+            {
+                failures.Add("InviteFriendsCard subtitle mismatch.");
+            }
+
             RequireCanvasScaler(FindDeep(scene, "PlayMenuCanvas"), failures);
             RequireInBuild(PlayMenuScenePath, failures);
             RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
@@ -568,7 +626,86 @@ namespace GulfRun.Editor
             return safeArea;
         }
 
-        private static Button CreateModeCard(string name, RectTransform parent, string title, string description, Vector2 anchoredPos)
+        private enum ModeCardIconStyle
+        {
+            Lightning,
+            Friends
+        }
+
+        private static void PolishPlayMenuScene(List<string> failures)
+        {
+            if (!File.Exists(PlayMenuScenePath))
+            {
+                failures.Add("PlayMenu scene missing; run full Play Flow build first.");
+                return;
+            }
+
+            Scene scene = EditorSceneManager.OpenScene(PlayMenuScenePath, OpenSceneMode.Single);
+            PolishModeCard(FindDeep(scene, "QuickPlayCard"), QuickPlaySubtitle, ModeCardIconStyle.Lightning, failures);
+            PolishModeCard(FindDeep(scene, "InviteFriendsCard"), InviteFriendsSubtitle, ModeCardIconStyle.Friends, failures);
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene))
+            {
+                failures.Add("Failed to save polished PlayMenu scene.");
+                return;
+            }
+
+            Debug.Log("[PlayFlow] Polished PlayMenu copy + icons (Sprint 20.1).");
+        }
+
+        private static void PolishModeCard(GameObject cardGo, string subtitle, ModeCardIconStyle iconStyle, List<string> failures)
+        {
+            if (cardGo == null)
+            {
+                failures.Add("Mode card missing for polish: " + iconStyle);
+                return;
+            }
+
+            RectTransform card = cardGo.GetComponent<RectTransform>();
+            EnsureCardShadow(cardGo);
+
+            Transform description = card.Find("Description");
+            Text descText = description != null ? description.GetComponent<Text>() : null;
+            if (descText == null)
+            {
+                failures.Add(cardGo.name + " Description text missing.");
+            }
+            else
+            {
+                descText.text = subtitle;
+                RectTransform descRt = descText.rectTransform;
+                descRt.anchorMin = new Vector2(0f, 0.08f);
+                descRt.anchorMax = new Vector2(1f, 0.42f);
+                descRt.offsetMin = new Vector2(40f, 16f);
+                descRt.offsetMax = new Vector2(-40f, 0f);
+            }
+
+            Transform title = card.Find("Title");
+            if (title != null)
+            {
+                RectTransform titleRt = title.GetComponent<RectTransform>();
+                titleRt.anchorMin = new Vector2(0f, 0.42f);
+                titleRt.anchorMax = new Vector2(1f, 0.62f);
+                titleRt.offsetMin = new Vector2(28f, 0f);
+                titleRt.offsetMax = new Vector2(-28f, 0f);
+            }
+
+            Transform existingIcon = card.Find("Icon");
+            if (existingIcon != null)
+            {
+                Object.DestroyImmediate(existingIcon.gameObject);
+            }
+
+            CreateModeCardIcon(card, iconStyle);
+        }
+
+        private static Button CreateModeCard(
+            string name,
+            RectTransform parent,
+            string title,
+            string description,
+            Vector2 anchoredPos,
+            ModeCardIconStyle iconStyle)
         {
             GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             go.transform.SetParent(parent, false);
@@ -587,16 +724,20 @@ namespace GulfRun.Editor
             button.targetGraphic = border;
             button.transition = Selectable.Transition.ColorTint;
 
+            EnsureCardShadow(go);
+
             Image fill = CreateUiImage("Fill", rt, stretch: true);
             fill.color = CardFill;
             fill.raycastTarget = false;
             fill.rectTransform.offsetMin = new Vector2(4f, 4f);
             fill.rectTransform.offsetMax = new Vector2(-4f, -4f);
 
+            CreateModeCardIcon(rt, iconStyle);
+
             Text titleText = CreateUiText("Title", rt, title, 40, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
             RectTransform titleRt = titleText.rectTransform;
-            titleRt.anchorMin = new Vector2(0f, 0.55f);
-            titleRt.anchorMax = new Vector2(1f, 0.85f);
+            titleRt.anchorMin = new Vector2(0f, 0.42f);
+            titleRt.anchorMax = new Vector2(1f, 0.62f);
             titleRt.offsetMin = new Vector2(28f, 0f);
             titleRt.offsetMax = new Vector2(-28f, 0f);
 
@@ -604,12 +745,95 @@ namespace GulfRun.Editor
             desc.horizontalOverflow = HorizontalWrapMode.Wrap;
             desc.verticalOverflow = VerticalWrapMode.Overflow;
             RectTransform descRt = desc.rectTransform;
-            descRt.anchorMin = new Vector2(0f, 0.12f);
-            descRt.anchorMax = new Vector2(1f, 0.52f);
-            descRt.offsetMin = new Vector2(40f, 20f);
+            descRt.anchorMin = new Vector2(0f, 0.08f);
+            descRt.anchorMax = new Vector2(1f, 0.42f);
+            descRt.offsetMin = new Vector2(40f, 16f);
             descRt.offsetMax = new Vector2(-40f, 0f);
 
             return button;
+        }
+
+        private static void EnsureCardShadow(GameObject cardGo)
+        {
+            Shadow shadow = cardGo.GetComponent<Shadow>();
+            if (shadow == null)
+            {
+                shadow = cardGo.AddComponent<Shadow>();
+            }
+
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
+            shadow.effectDistance = new Vector2(0f, -8f);
+            shadow.useGraphicAlpha = true;
+        }
+
+        private static void CreateModeCardIcon(RectTransform card, ModeCardIconStyle style)
+        {
+            RectTransform iconRoot = CreateRect("Icon", card);
+            iconRoot.SetAsLastSibling();
+            iconRoot.anchorMin = new Vector2(0.5f, 0.72f);
+            iconRoot.anchorMax = new Vector2(0.5f, 0.94f);
+            iconRoot.pivot = new Vector2(0.5f, 0.5f);
+            iconRoot.anchoredPosition = Vector2.zero;
+            iconRoot.sizeDelta = new Vector2(110f, 0f);
+
+            Image badge = CreateUiImage("Badge", iconRoot, stretch: true);
+            badge.sprite = GetBuiltinKnob();
+            badge.color = new Color(GoldBright.r, GoldBright.g, GoldBright.b, 0.22f);
+            badge.raycastTarget = false;
+            badge.preserveAspect = true;
+
+            if (style == ModeCardIconStyle.Lightning)
+            {
+                CreateBoltPiece(iconRoot, "BoltStem", new Vector2(6f, 2f), new Vector2(16f, 54f), -28f);
+                CreateBoltPiece(iconRoot, "BoltSlash", new Vector2(-8f, -6f), new Vector2(42f, 12f), -28f);
+                CreateBoltPiece(iconRoot, "BoltTip", new Vector2(10f, -22f), new Vector2(14f, 22f), -28f);
+            }
+            else
+            {
+                CreatePersonGlyph(iconRoot, new Vector2(-18f, 8f));
+                CreatePersonGlyph(iconRoot, new Vector2(18f, 8f));
+            }
+        }
+
+        private static void CreateBoltPiece(RectTransform parent, string name, Vector2 anchoredPos, Vector2 size, float zRot)
+        {
+            Image piece = CreateUiImage(name, parent, stretch: false);
+            piece.color = GoldBright;
+            piece.raycastTarget = false;
+            RectTransform rt = piece.rectTransform;
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = anchoredPos;
+            rt.sizeDelta = size;
+            rt.localEulerAngles = new Vector3(0f, 0f, zRot);
+        }
+
+        private static void CreatePersonGlyph(RectTransform parent, Vector2 anchoredPos)
+        {
+            Image head = CreateUiImage("Head", parent, stretch: false);
+            head.sprite = GetBuiltinKnob();
+            head.color = GoldBright;
+            head.raycastTarget = false;
+            head.preserveAspect = true;
+            RectTransform headRt = head.rectTransform;
+            headRt.anchorMin = new Vector2(0.5f, 0.5f);
+            headRt.anchorMax = new Vector2(0.5f, 0.5f);
+            headRt.pivot = new Vector2(0.5f, 0.5f);
+            headRt.anchoredPosition = anchoredPos + new Vector2(0f, 12f);
+            headRt.sizeDelta = new Vector2(28f, 28f);
+
+            Image body = CreateUiImage("Body", parent, stretch: false);
+            body.sprite = GetBuiltinKnob();
+            body.color = GoldBright;
+            body.raycastTarget = false;
+            body.preserveAspect = true;
+            RectTransform bodyRt = body.rectTransform;
+            bodyRt.anchorMin = new Vector2(0.5f, 0.5f);
+            bodyRt.anchorMax = new Vector2(0.5f, 0.5f);
+            bodyRt.pivot = new Vector2(0.5f, 0.5f);
+            bodyRt.anchoredPosition = anchoredPos + new Vector2(0f, -14f);
+            bodyRt.sizeDelta = new Vector2(36f, 28f);
         }
 
         private static RectTransform CreateActionCard(string name, RectTransform parent, Vector2 anchoredPos, Vector2 size)
