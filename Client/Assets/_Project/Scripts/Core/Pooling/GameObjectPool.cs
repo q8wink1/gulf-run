@@ -72,7 +72,28 @@ namespace GulfRun.Core.Pooling
 
         private GameObject CreateInstance()
         {
-            GameObject instance = Object.Instantiate(_prefab, _parent);
+            // Non-generic Instantiate + explicit GameObject resolve: legacy
+            // ScriptableObject refs (fileID 100100000 Prefab wrappers) and
+            // mis-typed assets throw InvalidCastException on Instantiate<T>.
+            Object cloned = Object.Instantiate((Object)_prefab, _parent);
+            GameObject instance = cloned as GameObject;
+            if (instance == null && cloned is Component component)
+            {
+                instance = component.gameObject;
+            }
+
+            if (instance == null)
+            {
+                Debug.LogError("[GameObjectPool] Instantiate did not yield a GameObject for '"
+                    + (_prefab != null ? _prefab.name : "null")
+                    + "' (got " + (cloned != null ? cloned.GetType().Name : "null") + ").");
+                instance = new GameObject((_prefab != null ? _prefab.name : "Pool") + "_Stub");
+                if (_parent != null)
+                {
+                    instance.transform.SetParent(_parent, false);
+                }
+            }
+
             PooledObjectHandle handle = instance.GetComponent<PooledObjectHandle>();
             if (handle == null)
             {

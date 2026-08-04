@@ -69,9 +69,6 @@ namespace GulfRun.Core.Managers
         /// </summary>
         private static void LoadSceneLogged(string sceneName, string methodName)
         {
-            string before = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            Debug.Log("[SceneManager] " + methodName + "() BEFORE LoadScene('" + sceneName
-                + "') active='" + before + "'");
             try
             {
                 UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
@@ -82,10 +79,6 @@ namespace GulfRun.Core.Managers
                     + "') threw: " + ex);
                 throw;
             }
-
-            string after = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            Debug.Log("[SceneManager] " + methodName + "() AFTER LoadScene('" + sceneName
-                + "') active='" + after + "'");
         }
     }
 }

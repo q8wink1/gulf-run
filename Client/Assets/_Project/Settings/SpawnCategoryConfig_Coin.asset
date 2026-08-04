@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SpawnCategoryConfig_Coin
   m_EditorClassIdentifier: 
   entries:
-  - Prefab: {fileID: 100100000, guid: b16940642e954de68806bbea31ad3f7f, type: 3}
+  - Prefab: {fileID: 100000, guid: b16940642e954de68806bbea31ad3f7f, type: 3}
     BaseWeight: 1
     DifficultyWeightMultiplier: 1
   baseSpawnChance: 0.9

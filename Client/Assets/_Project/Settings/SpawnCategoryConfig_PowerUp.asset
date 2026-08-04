@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SpawnCategoryConfig_PowerUp
   m_EditorClassIdentifier: 
   entries:
-  - Prefab: {fileID: 100100000, guid: 9c2d48360a0f4f01a8ab57e867973df9, type: 3}
+  - Prefab: {fileID: 100000, guid: 9c2d48360a0f4f01a8ab57e867973df9, type: 3}
     BaseWeight: 1
     DifficultyWeightMultiplier: 1
   baseSpawnChance: 0.15

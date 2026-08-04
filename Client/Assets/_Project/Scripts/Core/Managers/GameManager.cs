@@ -1,3 +1,4 @@
+using GulfRun.Core.Services;
 using UnityEngine;
 
 namespace GulfRun.Core.Managers
@@ -19,6 +20,10 @@ namespace GulfRun.Core.Managers
         {
             ApplyPerformanceTargets();
 
+            // Boot only initializes services — never Quick Play / Loading / Gameplay.
+            // Clear any leftover offline race flag (e.g. DisableDomainReload verify runs).
+            OfflineRaceEntryService.Clear();
+
             // TODO(Sprint 2+): Bootstrap game state machine and coordinate
             // manager startup order once gameplay systems are specified.
         }
@@ -29,12 +34,18 @@ namespace GulfRun.Core.Managers
             // CoreSystems singleton on this GameObject has finished its own Awake
             // before SceneManager.Instance is dereferenced. Only ever runs once:
             // duplicate GameManager instances self-destroy in Awake before Start.
-            // Sprint 14: Boot now always hands off to the Brand Intro first —
-            // the Intro scene itself is responsible for loading MainMenu once
-            // it finishes or is skipped (see IntroSequenceController).
+            // Official flow: Boot → Intro → Main Menu (Intro loads MainMenu).
             if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == BootSceneName)
             {
-                SceneManager.Instance?.LoadIntro();
+                if (SceneManager.Instance != null)
+                {
+                    SceneManager.Instance.LoadIntro();
+                }
+                else
+                {
+                    Debug.LogError("[GameManager] SceneManager.Instance missing on Boot — loading Intro directly.");
+                    UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.IntroSceneName);
+                }
             }
         }
 

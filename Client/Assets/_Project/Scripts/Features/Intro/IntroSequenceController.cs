@@ -121,7 +121,13 @@ namespace GulfRun.Features.Intro
             // Guard against Update() firing this twice in the same frame window.
             enabled = false;
             SaveManager.Instance?.MarkIntroSeen();
-            SceneManager.Instance?.LoadMainMenu();
+            if (SceneManager.Instance != null)
+            {
+                SceneManager.Instance.LoadMainMenu();
+                return;
+            }
+
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.MainMenuSceneName);
         }
 
         /// <summary>0 (fully visible scene) .. 1 (fully black) — drives the "Smooth fade into the Main Lobby. No loading stutter." black overlay.</summary>

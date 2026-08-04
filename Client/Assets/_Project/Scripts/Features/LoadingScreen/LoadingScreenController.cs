@@ -32,17 +32,12 @@ namespace GulfRun.Features.LoadingScreen
 
         private void Start()
         {
-            Debug.Log("[LoadingScreen] Start — activeScene="
-                + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
-                + " OfflineRaceEntryService.IsActive=" + OfflineRaceEntryService.IsActive
-                + " PendingLoadingAutoAdvance=" + OfflineRaceEntryService.PendingLoadingAutoAdvance
-                + " SceneManager.Instance=" + (SceneManager.Instance != null));
-
-            bool shouldAutoAdvance = OfflineRaceEntryService.ConsumeLoadingAutoAdvance()
-                                     || OfflineRaceEntryService.IsActive;
+            // Only auto-advance when Quick Play explicitly armed PendingLoadingAutoAdvance.
+            // Do NOT treat IsActive alone as a reason to jump — that flag can linger across
+            // DisableDomainReload Editor sessions and wrongly skip Main Menu flows.
+            bool shouldAutoAdvance = OfflineRaceEntryService.ConsumeLoadingAutoAdvance();
             if (!shouldAutoAdvance)
             {
-                Debug.Log("[LoadingScreen] No offline auto-advance — waiting for Continue (PreRaceIntro path).");
                 return;
             }
 
@@ -57,8 +52,6 @@ namespace GulfRun.Features.LoadingScreen
             }
 
             _autoAdvanceRemaining = seconds;
-            Debug.Log("[LoadingScreen] Offline auto-advance armed for " + seconds
-                + "s → Gameplay (skip PreRaceIntro).");
         }
 
         private void Update()
@@ -77,7 +70,6 @@ namespace GulfRun.Features.LoadingScreen
             if (_autoAdvanceRemaining <= 0f)
             {
                 _autoAdvanceRemaining = -1f;
-                Debug.Log("[LoadingScreen] Offline timer finished — calling GoToGameplay()");
                 GoToGameplay();
             }
         }
@@ -100,12 +92,10 @@ namespace GulfRun.Features.LoadingScreen
             // Offline Quick Play: Continue also enters the race (skip remaining timer).
             if (OfflineRaceEntryService.IsActive)
             {
-                Debug.Log("[LoadingScreen] Continue clicked (offline) → Gameplay");
                 GoToGameplay();
                 return;
             }
 
-            Debug.Log("[LoadingScreen] Continue clicked → PreRaceIntro");
             GoToPreRaceIntro();
         }
 
@@ -117,22 +107,14 @@ namespace GulfRun.Features.LoadingScreen
             }
 
             _navigatedAway = true;
-            Debug.Log("[LoadingScreen] Before LoadGameplay — SceneManager.Instance="
-                + (SceneManager.Instance != null)
-                + " target='" + SceneManager.GameplaySceneName + "'");
-
             if (SceneManager.Instance != null)
             {
                 SceneManager.Instance.LoadGameplay();
-                Debug.Log("[LoadingScreen] After SceneManager.Instance.LoadGameplay()");
                 return;
             }
 
-            Debug.Log("[LoadingScreen] SceneManager.Instance null — UnityEngine.SceneManagement.SceneManager.LoadScene('"
-                + SceneManager.GameplaySceneName + "')");
+            // Last resort: Boot SceneManager missing (Editor entered mid-flow without Boot).
             UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.GameplaySceneName);
-            Debug.Log("[LoadingScreen] After direct LoadScene('" + SceneManager.GameplaySceneName
-                + "') activeScene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
 
         private void GoToPreRaceIntro()
@@ -143,20 +125,13 @@ namespace GulfRun.Features.LoadingScreen
             }
 
             _navigatedAway = true;
-            Debug.Log("[LoadingScreen] Before LoadPreRaceIntro — SceneManager.Instance="
-                + (SceneManager.Instance != null));
-
             if (SceneManager.Instance != null)
             {
                 SceneManager.Instance.LoadPreRaceIntro();
-                Debug.Log("[LoadingScreen] After SceneManager.Instance.LoadPreRaceIntro()");
                 return;
             }
 
-            Debug.Log("[LoadingScreen] SceneManager.Instance null — UnityEngine.SceneManagement.SceneManager.LoadScene('"
-                + SceneManager.PreRaceIntroSceneName + "')");
             UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.PreRaceIntroSceneName);
-            Debug.Log("[LoadingScreen] After direct LoadScene('" + SceneManager.PreRaceIntroSceneName + "')");
         }
     }
 }

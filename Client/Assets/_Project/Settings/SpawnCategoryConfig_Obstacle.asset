@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SpawnCategoryConfig_Obstacle
   m_EditorClassIdentifier: 
   entries:
-  - Prefab: {fileID: 100100000, guid: e23d6233386a442b9cc0d4cd26224798, type: 3}
+  - Prefab: {fileID: 100000, guid: e23d6233386a442b9cc0d4cd26224798, type: 3}
     BaseWeight: 1
     DifficultyWeightMultiplier: 1.5
   baseSpawnChance: 0.8

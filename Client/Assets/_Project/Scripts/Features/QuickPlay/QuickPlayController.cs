@@ -41,22 +41,14 @@ namespace GulfRun.Features.QuickPlay
 
         private void Start()
         {
-            Debug.Log("[QuickPlay] Start — activeScene="
-                + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
-                + " SceneManager.Instance=" + (SceneManager.Instance != null)
-                + " MatchLobbySummaryService.Current=" + (MatchLobbySummaryService.Current != null));
-
             SetActive(playersFoundLabel, false);
             SetActive(joiningRoomLabel, false);
             SetActive(creatingRoomLabel, false);
             SetActive(waitingForPlayersLabel, false);
 
-            // Always arm offline LoadingScreen → Gameplay, even if Boot/SessionManager
-            // are missing (common when entering Play Mode from MainMenu/PlayMenu).
+            // Arm offline LoadingScreen → Gameplay only when this scene is entered
+            // via Play Menu Quick Play (or SessionManager match path).
             OfflineRaceEntryService.BeginPendingEntry();
-            Debug.Log("[QuickPlay] OfflineRaceEntryService.BeginPendingEntry() — IsActive="
-                + OfflineRaceEntryService.IsActive
-                + " PendingLoadingAutoAdvance=" + OfflineRaceEntryService.PendingLoadingAutoAdvance);
 
             string displayName = LocalProfileProviderService.Current != null &&
                                  LocalProfileProviderService.Current.HasProfile
@@ -69,18 +61,12 @@ namespace GulfRun.Features.QuickPlay
                 try
                 {
                     lobby.CreateLocalOfflinePrototype(displayName);
-                    Debug.Log("[QuickPlay] CreateLocalOfflinePrototype OK for '" + displayName + "'");
                 }
                 catch (System.Exception ex)
                 {
                     Debug.LogWarning("[QuickPlay] CreateLocalOfflinePrototype failed (continuing offline): "
                         + ex.Message);
                 }
-            }
-            else
-            {
-                Debug.LogWarning("[QuickPlay] MatchLobbySummaryService.Current is null — "
-                    + "skipping stub match; continuing offline LoadingScreen → Gameplay.");
             }
 
             SetStatus("Preparing offline race...");
@@ -132,21 +118,14 @@ namespace GulfRun.Features.QuickPlay
             }
 
             _navigatedAway = true;
-            Debug.Log("[QuickPlay] Before LoadLoadingScreen — SceneManager.Instance="
-                + (SceneManager.Instance != null));
-
             if (SceneManager.Instance != null)
             {
                 SceneManager.Instance.LoadLoadingScreen();
-                Debug.Log("[QuickPlay] After SceneManager.Instance.LoadLoadingScreen()");
                 return;
             }
 
-            Debug.Log("[QuickPlay] SceneManager.Instance null — UnityEngine.SceneManagement.SceneManager.LoadScene('"
-                + SceneManager.LoadingScreenSceneName + "')");
+            // Last resort when Boot managers were never created (dev entered QuickPlay directly).
             UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.LoadingScreenSceneName);
-            Debug.Log("[QuickPlay] After direct LoadScene('" + SceneManager.LoadingScreenSceneName
-                + "') activeScene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
 
         private void CancelAndReturn()
@@ -161,7 +140,6 @@ namespace GulfRun.Features.QuickPlay
             lobby?.CancelOrLeaveMatch();
             OfflineRaceEntryService.Clear();
 
-            Debug.Log("[QuickPlay] CancelAndReturn → PlayMenu");
             if (SceneManager.Instance != null)
             {
                 SceneManager.Instance.LoadPlayMenu();

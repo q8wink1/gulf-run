@@ -71,7 +71,6 @@ namespace GulfRun.Features.MainMenu
             }
 
             _navigating = true;
-            Debug.Log("Play button clicked");
 
             if (SceneManager.Instance != null)
             {
@@ -79,7 +78,6 @@ namespace GulfRun.Features.MainMenu
                 return;
             }
 
-            Debug.Log("[MainMenuPlayButton] SceneManager.Instance null — LoadPlayMenu via SceneManager.LoadScene('" + SceneManager.PlayMenuSceneName + "')");
             UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.PlayMenuSceneName);
         }
 
@@ -95,14 +93,12 @@ namespace GulfRun.Features.MainMenu
             {
                 GameObject go = new GameObject("EventSystem");
                 es = go.AddComponent<EventSystem>();
-                AddUiInputModule(go);
+                EnsureUiInputModule(go);
                 return;
             }
 
             EnsureUiInputModule(es.gameObject);
         }
-
-        private static void AddUiInputModule(GameObject go) => EnsureUiInputModule(go);
 
         private static void EnsureUiInputModule(GameObject go)
         {
@@ -112,7 +108,8 @@ namespace GulfRun.Features.MainMenu
             StandaloneInputModule legacy = go.GetComponent<StandaloneInputModule>();
             if (legacy != null)
             {
-                DestroyImmediate(legacy);
+                // Destroy (not DestroyImmediate) — safer during Awake/Play Mode.
+                Object.Destroy(legacy);
             }
 
             if (go.GetComponent<InputSystemUIInputModule>() == null)

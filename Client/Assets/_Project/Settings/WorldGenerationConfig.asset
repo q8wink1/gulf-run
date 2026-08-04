@@ -13,27 +13,27 @@ MonoBehaviour:
   m_Name: WorldGenerationConfig
   m_EditorClassIdentifier: 
   chunkPrefabs:
-  - Prefab: {fileID: 100100000, guid: e99c9c47c88e43e582b1ad8f426e7ed9, type: 3}
+  - Prefab: {fileID: 100000, guid: e99c9c47c88e43e582b1ad8f426e7ed9, type: 3}
     Weight: 3
-  - Prefab: {fileID: 100100000, guid: 83e331028d6d4ab2abd359a5761d05b2, type: 3}
+  - Prefab: {fileID: 100000, guid: 83e331028d6d4ab2abd359a5761d05b2, type: 3}
     Weight: 3
-  - Prefab: {fileID: 100100000, guid: af4a607c55764305a47b873e196b6b3b, type: 3}
+  - Prefab: {fileID: 100000, guid: af4a607c55764305a47b873e196b6b3b, type: 3}
     Weight: 2
-  - Prefab: {fileID: 100100000, guid: 578c60bc45e541f4a7d75ee7388977fd, type: 3}
+  - Prefab: {fileID: 100000, guid: 578c60bc45e541f4a7d75ee7388977fd, type: 3}
     Weight: 2
-  - Prefab: {fileID: 100100000, guid: a8afd6393c8146d59f255a8fa692e40e, type: 3}
+  - Prefab: {fileID: 100000, guid: a8afd6393c8146d59f255a8fa692e40e, type: 3}
     Weight: 2
-  - Prefab: {fileID: 100100000, guid: 35c66d3c324b419e9daf7bda928115c5, type: 3}
+  - Prefab: {fileID: 100000, guid: 35c66d3c324b419e9daf7bda928115c5, type: 3}
     Weight: 1.5
-  - Prefab: {fileID: 100100000, guid: e647d637b7ea40ab8ab93d7d665376b0, type: 3}
+  - Prefab: {fileID: 100000, guid: e647d637b7ea40ab8ab93d7d665376b0, type: 3}
     Weight: 2
-  - Prefab: {fileID: 100100000, guid: f589943082d84e14aa1bf021682bad8d, type: 3}
+  - Prefab: {fileID: 100000, guid: f589943082d84e14aa1bf021682bad8d, type: 3}
     Weight: 2
-  - Prefab: {fileID: 100100000, guid: 12de632db57849ea8eebef2996c3df00, type: 3}
+  - Prefab: {fileID: 100000, guid: 12de632db57849ea8eebef2996c3df00, type: 3}
     Weight: 1
-  - Prefab: {fileID: 100100000, guid: bf01c29933a540ce83e72fbd19042e36, type: 3}
+  - Prefab: {fileID: 100000, guid: bf01c29933a540ce83e72fbd19042e36, type: 3}
     Weight: 1
-  - Prefab: {fileID: 100100000, guid: 3b752473f2274ffd88c3f2dfeec023df, type: 3}
+  - Prefab: {fileID: 100000, guid: 3b752473f2274ffd88c3f2dfeec023df, type: 3}
     Weight: 1
   spawnAheadBufferMeters: 40
   cleanupBehindBufferMeters: 20
