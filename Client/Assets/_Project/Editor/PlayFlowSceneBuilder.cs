@@ -96,7 +96,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Build Gameplay HUD (Sprint 23.3)")]
         public static void BuildGameplayHudFromMenu() => BuildGameplayHudBatch();
 
-        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.12)")]
+        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.13)")]
         public static void ValidateGameplayRunnerFromMenu() => ValidateGameplayRunnerBatch();
 
         [MenuItem("GulfRun/Play Flow/Fix Play Now Navigation")]
@@ -301,7 +301,7 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 23.4–23.12: validate runner, camera, track, spawn, race, obstacles, game rules, collectibles.
+        /// Sprint 23.4–23.13: validate runner, camera, track, spawn, race, obstacles, game rules, collectibles, offline bootstrap.
         /// </summary>
         public static void ValidateGameplayRunnerBatch()
         {
@@ -317,7 +317,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn + Race + Obstacles + Game Rules + Collectibles Sprint 23.4–23.12 OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn + Race + Obstacles + Game Rules + Collectibles + Offline Race Sprint 23.4–23.13 OK.");
         }
 
         /// <summary>
@@ -4087,6 +4087,14 @@ namespace GulfRun.Editor
                 {
                     failures.Add("GameplaySpawnManager executeCollectiblePlans should be enabled (Sprint 23.12).");
                 }
+            }
+
+            GameObject offlineBootstrap = FindDeep(scene, "OfflineRaceBootstrap");
+            Require(offlineBootstrap, "OfflineRaceBootstrap", failures);
+            if (offlineBootstrap != null &&
+                offlineBootstrap.GetComponent<GulfRun.Features.Gameplay.OfflineRaceBootstrap>() == null)
+            {
+                failures.Add("OfflineRaceBootstrap missing OfflineRaceBootstrap component (Sprint 23.13).");
             }
 
             GameObject raceGo = FindDeep(scene, "RaceManager");

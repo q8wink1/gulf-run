@@ -77,6 +77,18 @@ namespace GulfRun.Core.Services
         /// <summary>Starts hosting a brand-new Quick Match (the PLAY button's action; public automatic matchmaking, P017).</summary>
         void StartQuickMatch(string localDisplayName);
 
+        /// <summary>
+        /// Sprint 23.13 — skip public search / lobby fill. Hosts a local
+        /// single-player stub match for the offline race prototype.
+        /// </summary>
+        void CreateLocalOfflinePrototype(string localDisplayName);
+
+        /// <summary>
+        /// Sprint 23.13 — set match phase to Running so Race Finish progress
+        /// reporting works during the offline Gameplay prototype.
+        /// </summary>
+        void MarkOfflineRaceRunning();
+
         /// <summary>Sprint 15 (Private Room "Create Room"). Hosts a brand-new invitation-only Private Room instead of public Quick Play.</summary>
         void CreatePrivateRoom(string localDisplayName);
 

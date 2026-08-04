@@ -180,6 +180,57 @@ namespace GulfRun.Features.Multiplayer.Session
             LobbyStateChanged?.Invoke();
         }
 
+        /// <summary>
+        /// Sprint 23.13 — offline Quick Play stub: one local player, no search,
+        /// no public-room join, no gradual opponent fill. Lobby/matchmaking
+        /// code paths remain intact for Invite / Private Room.
+        /// </summary>
+        public void CreateLocalOfflinePrototype(string localDisplayName)
+        {
+            if (IsMatchmaking)
+            {
+                CancelMatchmaking();
+            }
+
+            if (IsInMatch)
+            {
+                LeaveMatch();
+            }
+
+            string displayName = string.IsNullOrWhiteSpace(localDisplayName) ? "Player" : localDisplayName;
+            CreateMatchInternal(displayName, MatchCreationMode.QuickPlay);
+            if (!IsInMatch)
+            {
+                return;
+            }
+
+            OfflineRaceEntryService.BeginPendingEntry();
+            _gradualFillTimer = -1f;
+            _kickRefillTimer = -1f;
+            _remoteReadyTimer = -1f;
+            _pendingRemoteReadyIds.Clear();
+            _currentPublicRoomId = string.Empty;
+            _joinedExistingPublicRoom = false;
+            _matchmakingStatusMessage = "Preparing offline race...";
+            SetLocalReady(PlayerReadyState.Ready);
+            LobbyStateChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Sprint 23.13 — broadcast MatchState.Running so RaceFinish progress
+        /// / finish-line systems activate for the local offline prototype.
+        /// </summary>
+        public void MarkOfflineRaceRunning()
+        {
+            if (!IsInMatch || !OfflineRaceEntryService.IsActive)
+            {
+                return;
+            }
+
+            SetLocalReady(PlayerReadyState.Ready);
+            _match?.RequestMatchState(MatchState.Running);
+        }
+
         public void CreatePrivateRoom(string localDisplayName) =>
             CreateMatchInternal(localDisplayName, MatchCreationMode.PrivateRoom);
 
@@ -241,6 +292,7 @@ namespace GulfRun.Features.Multiplayer.Session
             _pendingQuickPlayDisplayName = string.Empty;
             IsMatchmaking = false;
             _matchmakingStatusMessage = string.Empty;
+            OfflineRaceEntryService.Clear();
             LobbyStateChanged?.Invoke();
         }
 
@@ -458,6 +510,7 @@ namespace GulfRun.Features.Multiplayer.Session
             _kickRefillTimer = -1f;
             _remoteReadyTimer = -1f;
             _pendingRemoteReadyIds.Clear();
+            OfflineRaceEntryService.Clear();
         }
 
         public void SetLocalReady(PlayerReadyState state)

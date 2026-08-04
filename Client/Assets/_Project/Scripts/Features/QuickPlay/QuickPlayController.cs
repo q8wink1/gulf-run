@@ -6,9 +6,9 @@ using UnityEngine.UI;
 namespace GulfRun.Features.QuickPlay
 {
     /// <summary>
-    /// Quick Play searching screen: starts mock public matchmaking on enter,
-    /// mirrors SessionManager status text, Cancel/Back → Play Menu, and
-    /// auto-loads Lobby once a match is formed.
+    /// Sprint 23.13 — Quick Play entry: skip public matchmaking / LobbyScreen,
+    /// create a local one-player stub, then hand off to LoadingScreen (2–3s)
+    /// → Gameplay. Lobby / matchmaking code remains for other entry points.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class QuickPlayController : MonoBehaviour
@@ -22,8 +22,7 @@ namespace GulfRun.Features.QuickPlay
         [SerializeField] private GameObject creatingRoomLabel;
         [SerializeField] private GameObject waitingForPlayersLabel;
 
-        private bool _searchStarted;
-        private bool _navigatedToLobby;
+        private bool _navigatedAway;
 
         private void Awake()
         {
@@ -40,16 +39,15 @@ namespace GulfRun.Features.QuickPlay
 
         private void Start()
         {
+            SetActive(playersFoundLabel, false);
+            SetActive(joiningRoomLabel, false);
+            SetActive(creatingRoomLabel, false);
+            SetActive(waitingForPlayersLabel, false);
+
             IMatchLobbySummaryProvider lobby = MatchLobbySummaryService.Current;
             if (lobby == null)
             {
                 SetStatus("Matchmaking unavailable");
-                return;
-            }
-
-            if (lobby.IsInMatch)
-            {
-                GoToLobby();
                 return;
             }
 
@@ -58,9 +56,9 @@ namespace GulfRun.Features.QuickPlay
                 ? LocalProfileProviderService.Current.LocalProfile.Nickname
                 : "Player";
 
-            lobby.StartQuickMatch(displayName);
-            _searchStarted = true;
-            RefreshStatus(lobby);
+            lobby.CreateLocalOfflinePrototype(displayName);
+            SetStatus("Preparing offline race...");
+            GoToLoadingScreen();
         }
 
         private void OnDestroy()
@@ -82,37 +80,6 @@ namespace GulfRun.Features.QuickPlay
             {
                 spinner.Rotate(0f, 0f, -180f * Time.deltaTime);
             }
-
-            IMatchLobbySummaryProvider lobby = MatchLobbySummaryService.Current;
-            if (lobby == null)
-            {
-                return;
-            }
-
-            RefreshStatus(lobby);
-
-            if (!_navigatedToLobby && lobby.IsInMatch && !lobby.IsMatchmaking)
-            {
-                // Brief beat so "Joining/Creating" copy is readable, then enter Lobby.
-                if (_searchStarted)
-                {
-                    GoToLobby();
-                }
-            }
-        }
-
-        private void RefreshStatus(IMatchLobbySummaryProvider lobby)
-        {
-            string message = string.IsNullOrEmpty(lobby.MatchmakingStatusMessage)
-                ? (lobby.IsInMatch ? "Entering Lobby..." : "Searching for available players...")
-                : lobby.MatchmakingStatusMessage;
-            SetStatus(message);
-
-            string lower = message.ToLowerInvariant();
-            SetActive(playersFoundLabel, lower.Contains("players found"));
-            SetActive(joiningRoomLabel, lower.Contains("joining"));
-            SetActive(creatingRoomLabel, lower.Contains("creating"));
-            SetActive(waitingForPlayersLabel, lower.Contains("waiting"));
         }
 
         private void SetStatus(string value)
@@ -131,24 +98,34 @@ namespace GulfRun.Features.QuickPlay
             }
         }
 
-        private void GoToLobby()
+        private void GoToLoadingScreen()
         {
-            _navigatedToLobby = true;
-            // Sprint 21.1 temporary nav: premium LobbyScreen UI foundation.
-            // TODO(Sprint 21+): restore LoadLobby() when networking UI connects.
-            if (SceneManager.Instance != null)
+            if (_navigatedAway)
             {
-                SceneManager.Instance.LoadLobbyScreen();
                 return;
             }
 
-            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.LobbyScreenSceneName);
+            _navigatedAway = true;
+            if (SceneManager.Instance != null)
+            {
+                SceneManager.Instance.LoadLoadingScreen();
+                return;
+            }
+
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.LoadingScreenSceneName);
         }
 
         private void CancelAndReturn()
         {
+            if (_navigatedAway)
+            {
+                return;
+            }
+
+            _navigatedAway = true;
             IMatchLobbySummaryProvider lobby = MatchLobbySummaryService.Current;
             lobby?.CancelOrLeaveMatch();
+            OfflineRaceEntryService.Clear();
 
             if (SceneManager.Instance != null)
             {
