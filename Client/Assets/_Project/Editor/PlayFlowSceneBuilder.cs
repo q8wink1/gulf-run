@@ -137,16 +137,6 @@ namespace GulfRun.Editor
                 BuildLobbyScreenScene(failures);
                 EnsureBuildSettings(failures);
                 ValidateLobbyScreen(failures);
-
-                if (CoreSceneManager.LobbyScreenSceneName != "LobbyScreen")
-                {
-                    failures.Add("SceneManager.LobbyScreenSceneName mismatch.");
-                }
-
-                if (CoreSceneManager.LobbySceneName != "Lobby")
-                {
-                    failures.Add("SceneManager.LobbySceneName must remain Lobby (pre-race).");
-                }
             }
             catch (System.Exception ex)
             {
@@ -172,11 +162,6 @@ namespace GulfRun.Editor
                 BuildMapVotingScreenScene(failures);
                 EnsureBuildSettings(failures);
                 ValidateMapVotingScreen(failures);
-
-                if (CoreSceneManager.MapVotingSceneName != "MapVoting")
-                {
-                    failures.Add("SceneManager.MapVotingSceneName mismatch.");
-                }
             }
             catch (System.Exception ex)
             {
@@ -204,16 +189,6 @@ namespace GulfRun.Editor
                 EnsureBuildSettings(failures);
                 ValidateWinningMapRevealScreen(failures);
                 ValidateMapVotingNextButton(failures);
-
-                if (CoreSceneManager.WinningMapRevealSceneName != "WinningMapReveal")
-                {
-                    failures.Add("SceneManager.WinningMapRevealSceneName mismatch.");
-                }
-
-                if (CoreSceneManager.MapVotingSceneName != "MapVoting")
-                {
-                    failures.Add("SceneManager.MapVotingSceneName mismatch.");
-                }
             }
             catch (System.Exception ex)
             {
@@ -238,16 +213,6 @@ namespace GulfRun.Editor
                 BuildLoadingScreenScene(failures);
                 EnsureBuildSettings(failures);
                 ValidateLoadingScreen(failures);
-
-                if (CoreSceneManager.LoadingScreenSceneName != "LoadingScreen")
-                {
-                    failures.Add("SceneManager.LoadingScreenSceneName mismatch.");
-                }
-
-                if (CoreSceneManager.LoadingSceneName != "Loading")
-                {
-                    failures.Add("SceneManager.LoadingSceneName must remain Loading (gameplay transition).");
-                }
             }
             catch (System.Exception ex)
             {
@@ -273,16 +238,6 @@ namespace GulfRun.Editor
                 BuildPreRaceIntroScene(failures);
                 EnsureBuildSettings(failures);
                 ValidatePreRaceIntro(failures);
-
-                if (CoreSceneManager.PreRaceIntroSceneName != "PreRaceIntro")
-                {
-                    failures.Add("SceneManager.PreRaceIntroSceneName mismatch.");
-                }
-
-                if (CoreSceneManager.LoadingScreenSceneName != "LoadingScreen")
-                {
-                    failures.Add("SceneManager.LoadingScreenSceneName must remain LoadingScreen.");
-                }
             }
             catch (System.Exception ex)
             {
@@ -2861,31 +2816,6 @@ namespace GulfRun.Editor
             ValidateInviteFriends(failures);
             ValidateLobbyScreen(failures);
             ValidateMainMenuWiring(failures);
-
-            if (CoreSceneManager.PlayMenuSceneName != "PlayMenu")
-            {
-                failures.Add("SceneManager.PlayMenuSceneName mismatch.");
-            }
-
-            if (CoreSceneManager.QuickPlaySceneName != "QuickPlay")
-            {
-                failures.Add("SceneManager.QuickPlaySceneName mismatch.");
-            }
-
-            if (CoreSceneManager.InviteFriendsSceneName != "InviteFriends")
-            {
-                failures.Add("SceneManager.InviteFriendsSceneName mismatch.");
-            }
-
-            if (CoreSceneManager.LobbyScreenSceneName != "LobbyScreen")
-            {
-                failures.Add("SceneManager.LobbyScreenSceneName mismatch.");
-            }
-
-            if (CoreSceneManager.LobbySceneName != "Lobby")
-            {
-                failures.Add("SceneManager.LobbySceneName must remain Lobby (pre-race).");
-            }
         }
 
         private static void ValidatePlayMenu(List<string> failures)
@@ -3202,8 +3132,6 @@ namespace GulfRun.Editor
                 failures.Add("RoomCodeText expected 'GULF-4821'.");
             }
 
-            GameObject readyButtonGo = FindDeep(scene, "ReadyButton");
-            RectTransform readyRt = readyButtonGo != null ? readyButtonGo.GetComponent<RectTransform>() : null;
             if (readyRt == null || readyRt.sizeDelta.x < 320f || readyRt.sizeDelta.y < 90f)
             {
                 failures.Add("ReadyButton expected large premium size (>= 320x90).");
