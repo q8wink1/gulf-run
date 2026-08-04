@@ -64,13 +64,19 @@ namespace GulfRun.Features.PlayMenu
 
         private static void OnQuickPlayClicked()
         {
+            Debug.Log("[PlayMenu] OnQuickPlayClicked — SceneManager.Instance="
+                + (SceneManager.Instance != null));
             if (SceneManager.Instance != null)
             {
                 SceneManager.Instance.LoadQuickPlay();
+                Debug.Log("[PlayMenu] After SceneManager.Instance.LoadQuickPlay()");
                 return;
             }
 
+            Debug.Log("[PlayMenu] SceneManager.Instance null — LoadScene('"
+                + SceneManager.QuickPlaySceneName + "')");
             UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.QuickPlaySceneName);
+            Debug.Log("[PlayMenu] After direct LoadScene('" + SceneManager.QuickPlaySceneName + "')");
         }
 
         private static void OnInviteFriendsClicked()

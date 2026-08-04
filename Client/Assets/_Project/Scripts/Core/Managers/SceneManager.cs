@@ -31,37 +31,61 @@ namespace GulfRun.Core.Managers
             // TODO(Sprint 2+): real Loading-scene/async/Addressables handoff.
         }
 
-        public void LoadIntro() => UnityEngine.SceneManagement.SceneManager.LoadScene(IntroSceneName);
+        public void LoadIntro() => LoadSceneLogged(IntroSceneName, nameof(LoadIntro));
 
-        public void LoadPlayMenu()
-        {
-            Debug.Log("[SceneManager] LoadPlayMenu() → loading scene '" + PlayMenuSceneName + "'");
-            UnityEngine.SceneManagement.SceneManager.LoadScene(PlayMenuSceneName);
-        }
+        public void LoadPlayMenu() => LoadSceneLogged(PlayMenuSceneName, nameof(LoadPlayMenu));
 
-        public void LoadQuickPlay() => UnityEngine.SceneManagement.SceneManager.LoadScene(QuickPlaySceneName);
+        public void LoadQuickPlay() => LoadSceneLogged(QuickPlaySceneName, nameof(LoadQuickPlay));
 
-        public void LoadInviteFriends() => UnityEngine.SceneManagement.SceneManager.LoadScene(InviteFriendsSceneName);
+        public void LoadInviteFriends() => LoadSceneLogged(InviteFriendsSceneName, nameof(LoadInviteFriends));
 
         /// <summary>Premium Lobby UI foundation (Sprint 21.1). Distinct from pre-race <see cref="LoadLobby"/>.</summary>
-        public void LoadLobbyScreen() => UnityEngine.SceneManagement.SceneManager.LoadScene(LobbyScreenSceneName);
+        public void LoadLobbyScreen() => LoadSceneLogged(LobbyScreenSceneName, nameof(LoadLobbyScreen));
 
-        public void LoadLobby() => UnityEngine.SceneManagement.SceneManager.LoadScene(LobbySceneName);
+        public void LoadLobby() => LoadSceneLogged(LobbySceneName, nameof(LoadLobby));
 
-        public void LoadMapVoting() => UnityEngine.SceneManagement.SceneManager.LoadScene(MapVotingSceneName);
+        public void LoadMapVoting() => LoadSceneLogged(MapVotingSceneName, nameof(LoadMapVoting));
 
-        public void LoadWinningMapReveal() => UnityEngine.SceneManagement.SceneManager.LoadScene(WinningMapRevealSceneName);
+        public void LoadWinningMapReveal() =>
+            LoadSceneLogged(WinningMapRevealSceneName, nameof(LoadWinningMapReveal));
 
         /// <summary>Premium Loading Screen UI (Sprint 22.5). Distinct from gameplay <see cref="LoadLoading"/>.</summary>
-        public void LoadLoadingScreen() => UnityEngine.SceneManagement.SceneManager.LoadScene(LoadingScreenSceneName);
+        public void LoadLoadingScreen() => LoadSceneLogged(LoadingScreenSceneName, nameof(LoadLoadingScreen));
 
         /// <summary>Pre-Race Intro + Sprint 23.2 countdown overlay. Presentation only — no movement / networking.</summary>
-        public void LoadPreRaceIntro() => UnityEngine.SceneManagement.SceneManager.LoadScene(PreRaceIntroSceneName);
+        public void LoadPreRaceIntro() => LoadSceneLogged(PreRaceIntroSceneName, nameof(LoadPreRaceIntro));
 
-        public void LoadLoading() => UnityEngine.SceneManagement.SceneManager.LoadScene(LoadingSceneName);
+        public void LoadLoading() => LoadSceneLogged(LoadingSceneName, nameof(LoadLoading));
 
-        public void LoadGameplay() => UnityEngine.SceneManagement.SceneManager.LoadScene(GameplaySceneName);
+        public void LoadGameplay() => LoadSceneLogged(GameplaySceneName, nameof(LoadGameplay));
 
-        public void LoadMainMenu() => UnityEngine.SceneManagement.SceneManager.LoadScene(MainMenuSceneName);
+        public void LoadMainMenu() => LoadSceneLogged(MainMenuSceneName, nameof(LoadMainMenu));
+
+        /// <summary>
+        /// Shared LoadScene with before/after logs. Callers that find
+        /// <see cref="Instance"/> null should invoke
+        /// <see cref="UnityEngine.SceneManagement.SceneManager.LoadScene(string)"/>
+        /// directly with the matching scene-name constant.
+        /// </summary>
+        private static void LoadSceneLogged(string sceneName, string methodName)
+        {
+            string before = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            Debug.Log("[SceneManager] " + methodName + "() BEFORE LoadScene('" + sceneName
+                + "') active='" + before + "'");
+            try
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("[SceneManager] " + methodName + "() LoadScene('" + sceneName
+                    + "') threw: " + ex);
+                throw;
+            }
+
+            string after = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            Debug.Log("[SceneManager] " + methodName + "() AFTER LoadScene('" + sceneName
+                + "') active='" + after + "'");
+        }
     }
 }

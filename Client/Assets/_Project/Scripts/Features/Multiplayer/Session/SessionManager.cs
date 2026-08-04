@@ -197,14 +197,25 @@ namespace GulfRun.Features.Multiplayer.Session
                 LeaveMatch();
             }
 
+            // Arm AFTER Leave/Cancel — those paths call OfflineRaceEntryService.Clear().
+            OfflineRaceEntryService.BeginPendingEntry();
+
             string displayName = string.IsNullOrWhiteSpace(localDisplayName) ? "Player" : localDisplayName;
-            CreateMatchInternal(displayName, MatchCreationMode.QuickPlay);
-            if (!IsInMatch)
+            if (MatchTransportService.Current == null)
             {
+                Debug.LogWarning("[SessionManager] CreateLocalOfflinePrototype: MatchTransportService.Current is null — stub match skipped; offline flag remains set.");
+                _matchmakingStatusMessage = "Preparing offline race...";
+                LobbyStateChanged?.Invoke();
                 return;
             }
 
-            OfflineRaceEntryService.BeginPendingEntry();
+            CreateMatchInternal(displayName, MatchCreationMode.QuickPlay);
+            if (!IsInMatch)
+            {
+                Debug.LogWarning("[SessionManager] CreateLocalOfflinePrototype: CreateMatchInternal did not enter match — offline flag remains set.");
+                return;
+            }
+
             _gradualFillTimer = -1f;
             _kickRefillTimer = -1f;
             _remoteReadyTimer = -1f;
