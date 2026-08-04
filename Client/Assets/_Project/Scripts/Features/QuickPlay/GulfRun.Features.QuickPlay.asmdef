@@ -3,6 +3,7 @@
     "rootNamespace": "GulfRun.Features.QuickPlay",
     "references": [
         "GulfRun.Core",
+        "GulfRun.Domain",
         "UnityEngine.UI"
     ],
     "includePlatforms": [],
