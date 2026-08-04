@@ -62,7 +62,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Polish Play Menu (Sprint 20.1)")]
         public static void PolishPlayMenuFromMenu() => PolishPlayMenuBatch();
 
-        [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.4)")]
+        [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.5)")]
         public static void BuildLobbyScreenFromMenu() => BuildLobbyScreenBatch();
 
         public static void RunBatch()
@@ -89,11 +89,10 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 21.4: rebuild LobbyScreen Host Controls UI (premium HOST
-        /// badge, Play waiting/prepared states, Kick placeholders, lobby
-        /// info header, system message footer). Keeps 21.2 slots + 21.3
-        /// Ready System visuals. Does not rebuild PlayMenu / QuickPlay /
-        /// InviteFriends.
+        /// Sprint 21.5: rebuild LobbyScreen with final visual polish (hierarchy,
+        /// Ready/Play touch targets, SafeArea insets, slot rhythm, typography).
+        /// Keeps 21.2–21.4 structure; no networking / ready logic / matchmaking.
+        /// Does not rebuild PlayMenu / QuickPlay / InviteFriends.
         /// </summary>
         public static void BuildLobbyScreenBatch()
         {
@@ -121,7 +120,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — LobbyScreen Sprint 21.4 Host Controls UI OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — LobbyScreen Sprint 21.5 Final Polish OK.");
         }
 
         /// <summary>
@@ -509,20 +508,20 @@ namespace GulfRun.Editor
             CreateSafeArea(canvasRt);
 
             Button backButton = CreateLabeledButton("BackButton", canvasRt, "Back", 168f, 64f, ButtonDark, GoldBright);
-            PlaceTopLeft(backButton.GetComponent<RectTransform>(), new Vector2(48f, -40f));
+            PlaceTopLeft(backButton.GetComponent<RectTransform>(), new Vector2(48f, -52f));
 
-            // Header — Room Type / Host / Players (+ room code) — Sprint 21.4
+            // Header — Room Type / Host / Players (+ room code) — Sprint 21.5 polish
             RectTransform headerRoot = CreateRect("HeaderRoot", canvasRt);
             headerRoot.anchorMin = new Vector2(0.5f, 1f);
             headerRoot.anchorMax = new Vector2(0.5f, 1f);
             headerRoot.pivot = new Vector2(0.5f, 1f);
-            headerRoot.anchoredPosition = new Vector2(0f, -32f);
-            headerRoot.sizeDelta = new Vector2(1180f, 128f);
+            headerRoot.anchoredPosition = new Vector2(0f, -56f);
+            headerRoot.sizeDelta = new Vector2(1200f, 120f);
 
             Image headerBorder = headerRoot.gameObject.AddComponent<Image>();
             headerBorder.color = PanelBorder;
             headerBorder.raycastTarget = false;
-            EnsureCardShadow(headerRoot.gameObject);
+            EnsureLobbyPanelShadow(headerRoot.gameObject);
 
             Image headerFill = CreateUiImage("Fill", headerRoot, stretch: true);
             headerFill.color = PanelBg;
@@ -530,41 +529,44 @@ namespace GulfRun.Editor
             headerFill.rectTransform.offsetMin = new Vector2(3f, 3f);
             headerFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
 
-            Text roomType = CreateUiText("RoomTypeText", headerRoot, "Room Type: Public", 32, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
+            Text roomType = CreateUiText("RoomTypeText", headerRoot, "Room Type: Public", 30, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
             RectTransform roomTypeRt = roomType.rectTransform;
             roomTypeRt.anchorMin = new Vector2(0f, 0.52f);
             roomTypeRt.anchorMax = new Vector2(1f, 1f);
-            roomTypeRt.offsetMin = new Vector2(24f, 0f);
-            roomTypeRt.offsetMax = new Vector2(-24f, -6f);
+            roomTypeRt.offsetMin = new Vector2(28f, 0f);
+            roomTypeRt.offsetMax = new Vector2(-28f, -6f);
 
             Text hostName = CreateUiText("HostNameText", headerRoot, "Host: DesertFox", 22, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
             RectTransform hostNameRt = hostName.rectTransform;
             hostNameRt.anchorMin = new Vector2(0f, 0f);
-            hostNameRt.anchorMax = new Vector2(0.38f, 0.52f);
+            hostNameRt.anchorMax = new Vector2(0.34f, 0.52f);
             hostNameRt.offsetMin = new Vector2(36f, 10f);
             hostNameRt.offsetMax = new Vector2(-8f, -4f);
 
             Text playerCount = CreateUiText("PlayerCountText", headerRoot, "Players: 1 / 4", 22, FontStyle.Bold, TextPrimary, TextAnchor.MiddleCenter);
             RectTransform playerCountRt = playerCount.rectTransform;
-            playerCountRt.anchorMin = new Vector2(0.32f, 0f);
-            playerCountRt.anchorMax = new Vector2(0.68f, 0.52f);
+            playerCountRt.anchorMin = new Vector2(0.34f, 0f);
+            playerCountRt.anchorMax = new Vector2(0.66f, 0.52f);
             playerCountRt.offsetMin = new Vector2(8f, 10f);
             playerCountRt.offsetMax = new Vector2(-8f, -4f);
 
             Text roomCode = CreateUiText("RoomCodeText", headerRoot, "GULF-4821", 22, FontStyle.Bold, Gold, TextAnchor.MiddleRight);
             RectTransform roomCodeRt = roomCode.rectTransform;
-            roomCodeRt.anchorMin = new Vector2(0.62f, 0f);
+            roomCodeRt.anchorMin = new Vector2(0.66f, 0f);
             roomCodeRt.anchorMax = new Vector2(1f, 0.52f);
             roomCodeRt.offsetMin = new Vector2(8f, 10f);
             roomCodeRt.offsetMax = new Vector2(-36f, -4f);
 
-            // Center — four vertical player slots (Sprint 21.2 polish; static mock only)
+            // Center — four equal player slots (Sprint 21.5 rhythm; static mock only)
+            const float slotHeight = 148f;
+            const float slotGap = 24f;
+            float slotsHeight = (slotHeight * 4f) + (slotGap * 3f);
             RectTransform slotsRoot = CreateRect("SlotsRoot", canvasRt);
             slotsRoot.anchorMin = new Vector2(0.5f, 0.5f);
             slotsRoot.anchorMax = new Vector2(0.5f, 0.5f);
             slotsRoot.pivot = new Vector2(0.5f, 0.5f);
-            slotsRoot.anchoredPosition = new Vector2(0f, 78f);
-            slotsRoot.sizeDelta = new Vector2(980f, 640f);
+            slotsRoot.anchoredPosition = new Vector2(0f, 72f);
+            slotsRoot.sizeDelta = new Vector2(980f, slotsHeight);
 
             // Mock hierarchy: host ready, guest not ready, connecting sample, empty waiting.
             // Kick visible on slots 1–2 as Host preview mock only (no kick logic).
@@ -624,25 +626,25 @@ namespace GulfRun.Editor
                 showHostBadge: false,
                 showKickButton: false);
 
-            // Status band above footer buttons (Sprint 21.3 Ready System UI)
+            // Status band above footer buttons (Sprint 21.3 Ready System UI + 21.5 polish)
             RectTransform statusRoot = CreateRect("StatusRoot", canvasRt);
             statusRoot.anchorMin = new Vector2(0.5f, 0f);
             statusRoot.anchorMax = new Vector2(0.5f, 0f);
             statusRoot.pivot = new Vector2(0.5f, 0f);
-            statusRoot.anchoredPosition = new Vector2(0f, 196f);
-            statusRoot.sizeDelta = new Vector2(1200f, 100f);
+            statusRoot.anchoredPosition = new Vector2(0f, 214f);
+            statusRoot.sizeDelta = new Vector2(1200f, 96f);
 
             RectTransform lobbyStatusPanel = CreateRect("LobbyStatusPanel", statusRoot);
             lobbyStatusPanel.anchorMin = new Vector2(0.5f, 0.5f);
             lobbyStatusPanel.anchorMax = new Vector2(0.5f, 0.5f);
             lobbyStatusPanel.pivot = new Vector2(0.5f, 0.5f);
-            lobbyStatusPanel.anchoredPosition = new Vector2(0f, 8f);
-            lobbyStatusPanel.sizeDelta = new Vector2(980f, 78f);
+            lobbyStatusPanel.anchoredPosition = new Vector2(0f, 6f);
+            lobbyStatusPanel.sizeDelta = new Vector2(980f, 72f);
 
             Image statusBorder = lobbyStatusPanel.gameObject.AddComponent<Image>();
             statusBorder.color = PanelBorder;
             statusBorder.raycastTarget = false;
-            EnsureCardShadow(lobbyStatusPanel.gameObject);
+            EnsureLobbyPanelShadow(lobbyStatusPanel.gameObject);
 
             Image statusFill = CreateUiImage("Fill", lobbyStatusPanel, stretch: true);
             statusFill.color = PanelBg;
@@ -691,8 +693,8 @@ namespace GulfRun.Editor
             messageFooter.anchorMin = new Vector2(0.5f, 0f);
             messageFooter.anchorMax = new Vector2(0.5f, 0f);
             messageFooter.pivot = new Vector2(0.5f, 0f);
-            messageFooter.anchoredPosition = new Vector2(0f, 148f);
-            messageFooter.sizeDelta = new Vector2(1100f, 40f);
+            messageFooter.anchoredPosition = new Vector2(0f, 156f);
+            messageFooter.sizeDelta = new Vector2(1200f, 36f);
 
             Text systemSample = CreateUiText(
                 "SystemMsg_PlayerJoined",
@@ -712,25 +714,34 @@ namespace GulfRun.Editor
             CreateInactiveSystemMessage(messageFooter, "SystemMsg_HostChanged", "Host changed...");
             CreateInactiveSystemMessage(messageFooter, "SystemMsg_Searching", "Searching for player...");
 
-            // Footer — Ready (left, premium), Play waiting/disabled (right, Sprint 21.4)
+            // Footer — Ready + Play matched touch targets (Sprint 21.5)
             RectTransform footerRoot = CreateRect("FooterRoot", canvasRt);
             footerRoot.anchorMin = new Vector2(0.5f, 0f);
             footerRoot.anchorMax = new Vector2(0.5f, 0f);
             footerRoot.pivot = new Vector2(0.5f, 0f);
-            footerRoot.anchoredPosition = new Vector2(0f, 36f);
-            footerRoot.sizeDelta = new Vector2(1480f, 110f);
+            footerRoot.anchoredPosition = new Vector2(0f, 40f);
+            footerRoot.sizeDelta = new Vector2(1400f, 120f);
 
-            Button readyButton = CreateLabeledButton("ReadyButton", footerRoot, "Ready", 340f, 96f, Gold, GoldButtonLabel);
+            const float actionButtonWidth = 400f;
+            const float actionButtonHeight = 104f;
+            Button readyButton = CreateLabeledButton(
+                "ReadyButton",
+                footerRoot,
+                "Ready",
+                actionButtonWidth,
+                actionButtonHeight,
+                Gold,
+                GoldButtonLabel);
             RectTransform readyRt = readyButton.GetComponent<RectTransform>();
             readyRt.anchorMin = new Vector2(0f, 0.5f);
             readyRt.anchorMax = new Vector2(0f, 0.5f);
             readyRt.pivot = new Vector2(0f, 0.5f);
-            readyRt.anchoredPosition = new Vector2(40f, 0f);
+            readyRt.anchoredPosition = new Vector2(48f, 0f);
             readyButton.transition = Selectable.Transition.None;
             Text readyLabel = readyButton.GetComponentInChildren<Text>();
             if (readyLabel != null)
             {
-                readyLabel.fontSize = 32;
+                readyLabel.fontSize = 30;
             }
 
             Image readyImage = readyButton.GetComponent<Image>();
@@ -741,15 +752,15 @@ namespace GulfRun.Editor
                 "PlayButton",
                 footerRoot,
                 "Waiting for Players...",
-                420f,
-                96f,
+                actionButtonWidth,
+                actionButtonHeight,
                 new Color(0.18f, 0.16f, 0.14f, 0.72f),
                 new Color(0.62f, 0.60f, 0.56f, 0.85f));
             RectTransform playRt = playButton.GetComponent<RectTransform>();
             playRt.anchorMin = new Vector2(1f, 0.5f);
             playRt.anchorMax = new Vector2(1f, 0.5f);
             playRt.pivot = new Vector2(1f, 0.5f);
-            playRt.anchoredPosition = new Vector2(-40f, 0f);
+            playRt.anchoredPosition = new Vector2(-48f, 0f);
             playButton.interactable = false;
             playButton.transition = Selectable.Transition.None;
             ColorBlock playColors = playButton.colors;
@@ -758,7 +769,7 @@ namespace GulfRun.Editor
             Text playLabel = playButton.GetComponentInChildren<Text>();
             if (playLabel != null)
             {
-                playLabel.fontSize = 26;
+                playLabel.fontSize = 30;
                 playLabel.color = new Color(0.62f, 0.60f, 0.56f, 0.85f);
             }
 
@@ -849,7 +860,7 @@ namespace GulfRun.Editor
         {
             // Touch-friendly vertical rhythm for mobile (CanvasScaler 1920×1080 match 0.5).
             const float slotHeight = 148f;
-            const float gap = 22f;
+            const float gap = 24f;
             float totalHeight = (slotHeight * 4f) + (gap * 3f);
             float topY = totalHeight * 0.5f - slotHeight * 0.5f;
             float y = topY - index * (slotHeight + gap);
@@ -864,13 +875,13 @@ namespace GulfRun.Editor
             Image border = slot.gameObject.AddComponent<Image>();
             border.color = occupied ? PanelBorder : EmptySlotBorder;
             border.raycastTarget = false;
-            EnsureCardShadow(slot.gameObject);
+            EnsureLobbyPanelShadow(slot.gameObject);
 
             Image fill = CreateUiImage("Fill", slot, stretch: true);
             fill.color = occupied ? CardFill : EmptySlotFill;
             fill.raycastTarget = false;
-            fill.rectTransform.offsetMin = new Vector2(4f, 4f);
-            fill.rectTransform.offsetMax = new Vector2(-4f, -4f);
+            fill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            fill.rectTransform.offsetMax = new Vector2(-3f, -3f);
 
             // Host badge exists on every slot; visible only as design mock on slot 0.
             CreateHostBadge(slot, showHostBadge);
@@ -1397,9 +1408,47 @@ namespace GulfRun.Editor
             }
 
             RectTransform playRt = playButtonGo != null ? playButtonGo.GetComponent<RectTransform>() : null;
-            if (playRt == null || playRt.sizeDelta.x < 380f || playRt.sizeDelta.y < 90f)
+            GameObject readyButtonGo = FindDeep(scene, "ReadyButton");
+            RectTransform readyRt = readyButtonGo != null ? readyButtonGo.GetComponent<RectTransform>() : null;
+            if (readyRt == null || playRt == null)
             {
-                failures.Add("PlayButton expected large premium size (>= 380x90).");
+                failures.Add("ReadyButton/PlayButton RectTransforms missing.");
+            }
+            else
+            {
+                if (Mathf.Abs(readyRt.sizeDelta.x - playRt.sizeDelta.x) > 0.5f
+                    || Mathf.Abs(readyRt.sizeDelta.y - playRt.sizeDelta.y) > 0.5f)
+                {
+                    failures.Add("ReadyButton and PlayButton must share identical sizeDelta (Sprint 21.5).");
+                }
+
+                if (readyRt.sizeDelta.y < 100f || readyRt.sizeDelta.y > 110f
+                    || readyRt.sizeDelta.x < 380f)
+                {
+                    failures.Add("Ready/Play expected ~400x104 touch targets (100–110 height, >=380 width).");
+                }
+            }
+
+            GameObject safeAreaGo = FindDeep(scene, "SafeArea");
+            RectTransform safeRt = safeAreaGo != null ? safeAreaGo.GetComponent<RectTransform>() : null;
+            if (safeRt == null
+                || Mathf.Abs(safeRt.sizeDelta.x + 96f) > 0.5f
+                || Mathf.Abs(safeRt.sizeDelta.y + 86f) > 0.5f
+                || Mathf.Abs(safeRt.anchoredPosition.y + 9f) > 0.5f)
+            {
+                failures.Add("SafeArea expected Main Menu insets (sizeDelta -96/-86, y -9).");
+            }
+
+            Vector2 expectedSlot = new Vector2(960f, 148f);
+            for (int i = 0; i < 4; i++)
+            {
+                RectTransform slotRt = FindDeep(scene, "PlayerSlot_" + i)?.GetComponent<RectTransform>();
+                if (slotRt == null
+                    || Mathf.Abs(slotRt.sizeDelta.x - expectedSlot.x) > 0.5f
+                    || Mathf.Abs(slotRt.sizeDelta.y - expectedSlot.y) > 0.5f)
+                {
+                    failures.Add("PlayerSlot_" + i + " expected identical sizeDelta 960x148.");
+                }
             }
 
             GameObject preparedLabelGo = FindDeep(scene, "PlayLabel_StartMatch");
@@ -1707,6 +1756,23 @@ namespace GulfRun.Editor
 
             shadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
             shadow.effectDistance = new Vector2(0f, -8f);
+            shadow.useGraphicAlpha = true;
+        }
+
+        /// <summary>
+        /// Softer drop shadow for Lobby panels / slots (Sprint 21.5 polish).
+        /// Uses Unity UI Shadow GUID — never Outline.
+        /// </summary>
+        private static void EnsureLobbyPanelShadow(GameObject panelGo)
+        {
+            Shadow shadow = panelGo.GetComponent<Shadow>();
+            if (shadow == null)
+            {
+                shadow = panelGo.AddComponent<Shadow>();
+            }
+
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.42f);
+            shadow.effectDistance = new Vector2(0f, -6f);
             shadow.useGraphicAlpha = true;
         }
 

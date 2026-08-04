@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate LobbyScreen.unity (Sprint 21.4 Host Controls UI) without Unity batchmode."""
+"""Generate LobbyScreen.unity (Sprint 21.5 Lobby Final Polish) without Unity batchmode."""
 
 from __future__ import annotations
 
@@ -305,8 +305,8 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append(f"  m_Script: {{fileID: 11500000, guid: {GUID_SHADOW}, type: 3}}")
         lines.append("  m_Name: ")
         lines.append("  m_EditorClassIdentifier: ")
-        lines.append("  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.55}")
-        lines.append("  m_EffectDistance: {x: 0, y: -8}")
+        lines.append("  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.42}")
+        lines.append("  m_EffectDistance: {x: 0, y: -6}")
         lines.append("  m_UseGraphicAlpha: 1")
 
     if n.mask_id is not None:
@@ -406,11 +406,11 @@ def player_slot(
     show_host: bool,
     show_kick: bool,
 ) -> Node:
-    slot_h, gap = 148.0, 22.0
+    slot_h, gap = 148.0, 24.0
     total = slot_h * 4 + gap * 3
     y = (total * 0.5 - slot_h * 0.5) - index * (slot_h + gap)
     kids: list[Node] = [
-        img("Fill", CARD if occupied else EMPTY_FILL, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-8, -8)),
+        img("Fill", CARD if occupied else EMPTY_FILL, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
         host_badge(show_host),
     ]
     if index != 0:
@@ -722,7 +722,7 @@ def main() -> None:
         GOLD_BRIGHT,
         amin=(0, 1),
         amax=(0, 1),
-        pos=(48, -40),
+        pos=(48, -52),
         size=(168, 64),
         pivot=(0, 1),
     )
@@ -733,21 +733,21 @@ def main() -> None:
         shadow=True,
         amin=(0.5, 1),
         amax=(0.5, 1),
-        pos=(0, -32),
-        size=(1180, 128),
+        pos=(0, -56),
+        size=(1200, 120),
         pivot=(0.5, 1),
         children=[
             img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
             txt(
                 "RoomTypeText",
                 "Room Type: Public",
-                32,
+                30,
                 GOLD_BRIGHT,
                 4,
                 amin=(0, 0.52),
                 amax=(1, 1),
                 pos=(0, -3),
-                size=(-48, 0),
+                size=(-56, 0),
             ),
             txt(
                 "HostNameText",
@@ -756,7 +756,7 @@ def main() -> None:
                 WHITE,
                 3,
                 amin=(0, 0),
-                amax=(0.38, 0.52),
+                amax=(0.34, 0.52),
                 pos=(14, 3),
                 size=(-44, -14),
                 pivot=(0, 0.5),
@@ -767,8 +767,8 @@ def main() -> None:
                 22,
                 WHITE,
                 4,
-                amin=(0.32, 0),
-                amax=(0.68, 0.52),
+                amin=(0.34, 0),
+                amax=(0.66, 0.52),
                 pos=(0, 3),
                 size=(-16, -14),
             ),
@@ -778,7 +778,7 @@ def main() -> None:
                 22,
                 GOLD,
                 5,
-                amin=(0.62, 0),
+                amin=(0.66, 0),
                 amax=(1, 0.52),
                 pos=(-14, 3),
                 size=(-44, -14),
@@ -791,8 +791,8 @@ def main() -> None:
         name="SlotsRoot",
         amin=(0.5, 0.5),
         amax=(0.5, 0.5),
-        pos=(0, 78),
-        size=(980, 640),
+        pos=(0, 72),
+        size=(980, 664),
         children=[
             player_slot(0, True, "DesertFox", "KW", (0.05, 0.45, 0.25, 1), 12, "Ready", SUCCESS, True, True, False),
             player_slot(1, True, "NightOwl", "AE", (0.05, 0.28, 0.55, 1), 8, "Not Ready", READY_MUTED, True, False, True),
@@ -806,11 +806,11 @@ def main() -> None:
         "Ready",
         GOLD,
         GOLD_LABEL,
-        label_size=32,
+        label_size=30,
         amin=(0, 0.5),
         amax=(0, 0.5),
-        pos=(40, 0),
-        size=(340, 96),
+        pos=(48, 0),
+        size=(400, 104),
         pivot=(0, 0.5),
         transition=0,
     )
@@ -825,14 +825,14 @@ def main() -> None:
         transition=0,
         amin=(1, 0.5),
         amax=(1, 0.5),
-        pos=(-40, 0),
-        size=(420, 96),
+        pos=(-48, 0),
+        size=(400, 104),
         pivot=(1, 0.5),
         children=[
             txt(
                 "Label",
                 "Waiting for Players...",
-                26,
+                30,
                 play_waiting_label,
                 4,
                 amin=(0, 0),
@@ -858,8 +858,8 @@ def main() -> None:
         name="FooterRoot",
         amin=(0.5, 0),
         amax=(0.5, 0),
-        pos=(0, 36),
-        size=(1480, 110),
+        pos=(0, 40),
+        size=(1400, 120),
         pivot=(0.5, 0),
         children=[ready_btn, play_btn],
     )
@@ -884,8 +884,8 @@ def main() -> None:
         shadow=True,
         amin=(0.5, 0.5),
         amax=(0.5, 0.5),
-        pos=(0, 8),
-        size=(980, 78),
+        pos=(0, 6),
+        size=(980, 72),
         children=[
             img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
             txt(
@@ -922,8 +922,8 @@ def main() -> None:
         name="StatusRoot",
         amin=(0.5, 0),
         amax=(0.5, 0),
-        pos=(0, 196),
-        size=(1200, 100),
+        pos=(0, 214),
+        size=(1200, 96),
         pivot=(0.5, 0),
         children=[lobby_status_panel, countdown],
     )
@@ -947,8 +947,8 @@ def main() -> None:
         name="MessageFooterRoot",
         amin=(0.5, 0),
         amax=(0.5, 0),
-        pos=(0, 148),
-        size=(1100, 40),
+        pos=(0, 156),
+        size=(1200, 36),
         pivot=(0.5, 0),
         children=[
             txt(
@@ -978,7 +978,8 @@ def main() -> None:
         size=(0, 0),
         sprite=BG_SPRITE,
     )
-    safe = Node(name="SafeArea", amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(0, 0))
+    # Main Menu SafeArea insets: 48 L/R, 52 top, 34 bottom
+    safe = Node(name="SafeArea", amin=(0, 0), amax=(1, 1), pos=(0, -9), size=(-96, -86))
 
     canvas = Node(
         name="LobbyScreenCanvas",

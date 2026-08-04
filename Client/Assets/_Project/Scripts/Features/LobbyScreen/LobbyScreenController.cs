@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace GulfRun.Features.LobbyScreen
 {
     /// <summary>
-    /// Premium Lobby UI (Sprint 21.1–21.4). Back → Play Menu.
+    /// Premium Lobby UI (Sprint 21.1–21.5). Back → Play Menu.
     /// Ready / Play prepared toggles are local visual demos only — no
     /// SessionManager, matchmaking, kick, host permissions, or network sync.
     /// </summary>
