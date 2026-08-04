@@ -89,6 +89,9 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Build Pre-Race Intro (Sprint 23.1)")]
         public static void BuildPreRaceIntroFromMenu() => BuildPreRaceIntroBatch();
 
+        [MenuItem("GulfRun/Play Flow/Build Race Countdown (Sprint 23.2)")]
+        public static void BuildRaceCountdownFromMenu() => BuildRaceCountdownBatch();
+
         public static void RunBatch()
         {
             var failures = new List<string>();
@@ -249,9 +252,10 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 23.1: build PreRaceIntro UI (map pan, starting-line players,
-        /// map info, Get Ready banner, audio placeholders). No countdown,
-        /// movement, networking, or race logic. Does not rebuild Main Menu.
+        /// Sprint 23.1 / 23.2: build PreRaceIntro UI (map pan, starting-line players,
+        /// map info, Get Ready banner) plus Sprint 23.2 countdown overlay
+        /// (3→2→1→GO! → Gameplay). No movement, networking, or race logic.
+        /// Does not rebuild Main Menu.
         /// </summary>
         public static void BuildPreRaceIntroBatch()
         {
@@ -279,8 +283,14 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — PreRaceIntro Sprint 23.1 Pre-Race Intro UI OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — PreRaceIntro Sprint 23.1/23.2 Pre-Race Intro + Countdown OK.");
         }
+
+        /// <summary>
+        /// Sprint 23.2: rebuild PreRaceIntro with race countdown overlay and validate.
+        /// Alias of <see cref="BuildPreRaceIntroBatch"/>.
+        /// </summary>
+        public static void BuildRaceCountdownBatch() => BuildPreRaceIntroBatch();
 
         /// <summary>
         /// Sprint 20.1: polish PlayMenu copy + card icons only. Does not rebuild
@@ -1843,6 +1853,7 @@ namespace GulfRun.Editor
             GameObject canvasGo = CreateOverlayCanvas("PreRaceIntroCanvas");
             PreRaceIntroController controller = canvasGo.AddComponent<PreRaceIntroController>();
             PreRaceIntroPanAnimation panAnimation = canvasGo.AddComponent<PreRaceIntroPanAnimation>();
+            RaceCountdownController countdown = canvasGo.AddComponent<RaceCountdownController>();
             RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
 
             RectTransform panRoot = CreateRect("BackgroundPanRoot", canvasRt);
@@ -1956,7 +1967,53 @@ namespace GulfRun.Editor
 
             GameObject countdownSound = new GameObject("CountdownSoundSource");
             countdownSound.transform.SetParent(audioRoot, false);
-            countdownSound.AddComponent<AudioSource>();
+            AudioSource countdownBeep = countdownSound.AddComponent<AudioSource>();
+
+            GameObject goSound = new GameObject("GoSoundSource");
+            goSound.transform.SetParent(audioRoot, false);
+            AudioSource goAudio = goSound.AddComponent<AudioSource>();
+
+            // Sprint 23.2 — countdown overlay (players stay on starting line underneath).
+            RectTransform countdownRoot = CreateRect("CountdownOverlay", canvasRt);
+            countdownRoot.anchorMin = Vector2.zero;
+            countdownRoot.anchorMax = Vector2.one;
+            countdownRoot.offsetMin = Vector2.zero;
+            countdownRoot.offsetMax = Vector2.zero;
+            countdownRoot.gameObject.SetActive(false);
+
+            Image goGlow = CreateUiImage("GoGlow", countdownRoot, stretch: false);
+            goGlow.sprite = GetBuiltinKnob();
+            goGlow.color = new Color(GlowGold.r, GlowGold.g, GlowGold.b, 0f);
+            goGlow.raycastTarget = false;
+            goGlow.preserveAspect = true;
+            RectTransform glowRt = goGlow.rectTransform;
+            glowRt.anchorMin = new Vector2(0.5f, 0.5f);
+            glowRt.anchorMax = new Vector2(0.5f, 0.5f);
+            glowRt.pivot = new Vector2(0.5f, 0.5f);
+            glowRt.anchoredPosition = Vector2.zero;
+            glowRt.sizeDelta = new Vector2(520f, 520f);
+
+            Text countdownText = CreateUiText(
+                "CountdownText",
+                countdownRoot,
+                string.Empty,
+                168,
+                FontStyle.Bold,
+                GoldBright,
+                TextAnchor.MiddleCenter);
+            countdownText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            countdownText.verticalOverflow = VerticalWrapMode.Overflow;
+            RectTransform countdownTextRt = countdownText.rectTransform;
+            countdownTextRt.anchorMin = new Vector2(0.5f, 0.5f);
+            countdownTextRt.anchorMax = new Vector2(0.5f, 0.5f);
+            countdownTextRt.pivot = new Vector2(0.5f, 0.5f);
+            countdownTextRt.anchoredPosition = Vector2.zero;
+            countdownTextRt.sizeDelta = new Vector2(900f, 320f);
+            EnsureLobbyPanelShadow(countdownText.gameObject);
+
+            Image transitionFade = CreateUiImage("TransitionFade", canvasRt, stretch: true);
+            transitionFade.color = new Color(0.02f, 0.02f, 0.04f, 0f);
+            transitionFade.raycastTarget = false;
 
             Button continueButton = CreateLabeledButton(
                 "ContinueButton",
@@ -1967,14 +2024,26 @@ namespace GulfRun.Editor
                 Gold,
                 GoldButtonLabel);
             PlaceBottomRight(continueButton.GetComponent<RectTransform>(), new Vector2(-48f, 48f));
+            continueButton.gameObject.SetActive(false);
 
             SerializedObject controllerSo = new SerializedObject(controller);
             controllerSo.FindProperty("continueButton").objectReferenceValue = continueButton;
+            controllerSo.FindProperty("countdown").objectReferenceValue = countdown;
             controllerSo.ApplyModifiedPropertiesWithoutUndo();
 
             SerializedObject panSo = new SerializedObject(panAnimation);
             panSo.FindProperty("panTarget").objectReferenceValue = panRoot;
             panSo.ApplyModifiedPropertiesWithoutUndo();
+
+            SerializedObject countdownSo = new SerializedObject(countdown);
+            countdownSo.FindProperty("countdownOverlay").objectReferenceValue = countdownRoot.gameObject;
+            countdownSo.FindProperty("countdownText").objectReferenceValue = countdownText;
+            countdownSo.FindProperty("goGlow").objectReferenceValue = goGlow;
+            countdownSo.FindProperty("transitionFade").objectReferenceValue = transitionFade;
+            countdownSo.FindProperty("continueButton").objectReferenceValue = continueButton.gameObject;
+            countdownSo.FindProperty("countdownBeepSource").objectReferenceValue = countdownBeep;
+            countdownSo.FindProperty("goSoundSource").objectReferenceValue = goAudio;
+            countdownSo.ApplyModifiedPropertiesWithoutUndo();
 
             SaveScene(scene, PreRaceIntroScenePath, failures);
         }
@@ -3683,7 +3752,12 @@ namespace GulfRun.Editor
             Require(FindDeep(scene, "AudioPlaceholders"), "PreRaceIntro AudioPlaceholders", failures);
             Require(FindDeep(scene, "IntroMusicSource"), "PreRaceIntro IntroMusicSource", failures);
             Require(FindDeep(scene, "CountdownSoundSource"), "PreRaceIntro CountdownSoundSource", failures);
+            Require(FindDeep(scene, "GoSoundSource"), "PreRaceIntro GoSoundSource", failures);
             Require(FindDeep(scene, "ContinueButton"), "PreRaceIntro ContinueButton", failures);
+            Require(FindDeep(scene, "CountdownOverlay"), "PreRaceIntro CountdownOverlay", failures);
+            Require(FindDeep(scene, "CountdownText"), "PreRaceIntro CountdownText", failures);
+            Require(FindDeep(scene, "GoGlow"), "PreRaceIntro GoGlow", failures);
+            Require(FindDeep(scene, "TransitionFade"), "PreRaceIntro TransitionFade", failures);
 
             Text banner = FindDeep(scene, "BannerText")?.GetComponent<Text>();
             if (banner == null || banner.text != "Get Ready")
@@ -3703,6 +3777,18 @@ namespace GulfRun.Editor
                 failures.Add("PreRaceIntro AudioPlaceholders must start inactive.");
             }
 
+            GameObject countdownOverlay = FindDeep(scene, "CountdownOverlay");
+            if (countdownOverlay != null && countdownOverlay.activeSelf)
+            {
+                failures.Add("PreRaceIntro CountdownOverlay must start inactive.");
+            }
+
+            GameObject continueGo = FindDeep(scene, "ContinueButton");
+            if (continueGo != null && continueGo.activeSelf)
+            {
+                failures.Add("PreRaceIntro ContinueButton must start inactive (auto countdown).");
+            }
+
             if (FindDeep(scene, "IntroMusicSource")?.GetComponent<AudioSource>() == null)
             {
                 failures.Add("PreRaceIntro IntroMusicSource missing AudioSource.");
@@ -3711,6 +3797,11 @@ namespace GulfRun.Editor
             if (FindDeep(scene, "CountdownSoundSource")?.GetComponent<AudioSource>() == null)
             {
                 failures.Add("PreRaceIntro CountdownSoundSource missing AudioSource.");
+            }
+
+            if (FindDeep(scene, "GoSoundSource")?.GetComponent<AudioSource>() == null)
+            {
+                failures.Add("PreRaceIntro GoSoundSource missing AudioSource.");
             }
 
             GameObject safeArea = FindDeep(scene, "SafeArea");
@@ -3738,6 +3829,11 @@ namespace GulfRun.Editor
                 {
                     failures.Add("PreRaceIntroController.continueButton must be wired.");
                 }
+
+                if (so.FindProperty("countdown").objectReferenceValue == null)
+                {
+                    failures.Add("PreRaceIntroController.countdown must be wired.");
+                }
             }
 
             PreRaceIntroPanAnimation pan = canvasGo?.GetComponent<PreRaceIntroPanAnimation>();
@@ -3751,6 +3847,45 @@ namespace GulfRun.Editor
                 if (panSo.FindProperty("panTarget").objectReferenceValue == null)
                 {
                     failures.Add("PreRaceIntroPanAnimation.panTarget must be wired.");
+                }
+            }
+
+            RaceCountdownController countdown = canvasGo?.GetComponent<RaceCountdownController>();
+            if (countdown == null)
+            {
+                failures.Add("PreRaceIntroCanvas missing RaceCountdownController.");
+            }
+            else
+            {
+                SerializedObject cdSo = new SerializedObject(countdown);
+                if (cdSo.FindProperty("countdownOverlay").objectReferenceValue == null)
+                {
+                    failures.Add("RaceCountdownController.countdownOverlay must be wired.");
+                }
+
+                if (cdSo.FindProperty("countdownText").objectReferenceValue == null)
+                {
+                    failures.Add("RaceCountdownController.countdownText must be wired.");
+                }
+
+                if (cdSo.FindProperty("goGlow").objectReferenceValue == null)
+                {
+                    failures.Add("RaceCountdownController.goGlow must be wired.");
+                }
+
+                if (cdSo.FindProperty("transitionFade").objectReferenceValue == null)
+                {
+                    failures.Add("RaceCountdownController.transitionFade must be wired.");
+                }
+
+                if (cdSo.FindProperty("countdownBeepSource").objectReferenceValue == null)
+                {
+                    failures.Add("RaceCountdownController.countdownBeepSource must be wired.");
+                }
+
+                if (cdSo.FindProperty("goSoundSource").objectReferenceValue == null)
+                {
+                    failures.Add("RaceCountdownController.goSoundSource must be wired.");
                 }
             }
 

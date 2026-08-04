@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate PreRaceIntro.unity (Sprint 23.1 Pre-Race Intro UI) without Unity batchmode."""
+"""Generate PreRaceIntro.unity (Sprint 23.1 + 23.2 countdown overlay) without Unity batchmode."""
 
 from __future__ import annotations
 
@@ -18,12 +18,15 @@ GUID_EVENTSYSTEM = "76c392e42b5098c458856cdf6ecaaaa1"
 GUID_STANDALONE = "4f231c4fb786f3946a6b90b886c48677"
 GUID_CONTROLLER = "b20c00000000000000000000000000a3"
 GUID_PAN = "b20c00000000000000000000000000a4"
+GUID_COUNTDOWN = "b20c00000000000000000000000000a5"
 GUID_BG = "a18b0000000000000000000000000001"
 FONT = "{fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}"
 BG_SPRITE = f"{{fileID: 21300000, guid: {GUID_BG}, type: 3}}"
 
 GOLD = (0.90, 0.71, 0.25, 1.0)
 GOLD_BRIGHT = (1.0, 0.84, 0.40, 1.0)
+GLOW_GOLD = (1.0, 0.84, 0.40, 0.0)
+FADE_BLACK = (0.02, 0.02, 0.04, 0.0)
 DIM = (0.02, 0.02, 0.04, 0.48)
 PANEL_BG = (0.10, 0.09, 0.10, 0.78)
 PANEL_BORDER = (0.90, 0.71, 0.25, 0.55)
@@ -73,6 +76,9 @@ class Node:
     font_style: int = 1
     align: int = 4
     text_color: tuple[float, float, float, float] = WHITE
+    h_overflow: int = 0
+    v_overflow: int = 0
+    max_size: int = 40
     button: bool = False
     interactable: int = 1
     transition: int = 1
@@ -227,12 +233,12 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append(f"    m_FontStyle: {n.font_style}")
         lines.append("    m_BestFit: 0")
         lines.append("    m_MinSize: 10")
-        lines.append("    m_MaxSize: 40")
+        lines.append(f"    m_MaxSize: {n.max_size}")
         lines.append(f"    m_Alignment: {n.align}")
         lines.append("    m_AlignByGeometry: 0")
         lines.append("    m_RichText: 1")
-        lines.append("    m_HorizontalOverflow: 0")
-        lines.append("    m_VerticalOverflow: 0")
+        lines.append(f"    m_HorizontalOverflow: {n.h_overflow}")
+        lines.append(f"    m_VerticalOverflow: {n.v_overflow}")
         lines.append("    m_LineSpacing: 1")
         lines.append(f"  m_Text: {n.text}")
 
@@ -747,7 +753,56 @@ def main() -> None:
         children=[
             Node(name="IntroMusicSource", audio_source=True, size=(0, 0)),
             Node(name="CountdownSoundSource", audio_source=True, size=(0, 0)),
+            Node(name="GoSoundSource", audio_source=True, size=(0, 0)),
         ],
+    )
+
+    countdown_overlay = Node(
+        name="CountdownOverlay",
+        active=0,
+        amin=(0, 0),
+        amax=(1, 1),
+        pos=(0, 0),
+        size=(0, 0),
+        pivot=(0.5, 0.5),
+        children=[
+            Node(
+                name="GoGlow",
+                image=GLOW_GOLD,
+                sprite="{fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}",
+                preserve=1,
+                amin=(0.5, 0.5),
+                amax=(0.5, 0.5),
+                pos=(0, 0),
+                size=(520, 520),
+            ),
+            Node(
+                name="CountdownText",
+                text="",
+                font_size=168,
+                font_style=1,
+                align=4,
+                text_color=GOLD_BRIGHT,
+                h_overflow=1,
+                v_overflow=1,
+                max_size=200,
+                shadow=True,
+                amin=(0.5, 0.5),
+                amax=(0.5, 0.5),
+                pos=(0, 0),
+                size=(900, 320),
+            ),
+        ],
+    )
+
+    transition_fade = Node(
+        name="TransitionFade",
+        image=FADE_BLACK,
+        amin=(0, 0),
+        amax=(1, 1),
+        pos=(0, 0),
+        size=(0, 0),
+        pivot=(0.5, 0.5),
     )
 
     continue_btn = btn(
@@ -761,6 +816,7 @@ def main() -> None:
         size=(280, 72),
         pivot=(1, 0),
     )
+    continue_btn.active = 0
 
     canvas = Node(
         name="PreRaceIntroCanvas",
@@ -770,18 +826,35 @@ def main() -> None:
         size=(0, 0),
         pivot=(0, 0),
         scale=(0, 0, 0),
-        children=[pan_root, dim, safe, banner, map_info, players, audio, continue_btn],
+        children=[
+            pan_root,
+            dim,
+            safe,
+            banner,
+            map_info,
+            players,
+            audio,
+            countdown_overlay,
+            transition_fade,
+            continue_btn,
+        ],
     )
     canvas.prep()
 
     if continue_btn.btn_id is None:
         raise RuntimeError("ContinueButton missing")
 
+    go_glow = countdown_overlay.children[0]
+    countdown_text = countdown_overlay.children[1]
+    beep_src = audio.children[1]
+    go_src = audio.children[2]
+
     canvas_comp = nid()
     scaler_id = nid()
     ray_id = nid()
     ctrl_id = nid()
     pan_id = nid()
+    countdown_id = nid()
 
     lines: list[str] = [SCENE_HEADER.rstrip()]
 
@@ -881,7 +954,7 @@ def main() -> None:
         "  m_Enabled: 1",
     ]
 
-    canvas_comps = [canvas.rt, canvas_comp, scaler_id, ray_id, ctrl_id, pan_id]
+    canvas_comps = [canvas.rt, canvas_comp, scaler_id, ray_id, ctrl_id, pan_id, countdown_id]
     lines.append(f"--- !u!1 &{canvas.go}")
     lines.append("GameObject:")
     lines.append("  m_ObjectHideFlags: 0")
@@ -997,6 +1070,7 @@ def main() -> None:
         "  m_Name: ",
         "  m_EditorClassIdentifier: ",
         f"  continueButton: {{fileID: {continue_btn.btn_id}}}",
+        f"  countdown: {{fileID: {countdown_id}}}",
         f"--- !u!114 &{pan_id}",
         "MonoBehaviour:",
         "  m_ObjectHideFlags: 0",
@@ -1013,6 +1087,31 @@ def main() -> None:
         "  panFrom: {x: -80, y: 0}",
         "  panTo: {x: 80, y: 12}",
         "  cycleSeconds: 14",
+        f"--- !u!114 &{countdown_id}",
+        "MonoBehaviour:",
+        "  m_ObjectHideFlags: 0",
+        "  m_CorrespondingSourceObject: {fileID: 0}",
+        "  m_PrefabInstance: {fileID: 0}",
+        "  m_PrefabAsset: {fileID: 0}",
+        f"  m_GameObject: {{fileID: {canvas.go}}}",
+        "  m_Enabled: 1",
+        "  m_EditorHideFlags: 0",
+        f"  m_Script: {{fileID: 11500000, guid: {GUID_COUNTDOWN}, type: 3}}",
+        "  m_Name: ",
+        "  m_EditorClassIdentifier: ",
+        f"  countdownOverlay: {{fileID: {countdown_overlay.go}}}",
+        f"  countdownText: {{fileID: {countdown_text.txt_id}}}",
+        f"  goGlow: {{fileID: {go_glow.img_id}}}",
+        f"  transitionFade: {{fileID: {transition_fade.img_id}}}",
+        f"  continueButton: {{fileID: {continue_btn.go}}}",
+        f"  countdownBeepSource: {{fileID: {beep_src.audio_id}}}",
+        f"  goSoundSource: {{fileID: {go_src.audio_id}}}",
+        "  introHoldSeconds: 1.75",
+        "  digitSeconds: 0.9",
+        "  goSeconds: 1.2",
+        "  transitionFadeSeconds: 0.45",
+        "  startScale: 1.7",
+        "  settleScale: 1",
     ]
 
     for ch in canvas.children:

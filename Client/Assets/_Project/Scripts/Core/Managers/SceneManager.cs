@@ -51,7 +51,7 @@ namespace GulfRun.Core.Managers
         /// <summary>Premium Loading Screen UI (Sprint 22.5). Distinct from gameplay <see cref="LoadLoading"/>.</summary>
         public void LoadLoadingScreen() => UnityEngine.SceneManagement.SceneManager.LoadScene(LoadingScreenSceneName);
 
-        /// <summary>Pre-Race Intro UI (Sprint 23.1). Presentation only — no race / countdown logic.</summary>
+        /// <summary>Pre-Race Intro + Sprint 23.2 countdown overlay. Presentation only — no movement / networking.</summary>
         public void LoadPreRaceIntro() => UnityEngine.SceneManagement.SceneManager.LoadScene(PreRaceIntroSceneName);
 
         public void LoadLoading() => UnityEngine.SceneManagement.SceneManager.LoadScene(LoadingSceneName);

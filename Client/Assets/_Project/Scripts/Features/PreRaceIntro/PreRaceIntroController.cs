@@ -1,25 +1,28 @@
-using GulfRun.Core.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace GulfRun.Features.PreRaceIntro
 {
     /// <summary>
-    /// Pre-Race Intro UI (Sprint 23.1). Presentation placeholders only —
-    /// no countdown, movement, networking, or race logic.
-    /// Optional Continue stub loads Gameplay for Editor flow testing.
+    /// Pre-Race Intro UI (Sprint 23.1 / 23.2). Presentation placeholders only —
+    /// no player movement, controls, obstacles, or networking.
+    /// Sprint 23.2 auto-starts <see cref="RaceCountdownController"/> after a brief hold.
+    /// Optional Continue stub skips the intro hold for Editor flow testing.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class PreRaceIntroController : MonoBehaviour
     {
         [SerializeField] private Button continueButton;
+        [SerializeField] private RaceCountdownController countdown;
 
         private void Awake()
         {
-            if (continueButton != null)
+            if (continueButton == null)
             {
-                continueButton.onClick.AddListener(OnContinueClicked);
+                return;
             }
+
+            continueButton.onClick.AddListener(OnContinueClicked);
         }
 
         private void OnDestroy()
@@ -30,15 +33,12 @@ namespace GulfRun.Features.PreRaceIntro
             }
         }
 
-        private static void OnContinueClicked()
+        private void OnContinueClicked()
         {
-            if (SceneManager.Instance != null)
+            if (countdown != null)
             {
-                SceneManager.Instance.LoadGameplay();
-                return;
+                countdown.SkipHoldAndStart();
             }
-
-            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.GameplaySceneName);
         }
     }
 }
