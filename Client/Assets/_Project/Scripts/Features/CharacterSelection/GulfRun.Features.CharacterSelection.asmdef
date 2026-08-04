@@ -1,9 +1,8 @@
 {
-    "name": "GulfRun.Features.MainMenu",
-    "rootNamespace": "GulfRun.Features.MainMenu",
+    "name": "GulfRun.Features.CharacterSelection",
+    "rootNamespace": "GulfRun.Features.CharacterSelection",
     "references": [
         "GulfRun.Core",
-        "GulfRun.Domain",
         "UnityEngine.UI"
     ],
     "includePlatforms": [],

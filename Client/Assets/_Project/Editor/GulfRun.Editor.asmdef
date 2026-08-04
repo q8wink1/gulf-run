@@ -8,6 +8,8 @@
         "GulfRun.Presentation",
         "GulfRun.Features.Matchmaking",
         "GulfRun.Features.Progression",
+        "GulfRun.Features.MainMenu",
+        "GulfRun.Features.CharacterSelection",
         "UnityEngine.UI"
     ],
     "includePlatforms": [
