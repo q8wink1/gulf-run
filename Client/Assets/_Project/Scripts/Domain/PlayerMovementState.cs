@@ -13,6 +13,9 @@ namespace GulfRun.Domain
         Falling,
         Landing,
 
+        /// <summary>Sprint 23.4 — temporary slide / duck under obstacles.</summary>
+        Sliding,
+
         /// <summary>Race-start countdown (3-2-1-GO) is active; the player is held in place.</summary>
         Countdown,
 

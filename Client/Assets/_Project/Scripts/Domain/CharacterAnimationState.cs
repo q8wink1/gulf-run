@@ -19,6 +19,8 @@ namespace GulfRun.Domain
         Jump,
         DoubleJump,
         Fall,
+        /// <summary>Sprint 23.4 — slide / duck locomotion.</summary>
+        Slide,
         Win,
         Lose,
         Celebrate

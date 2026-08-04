@@ -23,6 +23,8 @@ namespace GulfRun.Domain
                     return CharacterAnimationState.DoubleJump;
                 case PlayerMovementState.Falling:
                     return CharacterAnimationState.Fall;
+                case PlayerMovementState.Sliding:
+                    return CharacterAnimationState.Slide;
                 default:
                     return CharacterAnimationState.Idle;
             }
