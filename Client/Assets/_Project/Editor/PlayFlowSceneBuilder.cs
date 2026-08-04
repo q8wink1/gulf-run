@@ -67,7 +67,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.5)")]
         public static void BuildLobbyScreenFromMenu() => BuildLobbyScreenBatch();
 
-        [MenuItem("GulfRun/Play Flow/Build Map Voting Screen (Sprint 22.1)")]
+        [MenuItem("GulfRun/Play Flow/Build Map Voting Screen (Sprint 22.2)")]
         public static void BuildMapVotingScreenFromMenu() => BuildMapVotingScreenBatch();
 
         public static void RunBatch()
@@ -129,8 +129,8 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 22.1: rebuild MapVoting as premium UI-only foundation (three map
-        /// cards, timer/players/votes placeholders). No vote logic, countdown,
+        /// Sprint 22.2: rebuild MapVoting premium map cards (flag, difficulty,
+        /// duration, selected/hover/locked visuals). No vote logic, countdown,
         /// networking, or SessionManager. Does not rebuild LobbyScreen / PlayMenu.
         /// </summary>
         public static void BuildMapVotingScreenBatch()
@@ -154,7 +154,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — MapVoting Sprint 22.1 UI foundation OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — MapVoting Sprint 22.2 premium map cards OK.");
         }
 
         /// <summary>
@@ -905,9 +905,9 @@ namespace GulfRun.Editor
             subtitleRt.offsetMin = new Vector2(40f, 4f);
             subtitleRt.offsetMax = new Vector2(-40f, 0f);
 
-            // Center — three large Gulf map cards
+            // Center — three equal premium Gulf map cards
             const float cardWidth = 500f;
-            const float cardHeight = 620f;
+            const float cardHeight = 680f;
             const float cardGap = 36f;
             float cardsWidth = (cardWidth * 3f) + (cardGap * 2f);
             RectTransform cardsRoot = CreateRect("CardsRoot", canvasRt);
@@ -921,54 +921,80 @@ namespace GulfRun.Editor
             var cardBorders = new Image[3];
             var voteImages = new Image[3];
             var voteLabels = new Text[3];
+            var selectedCheckmarks = new GameObject[3];
+            var cardVisuals = new MapCardVisual[3];
 
             CreateMapCard(
                 "MapCard_0",
                 cardsRoot,
                 0,
                 "Kuwait City",
-                "Neon towers and desert highways through the capital skyline.",
-                new Color(0.72f, 0.48f, 0.28f, 1f),
-                new Color(0.42f, 0.28f, 0.16f, 1f),
+                "KW",
+                new Color(0.00f, 0.45f, 0.28f, 1f),
+                "Medium",
+                ConnectingAmber,
+                "Neon towers and desert highways racing through the capital skyline.",
+                "Est. 3:30",
+                new Color(0.78f, 0.52f, 0.30f, 1f),
+                new Color(0.38f, 0.24f, 0.14f, 1f),
+                new Color(0.95f, 0.78f, 0.42f, 0.55f),
                 cardWidth,
                 cardHeight,
                 cardGap,
                 out voteButtons[0],
                 out cardBorders[0],
                 out voteImages[0],
-                out voteLabels[0]);
+                out voteLabels[0],
+                out selectedCheckmarks[0],
+                out cardVisuals[0]);
 
             CreateMapCard(
                 "MapCard_1",
                 cardsRoot,
                 1,
                 "Dubai Marina",
-                "Coastal expressways beside glass towers and marina lights.",
-                new Color(0.22f, 0.48f, 0.68f, 1f),
-                new Color(0.12f, 0.28f, 0.42f, 1f),
+                "AE",
+                new Color(0.78f, 0.12f, 0.14f, 1f),
+                "Hard",
+                new Color(0.92f, 0.38f, 0.32f, 1f),
+                "Coastal expressways beside glass towers and glittering marina lights.",
+                "Est. 4:15",
+                new Color(0.18f, 0.42f, 0.68f, 1f),
+                new Color(0.08f, 0.22f, 0.40f, 1f),
+                new Color(0.55f, 0.82f, 0.95f, 0.50f),
                 cardWidth,
                 cardHeight,
                 cardGap,
                 out voteButtons[1],
                 out cardBorders[1],
                 out voteImages[1],
-                out voteLabels[1]);
+                out voteLabels[1],
+                out selectedCheckmarks[1],
+                out cardVisuals[1]);
 
             CreateMapCard(
                 "MapCard_2",
                 cardsRoot,
                 2,
                 "Muscat Coast",
-                "Mountain curves meeting turquoise Gulf waters at dusk.",
-                new Color(0.28f, 0.58f, 0.52f, 1f),
-                new Color(0.55f, 0.42f, 0.28f, 1f),
+                "OM",
+                new Color(0.72f, 0.10f, 0.16f, 1f),
+                "Easy",
+                SuccessGreen,
+                "Mountain curves meeting turquoise Gulf waters at golden hour.",
+                "Est. 2:45",
+                new Color(0.22f, 0.58f, 0.52f, 1f),
+                new Color(0.52f, 0.38f, 0.24f, 1f),
+                new Color(0.95f, 0.72f, 0.38f, 0.48f),
                 cardWidth,
                 cardHeight,
                 cardGap,
                 out voteButtons[2],
                 out cardBorders[2],
                 out voteImages[2],
-                out voteLabels[2]);
+                out voteLabels[2],
+                out selectedCheckmarks[2],
+                out cardVisuals[2]);
 
             // Bottom — timer / players / votes placeholders (static copy only)
             RectTransform footerRoot = CreateRect("FooterRoot", canvasRt);
@@ -1037,16 +1063,22 @@ namespace GulfRun.Editor
             SerializedProperty cardBordersProp = so.FindProperty("cardBorders");
             SerializedProperty voteImagesProp = so.FindProperty("voteButtonImages");
             SerializedProperty voteLabelsProp = so.FindProperty("voteButtonLabels");
+            SerializedProperty checkmarksProp = so.FindProperty("selectedCheckmarks");
+            SerializedProperty visualsProp = so.FindProperty("cardVisuals");
             voteButtonsProp.arraySize = 3;
             cardBordersProp.arraySize = 3;
             voteImagesProp.arraySize = 3;
             voteLabelsProp.arraySize = 3;
+            checkmarksProp.arraySize = 3;
+            visualsProp.arraySize = 3;
             for (int i = 0; i < 3; i++)
             {
                 voteButtonsProp.GetArrayElementAtIndex(i).objectReferenceValue = voteButtons[i];
                 cardBordersProp.GetArrayElementAtIndex(i).objectReferenceValue = cardBorders[i];
                 voteImagesProp.GetArrayElementAtIndex(i).objectReferenceValue = voteImages[i];
                 voteLabelsProp.GetArrayElementAtIndex(i).objectReferenceValue = voteLabels[i];
+                checkmarksProp.GetArrayElementAtIndex(i).objectReferenceValue = selectedCheckmarks[i];
+                visualsProp.GetArrayElementAtIndex(i).objectReferenceValue = cardVisuals[i];
             }
 
             so.ApplyModifiedPropertiesWithoutUndo();
@@ -1059,16 +1091,24 @@ namespace GulfRun.Editor
             RectTransform parent,
             int index,
             string mapName,
+            string countryCode,
+            Color flagColor,
+            string difficultyLabel,
+            Color difficultyColor,
             string description,
+            string durationLabel,
             Color previewTop,
             Color previewBottom,
+            Color previewAccent,
             float cardWidth,
             float cardHeight,
             float cardGap,
             out Button voteButton,
             out Image cardBorder,
             out Image voteImage,
-            out Text voteLabel)
+            out Text voteLabel,
+            out GameObject selectedCheckmark,
+            out MapCardVisual cardVisual)
         {
             float x = (index - 1) * (cardWidth + cardGap);
             RectTransform card = CreateRect(name, parent);
@@ -1080,8 +1120,13 @@ namespace GulfRun.Editor
 
             cardBorder = card.gameObject.AddComponent<Image>();
             cardBorder.color = PanelBorder;
-            cardBorder.raycastTarget = false;
+            cardBorder.raycastTarget = true;
             EnsureLobbyPanelShadow(card.gameObject);
+
+            cardVisual = card.gameObject.AddComponent<MapCardVisual>();
+            SerializedObject visualSo = new SerializedObject(cardVisual);
+            visualSo.FindProperty("cardShadow").objectReferenceValue = card.GetComponent<Shadow>();
+            visualSo.ApplyModifiedPropertiesWithoutUndo();
 
             Image fill = CreateUiImage("Fill", card, stretch: true);
             fill.color = CardFill;
@@ -1094,29 +1139,104 @@ namespace GulfRun.Editor
             previewRoot.anchorMin = new Vector2(0.5f, 1f);
             previewRoot.anchorMax = new Vector2(0.5f, 1f);
             previewRoot.pivot = new Vector2(0.5f, 1f);
-            previewRoot.anchoredPosition = new Vector2(0f, -28f);
-            previewRoot.sizeDelta = new Vector2(cardWidth - 48f, 280f);
+            previewRoot.anchoredPosition = new Vector2(0f, -22f);
+            previewRoot.sizeDelta = new Vector2(cardWidth - 40f, 300f);
 
             Image previewBorder = previewRoot.gameObject.AddComponent<Image>();
-            previewBorder.color = new Color(Gold.r, Gold.g, Gold.b, 0.35f);
+            previewBorder.color = new Color(Gold.r, Gold.g, Gold.b, 0.40f);
             previewBorder.raycastTarget = false;
 
             Image previewTopImg = CreateUiImage("PreviewTop", previewRoot, stretch: true);
             previewTopImg.color = previewTop;
             previewTopImg.raycastTarget = false;
-            previewTopImg.rectTransform.offsetMin = new Vector2(3f, 90f);
+            previewTopImg.rectTransform.offsetMin = new Vector2(3f, 96f);
             previewTopImg.rectTransform.offsetMax = new Vector2(-3f, -3f);
 
             Image previewBottomImg = CreateUiImage("PreviewBottom", previewRoot, stretch: true);
             previewBottomImg.color = previewBottom;
             previewBottomImg.raycastTarget = false;
             previewBottomImg.rectTransform.offsetMin = new Vector2(3f, 3f);
-            previewBottomImg.rectTransform.offsetMax = new Vector2(-3f, -188f);
+            previewBottomImg.rectTransform.offsetMax = new Vector2(-3f, -200f);
 
-            Text nameText = CreateUiText("MapName", card, mapName, 32, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
+            Image previewAccentImg = CreateUiImage("PreviewAccent", previewRoot, stretch: false);
+            previewAccentImg.color = previewAccent;
+            previewAccentImg.raycastTarget = false;
+            RectTransform accentRt = previewAccentImg.rectTransform;
+            accentRt.anchorMin = new Vector2(0f, 0f);
+            accentRt.anchorMax = new Vector2(1f, 0f);
+            accentRt.pivot = new Vector2(0.5f, 0f);
+            accentRt.anchoredPosition = new Vector2(0f, 3f);
+            accentRt.sizeDelta = new Vector2(-6f, 28f);
+
+            Text previewCaption = CreateUiText(
+                "PreviewCaption",
+                previewRoot,
+                mapName.ToUpperInvariant(),
+                18,
+                FontStyle.Bold,
+                new Color(1f, 1f, 1f, 0.88f),
+                TextAnchor.MiddleCenter);
+            RectTransform captionRt = previewCaption.rectTransform;
+            captionRt.anchorMin = new Vector2(0f, 0f);
+            captionRt.anchorMax = new Vector2(1f, 0f);
+            captionRt.pivot = new Vector2(0.5f, 0f);
+            captionRt.anchoredPosition = new Vector2(0f, 4f);
+            captionRt.sizeDelta = new Vector2(-16f, 26f);
+
+            // Meta row — country flag + difficulty
+            RectTransform metaRow = CreateRect("MetaRow", card);
+            metaRow.anchorMin = new Vector2(0.5f, 1f);
+            metaRow.anchorMax = new Vector2(0.5f, 1f);
+            metaRow.pivot = new Vector2(0.5f, 1f);
+            metaRow.anchoredPosition = new Vector2(0f, -336f);
+            metaRow.sizeDelta = new Vector2(cardWidth - 48f, 36f);
+
+            Image flag = CreateUiImage("CountryFlag", metaRow, stretch: false);
+            flag.color = flagColor;
+            flag.raycastTarget = false;
+            RectTransform flagRt = flag.rectTransform;
+            flagRt.anchorMin = new Vector2(0f, 0.5f);
+            flagRt.anchorMax = new Vector2(0f, 0.5f);
+            flagRt.pivot = new Vector2(0f, 0.5f);
+            flagRt.anchoredPosition = new Vector2(0f, 0f);
+            flagRt.sizeDelta = new Vector2(44f, 28f);
+
+            Text country = CreateUiText("CountryCode", metaRow, countryCode, 18, FontStyle.Bold, TextMuted, TextAnchor.MiddleLeft);
+            RectTransform countryRt = country.rectTransform;
+            countryRt.anchorMin = new Vector2(0f, 0.5f);
+            countryRt.anchorMax = new Vector2(0f, 0.5f);
+            countryRt.pivot = new Vector2(0f, 0.5f);
+            countryRt.anchoredPosition = new Vector2(54f, 0f);
+            countryRt.sizeDelta = new Vector2(70f, 30f);
+
+            Image difficultyBadge = CreateUiImage("DifficultyBadge", metaRow, stretch: false);
+            difficultyBadge.color = new Color(difficultyColor.r, difficultyColor.g, difficultyColor.b, 0.22f);
+            difficultyBadge.raycastTarget = false;
+            RectTransform difficultyBadgeRt = difficultyBadge.rectTransform;
+            difficultyBadgeRt.anchorMin = new Vector2(1f, 0.5f);
+            difficultyBadgeRt.anchorMax = new Vector2(1f, 0.5f);
+            difficultyBadgeRt.pivot = new Vector2(1f, 0.5f);
+            difficultyBadgeRt.anchoredPosition = Vector2.zero;
+            difficultyBadgeRt.sizeDelta = new Vector2(128f, 30f);
+
+            Text difficulty = CreateUiText(
+                "DifficultyText",
+                difficultyBadgeRt,
+                difficultyLabel,
+                18,
+                FontStyle.Bold,
+                difficultyColor,
+                TextAnchor.MiddleCenter);
+            RectTransform difficultyRt = difficulty.rectTransform;
+            difficultyRt.anchorMin = Vector2.zero;
+            difficultyRt.anchorMax = Vector2.one;
+            difficultyRt.offsetMin = Vector2.zero;
+            difficultyRt.offsetMax = Vector2.zero;
+
+            Text nameText = CreateUiText("MapName", card, mapName, 34, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
             RectTransform nameRt = nameText.rectTransform;
-            nameRt.anchorMin = new Vector2(0f, 0.38f);
-            nameRt.anchorMax = new Vector2(1f, 0.48f);
+            nameRt.anchorMin = new Vector2(0f, 0.36f);
+            nameRt.anchorMax = new Vector2(1f, 0.46f);
             nameRt.offsetMin = new Vector2(20f, 0f);
             nameRt.offsetMax = new Vector2(-20f, 0f);
 
@@ -1124,24 +1244,38 @@ namespace GulfRun.Editor
                 "Description",
                 card,
                 description,
-                20,
+                19,
                 FontStyle.Normal,
                 TextMuted,
                 TextAnchor.UpperCenter);
             descText.horizontalOverflow = HorizontalWrapMode.Wrap;
             descText.verticalOverflow = VerticalWrapMode.Overflow;
             RectTransform descRt = descText.rectTransform;
-            descRt.anchorMin = new Vector2(0f, 0.18f);
-            descRt.anchorMax = new Vector2(1f, 0.38f);
+            descRt.anchorMin = new Vector2(0f, 0.22f);
+            descRt.anchorMax = new Vector2(1f, 0.36f);
             descRt.offsetMin = new Vector2(28f, 0f);
             descRt.offsetMax = new Vector2(-28f, 0f);
+
+            Text durationText = CreateUiText(
+                "DurationText",
+                card,
+                durationLabel,
+                20,
+                FontStyle.Bold,
+                Gold,
+                TextAnchor.MiddleCenter);
+            RectTransform durationRt = durationText.rectTransform;
+            durationRt.anchorMin = new Vector2(0f, 0.155f);
+            durationRt.anchorMax = new Vector2(1f, 0.22f);
+            durationRt.offsetMin = new Vector2(24f, 0f);
+            durationRt.offsetMax = new Vector2(-24f, 0f);
 
             voteButton = CreateLabeledButton("VoteButton", card, "Vote", 280f, 72f, Gold, GoldButtonLabel);
             RectTransform voteRt = voteButton.GetComponent<RectTransform>();
             voteRt.anchorMin = new Vector2(0.5f, 0f);
             voteRt.anchorMax = new Vector2(0.5f, 0f);
             voteRt.pivot = new Vector2(0.5f, 0f);
-            voteRt.anchoredPosition = new Vector2(0f, 28f);
+            voteRt.anchoredPosition = new Vector2(0f, 26f);
             voteButton.transition = Selectable.Transition.None;
             voteImage = voteButton.GetComponent<Image>();
             voteLabel = voteButton.GetComponentInChildren<Text>();
@@ -1149,6 +1283,75 @@ namespace GulfRun.Editor
             {
                 voteLabel.fontSize = 28;
             }
+
+            // Selected checkmark — inactive until Vote highlight.
+            selectedCheckmark = CreateRect("SelectedCheckmark", card).gameObject;
+            selectedCheckmark.SetActive(false);
+            RectTransform checkRt = selectedCheckmark.GetComponent<RectTransform>();
+            checkRt.anchorMin = new Vector2(1f, 1f);
+            checkRt.anchorMax = new Vector2(1f, 1f);
+            checkRt.pivot = new Vector2(1f, 1f);
+            checkRt.anchoredPosition = new Vector2(-18f, -18f);
+            checkRt.sizeDelta = new Vector2(52f, 52f);
+
+            Image checkBadge = selectedCheckmark.AddComponent<Image>();
+            checkBadge.sprite = GetBuiltinKnob();
+            checkBadge.color = GoldBright;
+            checkBadge.raycastTarget = false;
+            checkBadge.preserveAspect = true;
+
+            Text checkMark = CreateUiText("CheckMark", checkRt, "✓", 28, FontStyle.Bold, GoldButtonLabel, TextAnchor.MiddleCenter);
+            RectTransform checkMarkRt = checkMark.rectTransform;
+            checkMarkRt.anchorMin = Vector2.zero;
+            checkMarkRt.anchorMax = Vector2.one;
+            checkMarkRt.offsetMin = Vector2.zero;
+            checkMarkRt.offsetMax = Vector2.zero;
+
+            // Locked overlay — hidden by default on all three cards.
+            RectTransform lockedRoot = CreateRect("LockedRoot", card);
+            lockedRoot.anchorMin = Vector2.zero;
+            lockedRoot.anchorMax = Vector2.one;
+            lockedRoot.offsetMin = new Vector2(3f, 3f);
+            lockedRoot.offsetMax = new Vector2(-3f, -3f);
+            lockedRoot.gameObject.SetActive(false);
+
+            Image lockedDim = lockedRoot.gameObject.AddComponent<Image>();
+            lockedDim.color = new Color(0.04f, 0.03f, 0.03f, 0.72f);
+            lockedDim.raycastTarget = false;
+
+            Image lockBadge = CreateUiImage("LockIcon", lockedRoot, stretch: false);
+            lockBadge.sprite = GetBuiltinKnob();
+            lockBadge.color = Gold;
+            lockBadge.raycastTarget = false;
+            lockBadge.preserveAspect = true;
+            RectTransform lockBadgeRt = lockBadge.rectTransform;
+            lockBadgeRt.anchorMin = new Vector2(0.5f, 0.5f);
+            lockBadgeRt.anchorMax = new Vector2(0.5f, 0.5f);
+            lockBadgeRt.pivot = new Vector2(0.5f, 0.5f);
+            lockBadgeRt.anchoredPosition = new Vector2(0f, 22f);
+            lockBadgeRt.sizeDelta = new Vector2(72f, 72f);
+
+            Text lockGlyph = CreateUiText("LockGlyph", lockBadgeRt, "L", 30, FontStyle.Bold, GoldButtonLabel, TextAnchor.MiddleCenter);
+            RectTransform lockGlyphRt = lockGlyph.rectTransform;
+            lockGlyphRt.anchorMin = Vector2.zero;
+            lockGlyphRt.anchorMax = Vector2.one;
+            lockGlyphRt.offsetMin = Vector2.zero;
+            lockGlyphRt.offsetMax = Vector2.zero;
+
+            Text lockedLabel = CreateUiText(
+                "LockedLabel",
+                lockedRoot,
+                "Locked",
+                28,
+                FontStyle.Bold,
+                GoldBright,
+                TextAnchor.MiddleCenter);
+            RectTransform lockedLabelRt = lockedLabel.rectTransform;
+            lockedLabelRt.anchorMin = new Vector2(0.5f, 0.5f);
+            lockedLabelRt.anchorMax = new Vector2(0.5f, 0.5f);
+            lockedLabelRt.pivot = new Vector2(0.5f, 0.5f);
+            lockedLabelRt.anchoredPosition = new Vector2(0f, -36f);
+            lockedLabelRt.sizeDelta = new Vector2(200f, 36f);
         }
 
         private static void CreateInactiveStatusMessage(RectTransform parent, string name, string message)
@@ -1948,6 +2151,9 @@ namespace GulfRun.Editor
             }
 
             string[] expectedNames = { "Kuwait City", "Dubai Marina", "Muscat Coast" };
+            string[] expectedCountries = { "KW", "AE", "OM" };
+            string[] expectedDifficulties = { "Medium", "Hard", "Easy" };
+            string[] expectedDurations = { "Est. 3:30", "Est. 4:15", "Est. 2:45" };
             for (int i = 0; i < 3; i++)
             {
                 GameObject card = FindDeep(scene, "MapCard_" + i);
@@ -1958,13 +2164,54 @@ namespace GulfRun.Editor
 
                 Require(FindChildRecursive(card.transform, "MapPreview")?.gameObject, "MapCard_" + i + " MapPreview", failures);
                 Require(FindChildRecursive(card.transform, "MapName")?.gameObject, "MapCard_" + i + " MapName", failures);
+                Require(FindChildRecursive(card.transform, "CountryFlag")?.gameObject, "MapCard_" + i + " CountryFlag", failures);
+                Require(FindChildRecursive(card.transform, "CountryCode")?.gameObject, "MapCard_" + i + " CountryCode", failures);
+                Require(FindChildRecursive(card.transform, "DifficultyText")?.gameObject, "MapCard_" + i + " DifficultyText", failures);
                 Require(FindChildRecursive(card.transform, "Description")?.gameObject, "MapCard_" + i + " Description", failures);
+                Require(FindChildRecursive(card.transform, "DurationText")?.gameObject, "MapCard_" + i + " DurationText", failures);
                 Require(FindChildRecursive(card.transform, "VoteButton")?.gameObject, "MapCard_" + i + " VoteButton", failures);
+                Require(FindChildRecursive(card.transform, "SelectedCheckmark")?.gameObject, "MapCard_" + i + " SelectedCheckmark", failures);
+                Require(FindChildRecursive(card.transform, "LockedRoot")?.gameObject, "MapCard_" + i + " LockedRoot", failures);
+
+                if (card.GetComponent<MapCardVisual>() == null)
+                {
+                    failures.Add("MapCard_" + i + " missing MapCardVisual.");
+                }
 
                 Text mapName = FindChildRecursive(card.transform, "MapName")?.GetComponent<Text>();
                 if (mapName == null || mapName.text != expectedNames[i])
                 {
                     failures.Add("MapCard_" + i + " MapName expected '" + expectedNames[i] + "'.");
+                }
+
+                Text country = FindChildRecursive(card.transform, "CountryCode")?.GetComponent<Text>();
+                if (country == null || country.text != expectedCountries[i])
+                {
+                    failures.Add("MapCard_" + i + " CountryCode expected '" + expectedCountries[i] + "'.");
+                }
+
+                Text difficulty = FindChildRecursive(card.transform, "DifficultyText")?.GetComponent<Text>();
+                if (difficulty == null || difficulty.text != expectedDifficulties[i])
+                {
+                    failures.Add("MapCard_" + i + " DifficultyText expected '" + expectedDifficulties[i] + "'.");
+                }
+
+                Text duration = FindChildRecursive(card.transform, "DurationText")?.GetComponent<Text>();
+                if (duration == null || duration.text != expectedDurations[i])
+                {
+                    failures.Add("MapCard_" + i + " DurationText expected '" + expectedDurations[i] + "'.");
+                }
+
+                GameObject checkmark = FindChildRecursive(card.transform, "SelectedCheckmark")?.gameObject;
+                if (checkmark != null && checkmark.activeSelf)
+                {
+                    failures.Add("MapCard_" + i + " SelectedCheckmark must start inactive.");
+                }
+
+                GameObject locked = FindChildRecursive(card.transform, "LockedRoot")?.gameObject;
+                if (locked != null && locked.activeSelf)
+                {
+                    failures.Add("MapCard_" + i + " LockedRoot must start inactive.");
                 }
             }
 
@@ -2014,6 +2261,38 @@ namespace GulfRun.Editor
                         if (voteButtons.GetArrayElementAtIndex(i).objectReferenceValue == null)
                         {
                             failures.Add("MapVotingScreenController.voteButtons[" + i + "] must be wired.");
+                        }
+                    }
+                }
+
+                SerializedProperty checkmarks = so.FindProperty("selectedCheckmarks");
+                if (checkmarks == null || checkmarks.arraySize != 3)
+                {
+                    failures.Add("MapVotingScreenController.selectedCheckmarks must have 3 entries.");
+                }
+                else
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        if (checkmarks.GetArrayElementAtIndex(i).objectReferenceValue == null)
+                        {
+                            failures.Add("MapVotingScreenController.selectedCheckmarks[" + i + "] must be wired.");
+                        }
+                    }
+                }
+
+                SerializedProperty visuals = so.FindProperty("cardVisuals");
+                if (visuals == null || visuals.arraySize != 3)
+                {
+                    failures.Add("MapVotingScreenController.cardVisuals must have 3 entries.");
+                }
+                else
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        if (visuals.GetArrayElementAtIndex(i).objectReferenceValue == null)
+                        {
+                            failures.Add("MapVotingScreenController.cardVisuals[" + i + "] must be wired.");
                         }
                     }
                 }

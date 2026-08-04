@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate MapVoting.unity (Sprint 22.1 Map Voting UI) without Unity batchmode."""
+"""Generate MapVoting.unity (Sprint 22.2 Premium Map Cards) without Unity batchmode."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ GUID_MASK = "31a19414c41e5ae4aae2af33fee712f6"
 GUID_EVENTSYSTEM = "76c392e42b5098c458856cdf6ecaaaa1"
 GUID_STANDALONE = "4f231c4fb786f3946a6b90b886c48677"
 GUID_CONTROLLER = "b20c0000000000000000000000000073"
+GUID_MAP_CARD_VISUAL = "b20c0000000000000000000000000074"
 GUID_BG = "a18b0000000000000000000000000001"
 KNOB = "{fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}"
 FONT = "{fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}"
@@ -39,6 +40,7 @@ EMPTY_FILL = (0.10, 0.09, 0.10, 0.55)
 EMPTY_BORDER = (0.90, 0.71, 0.25, 0.22)
 AVATAR = (0.72, 0.58, 0.42, 1.0)
 GOLD_LABEL = (0.20, 0.14, 0.02, 1.0)
+HARD_RED = (0.92, 0.38, 0.32, 1.0)
 
 _next = 10000
 
@@ -81,6 +83,7 @@ class Node:
     button: bool = False
     interactable: int = 1
     transition: int = 1
+    script_guid: str | None = None
     # ids for optional components
     cr: int = field(default_factory=nid)
     img_id: int | None = None
@@ -88,6 +91,7 @@ class Node:
     btn_id: int | None = None
     sh_id: int | None = None
     mask_id: int | None = None
+    script_id: int | None = None
 
     def prep(self) -> None:
         needs_cr = self.image is not None or self.text is not None or self.button
@@ -103,6 +107,8 @@ class Node:
             self.sh_id = nid()
         if self.mask:
             self.mask_id = nid()
+        if self.script_guid:
+            self.script_id = nid()
         for ch in self.children:
             ch.prep()
 
@@ -122,6 +128,8 @@ def comps(n: Node) -> list[int]:
         out.append(n.sh_id)
     if n.mask_id:
         out.append(n.mask_id)
+    if n.script_id:
+        out.append(n.script_id)
     return out
 
 
@@ -323,6 +331,22 @@ def emit_node(lines: list[str], n: Node, father: int) -> None:
         lines.append("  m_Name: ")
         lines.append("  m_EditorClassIdentifier: ")
         lines.append("  m_ShowMaskGraphic: 1")
+
+    if n.script_id is not None and n.script_guid:
+        lines.append(f"--- !u!114 &{n.script_id}")
+        lines.append("MonoBehaviour:")
+        lines.append("  m_ObjectHideFlags: 0")
+        lines.append("  m_CorrespondingSourceObject: {fileID: 0}")
+        lines.append("  m_PrefabInstance: {fileID: 0}")
+        lines.append("  m_PrefabAsset: {fileID: 0}")
+        lines.append(f"  m_GameObject: {{fileID: {n.go}}}")
+        lines.append("  m_Enabled: 1")
+        lines.append("  m_EditorHideFlags: 0")
+        lines.append(f"  m_Script: {{fileID: 11500000, guid: {n.script_guid}, type: 3}}")
+        lines.append("  m_Name: ")
+        lines.append("  m_EditorClassIdentifier: ")
+        shadow_ref = n.sh_id if n.sh_id is not None else 0
+        lines.append(f"  cardShadow: {{fileID: {shadow_ref}}}")
 
     for ch in n.children:
         emit_node(lines, ch, n.rt)
@@ -710,8 +734,20 @@ NavMeshSettings:
   m_NavMeshData: {fileID: 0}
 """
 
-def map_card(index: int, map_name: str, description: str, preview_top, preview_bottom) -> Node:
-    card_w, card_h, gap = 500.0, 620.0, 36.0
+def map_card(
+    index: int,
+    map_name: str,
+    country_code: str,
+    flag_color,
+    difficulty: str,
+    difficulty_color,
+    description: str,
+    duration: str,
+    preview_top,
+    preview_bottom,
+    preview_accent,
+) -> Node:
+    card_w, card_h, gap = 500.0, 680.0, 36.0
     x = (index - 1) * (card_w + gap)
     vote = btn(
         "VoteButton",
@@ -721,18 +757,18 @@ def map_card(index: int, map_name: str, description: str, preview_top, preview_b
         label_size=28,
         amin=(0.5, 0),
         amax=(0.5, 0),
-        pos=(0, 28),
+        pos=(0, 26),
         size=(280, 72),
         pivot=(0.5, 0),
         transition=0,
     )
     preview = img(
         "MapPreview",
-        (GOLD[0], GOLD[1], GOLD[2], 0.35),
+        (GOLD[0], GOLD[1], GOLD[2], 0.40),
         amin=(0.5, 1),
         amax=(0.5, 1),
-        pos=(0, -28),
-        size=(card_w - 48, 280),
+        pos=(0, -22),
+        size=(card_w - 40, 300),
         pivot=(0.5, 1),
         children=[
             img(
@@ -740,16 +776,165 @@ def map_card(index: int, map_name: str, description: str, preview_top, preview_b
                 preview_top,
                 amin=(0, 0),
                 amax=(1, 1),
-                pos=(0, 43.5),
-                size=(-6, -93),
+                pos=(0, 46.5),
+                size=(-6, -99),
             ),
             img(
                 "PreviewBottom",
                 preview_bottom,
                 amin=(0, 0),
                 amax=(1, 1),
-                pos=(0, -92.5),
-                size=(-6, -191),
+                pos=(0, -98.5),
+                size=(-6, -203),
+            ),
+            img(
+                "PreviewAccent",
+                preview_accent,
+                amin=(0, 0),
+                amax=(1, 0),
+                pos=(0, 3),
+                size=(-6, 28),
+                pivot=(0.5, 0),
+            ),
+            txt(
+                "PreviewCaption",
+                map_name.upper(),
+                18,
+                (1.0, 1.0, 1.0, 0.88),
+                4,
+                amin=(0, 0),
+                amax=(1, 0),
+                pos=(0, 4),
+                size=(-16, 26),
+                pivot=(0.5, 0),
+            ),
+        ],
+    )
+    meta = Node(
+        name="MetaRow",
+        amin=(0.5, 1),
+        amax=(0.5, 1),
+        pos=(0, -336),
+        size=(card_w - 48, 36),
+        pivot=(0.5, 1),
+        children=[
+            img(
+                "CountryFlag",
+                flag_color,
+                amin=(0, 0.5),
+                amax=(0, 0.5),
+                pos=(0, 0),
+                size=(44, 28),
+                pivot=(0, 0.5),
+            ),
+            txt(
+                "CountryCode",
+                country_code,
+                18,
+                MUTED,
+                3,
+                amin=(0, 0.5),
+                amax=(0, 0.5),
+                pos=(54, 0),
+                size=(70, 30),
+                pivot=(0, 0.5),
+            ),
+            img(
+                "DifficultyBadge",
+                (
+                    difficulty_color[0],
+                    difficulty_color[1],
+                    difficulty_color[2],
+                    0.22,
+                ),
+                amin=(1, 0.5),
+                amax=(1, 0.5),
+                pos=(0, 0),
+                size=(128, 30),
+                pivot=(1, 0.5),
+                children=[
+                    txt(
+                        "DifficultyText",
+                        difficulty,
+                        18,
+                        difficulty_color,
+                        4,
+                        amin=(0, 0),
+                        amax=(1, 1),
+                        pos=(0, 0),
+                        size=(0, 0),
+                    )
+                ],
+            ),
+        ],
+    )
+    checkmark = img(
+        "SelectedCheckmark",
+        GOLD_BRIGHT,
+        active=0,
+        amin=(1, 1),
+        amax=(1, 1),
+        pos=(-18, -18),
+        size=(52, 52),
+        pivot=(1, 1),
+        sprite=KNOB,
+        preserve=1,
+        children=[
+            txt(
+                "CheckMark",
+                "✓",
+                28,
+                GOLD_LABEL,
+                4,
+                amin=(0, 0),
+                amax=(1, 1),
+                pos=(0, 0),
+                size=(0, 0),
+            )
+        ],
+    )
+    locked = img(
+        "LockedRoot",
+        (0.04, 0.03, 0.03, 0.72),
+        active=0,
+        amin=(0, 0),
+        amax=(1, 1),
+        pos=(0, 0),
+        size=(-6, -6),
+        children=[
+            img(
+                "LockIcon",
+                GOLD,
+                amin=(0.5, 0.5),
+                amax=(0.5, 0.5),
+                pos=(0, 22),
+                size=(72, 72),
+                sprite=KNOB,
+                preserve=1,
+                children=[
+                    txt(
+                        "LockGlyph",
+                        "L",
+                        30,
+                        GOLD_LABEL,
+                        4,
+                        amin=(0, 0),
+                        amax=(1, 1),
+                        pos=(0, 0),
+                        size=(0, 0),
+                    )
+                ],
+            ),
+            txt(
+                "LockedLabel",
+                "Locked",
+                28,
+                GOLD_BRIGHT,
+                4,
+                amin=(0.5, 0.5),
+                amax=(0.5, 0.5),
+                pos=(0, -36),
+                size=(200, 36),
             ),
         ],
     )
@@ -757,6 +942,8 @@ def map_card(index: int, map_name: str, description: str, preview_top, preview_b
         f"MapCard_{index}",
         PANEL_BORDER,
         shadow=True,
+        raycast=1,
+        script_guid=GUID_MAP_CARD_VISUAL,
         amin=(0.5, 0.5),
         amax=(0.5, 0.5),
         pos=(x, 0),
@@ -764,29 +951,43 @@ def map_card(index: int, map_name: str, description: str, preview_top, preview_b
         children=[
             img("Fill", CARD, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
             preview,
+            meta,
             txt(
                 "MapName",
                 map_name,
-                32,
+                34,
                 GOLD_BRIGHT,
                 4,
-                amin=(0, 0.38),
-                amax=(1, 0.48),
+                amin=(0, 0.36),
+                amax=(1, 0.46),
                 pos=(0, 0),
                 size=(-40, 0),
             ),
             txt(
                 "Description",
                 description,
-                20,
+                19,
                 MUTED,
                 1,
-                amin=(0, 0.18),
-                amax=(1, 0.38),
+                amin=(0, 0.22),
+                amax=(1, 0.36),
                 pos=(0, 0),
                 size=(-56, 0),
             ),
+            txt(
+                "DurationText",
+                duration,
+                20,
+                GOLD,
+                4,
+                amin=(0, 0.155),
+                amax=(1, 0.22),
+                pos=(0, 0),
+                size=(-48, 0),
+            ),
             vote,
+            checkmark,
+            locked,
         ],
     )
 
@@ -845,28 +1046,46 @@ def main() -> None:
         amin=(0.5, 0.5),
         amax=(0.5, 0.5),
         pos=(0, 8),
-        size=(1572, 620),
+        size=(1572, 680),
         children=[
             map_card(
                 0,
                 "Kuwait City",
-                "Neon towers and desert highways through the capital skyline.",
-                (0.72, 0.48, 0.28, 1.0),
-                (0.42, 0.28, 0.16, 1.0),
+                "KW",
+                (0.00, 0.45, 0.28, 1.0),
+                "Medium",
+                CONNECTING,
+                "Neon towers and desert highways racing through the capital skyline.",
+                "Est. 3:30",
+                (0.78, 0.52, 0.30, 1.0),
+                (0.38, 0.24, 0.14, 1.0),
+                (0.95, 0.78, 0.42, 0.55),
             ),
             map_card(
                 1,
                 "Dubai Marina",
-                "Coastal expressways beside glass towers and marina lights.",
-                (0.22, 0.48, 0.68, 1.0),
-                (0.12, 0.28, 0.42, 1.0),
+                "AE",
+                (0.78, 0.12, 0.14, 1.0),
+                "Hard",
+                HARD_RED,
+                "Coastal expressways beside glass towers and glittering marina lights.",
+                "Est. 4:15",
+                (0.18, 0.42, 0.68, 1.0),
+                (0.08, 0.22, 0.40, 1.0),
+                (0.55, 0.82, 0.95, 0.50),
             ),
             map_card(
                 2,
                 "Muscat Coast",
-                "Mountain curves meeting turquoise Gulf waters at dusk.",
-                (0.28, 0.58, 0.52, 1.0),
-                (0.55, 0.42, 0.28, 1.0),
+                "OM",
+                (0.72, 0.10, 0.16, 1.0),
+                "Easy",
+                SUCCESS,
+                "Mountain curves meeting turquoise Gulf waters at golden hour.",
+                "Est. 2:45",
+                (0.22, 0.58, 0.52, 1.0),
+                (0.52, 0.38, 0.24, 1.0),
+                (0.95, 0.72, 0.38, 0.48),
             ),
         ],
     )
@@ -945,11 +1164,18 @@ def main() -> None:
 
     card_nodes = [find_node(cards, f"MapCard_{i}") for i in range(3)]
     vote_btns = [find_node(c, "VoteButton") for c in card_nodes]
+    checkmarks = [find_node(c, "SelectedCheckmark") for c in card_nodes]
     for i, vb in enumerate(vote_btns):
         if vb is None or vb.btn_id is None or vb.img_id is None:
             raise RuntimeError(f"MapCard_{i} VoteButton missing")
         if not vb.children or vb.children[0].txt_id is None:
             raise RuntimeError(f"MapCard_{i} VoteButton Label missing")
+        if card_nodes[i] is None or card_nodes[i].script_id is None:
+            raise RuntimeError(f"MapCard_{i} MapCardVisual missing")
+        if checkmarks[i] is None:
+            raise RuntimeError(f"MapCard_{i} SelectedCheckmark missing")
+        if find_node(card_nodes[i], "LockedRoot") is None:
+            raise RuntimeError(f"MapCard_{i} LockedRoot missing")
 
     canvas_comp = nid()
     scaler_id = nid()
@@ -1186,6 +1412,14 @@ def main() -> None:
         f"  - {{fileID: {vote_btns[0].children[0].txt_id}}}",
         f"  - {{fileID: {vote_btns[1].children[0].txt_id}}}",
         f"  - {{fileID: {vote_btns[2].children[0].txt_id}}}",
+        "  selectedCheckmarks:",
+        f"  - {{fileID: {checkmarks[0].go}}}",
+        f"  - {{fileID: {checkmarks[1].go}}}",
+        f"  - {{fileID: {checkmarks[2].go}}}",
+        "  cardVisuals:",
+        f"  - {{fileID: {card_nodes[0].script_id}}}",
+        f"  - {{fileID: {card_nodes[1].script_id}}}",
+        f"  - {{fileID: {card_nodes[2].script_id}}}",
     ]
 
     for ch in canvas.children:

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace GulfRun.Features.MapVotingScreen
 {
     /// <summary>
-    /// Premium Map Voting UI (Sprint 22.1). Back → LobbyScreen.
+    /// Premium Map Voting UI (Sprint 22.2). Back → LobbyScreen.
     /// Vote buttons are local visual highlight only — no countdown, vote
     /// counting, networking, SessionManager, or matchmaking.
     /// </summary>
@@ -13,7 +13,7 @@ namespace GulfRun.Features.MapVotingScreen
     public sealed class MapVotingScreenController : MonoBehaviour
     {
         private static readonly Color CardBorderIdle = new Color(0.90f, 0.71f, 0.25f, 0.55f);
-        private static readonly Color CardBorderSelected = new Color(1f, 0.84f, 0.40f, 1f);
+        private static readonly Color CardBorderSelected = new Color(1f, 0.88f, 0.35f, 1f);
         private static readonly Color VoteIdleBg = new Color(0.90f, 0.71f, 0.25f, 1f);
         private static readonly Color VoteIdleLabel = new Color(0.20f, 0.14f, 0.02f, 1f);
         private static readonly Color VoteSelectedBg = new Color(0.40f, 0.85f, 0.45f, 1f);
@@ -24,6 +24,8 @@ namespace GulfRun.Features.MapVotingScreen
         [SerializeField] private Image[] cardBorders;
         [SerializeField] private Image[] voteButtonImages;
         [SerializeField] private Text[] voteButtonLabels;
+        [SerializeField] private GameObject[] selectedCheckmarks;
+        [SerializeField] private MapCardVisual[] cardVisuals;
 
         private int _selectedIndex = -1;
 
@@ -101,8 +103,18 @@ namespace GulfRun.Features.MapVotingScreen
 
                 if (voteButtonLabels != null && i < voteButtonLabels.Length && voteButtonLabels[i] != null)
                 {
-                    voteButtonLabels[i].text = selected ? "Voted ✓" : "Vote";
+                    voteButtonLabels[i].text = selected ? "Voted" : "Vote";
                     voteButtonLabels[i].color = selected ? VoteSelectedLabel : VoteIdleLabel;
+                }
+
+                if (selectedCheckmarks != null && i < selectedCheckmarks.Length && selectedCheckmarks[i] != null)
+                {
+                    selectedCheckmarks[i].SetActive(selected);
+                }
+
+                if (cardVisuals != null && i < cardVisuals.Length && cardVisuals[i] != null)
+                {
+                    cardVisuals[i].SetSelected(selected);
                 }
             }
         }
