@@ -1,0 +1,951 @@
+using System.Collections.Generic;
+using System.IO;
+using GulfRun.Features.InviteFriends;
+using GulfRun.Features.MainMenu;
+using GulfRun.Features.PlayMenu;
+using GulfRun.Features.QuickPlay;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using CoreSceneManager = GulfRun.Core.Managers.SceneManager;
+
+namespace GulfRun.Editor
+{
+    /// <summary>
+    /// Builds PlayMenu / QuickPlay / InviteFriends scenes, wires Main Menu Play Now,
+    /// updates EditorBuildSettings, and validates hierarchy in batchmode.
+    /// </summary>
+    public static class PlayFlowSceneBuilder
+    {
+        private const string PlayMenuScenePath = "Assets/_Project/Scenes/PlayMenu.unity";
+        private const string QuickPlayScenePath = "Assets/_Project/Scenes/QuickPlay.unity";
+        private const string InviteFriendsScenePath = "Assets/_Project/Scenes/InviteFriends.unity";
+        private const string MainMenuScenePath = "Assets/_Project/Scenes/MainMenu.unity";
+        private const string BackgroundGuid = "a18b0000000000000000000000000001";
+
+        private static readonly Color Gold = new Color(0.90f, 0.71f, 0.25f, 1f);
+        private static readonly Color GoldBright = new Color(1f, 0.84f, 0.40f, 1f);
+        private static readonly Color PanelBg = new Color(0.10f, 0.09f, 0.10f, 0.78f);
+        private static readonly Color PanelBorder = new Color(0.90f, 0.71f, 0.25f, 0.55f);
+        private static readonly Color TextPrimary = Color.white;
+        private static readonly Color TextMuted = new Color(0.80f, 0.80f, 0.80f, 1f);
+        private static readonly Color ButtonDark = new Color(0.12f, 0.10f, 0.09f, 0.92f);
+        private static readonly Color CardFill = new Color(0.12f, 0.11f, 0.12f, 0.88f);
+        private static readonly Color HighlightGold = new Color(0.90f, 0.71f, 0.25f, 0.12f);
+
+        [MenuItem("GulfRun/Play Flow/Build Scenes + Wire Play")]
+        public static void RunFromMenu() => RunBatch();
+
+        public static void RunBatch()
+        {
+            var failures = new List<string>();
+
+            try
+            {
+                WireMainMenuPlayButton(failures);
+                BuildPlayMenuScene(failures);
+                BuildQuickPlayScene(failures);
+                BuildInviteFriendsScene(failures);
+                EnsureBuildSettings(failures);
+                ValidateAll(failures);
+            }
+            catch (System.Exception ex)
+            {
+                failures.Add("Unhandled: " + ex);
+                Debug.LogException(ex);
+            }
+
+            if (failures.Count == 0)
+            {
+                Debug.Log("[PlayFlow] PASS — PlayMenu/QuickPlay/InviteFriends built, Play wired, build settings OK.");
+                EditorApplication.Exit(0);
+            }
+            else
+            {
+                foreach (string failure in failures)
+                {
+                    Debug.LogError("[PlayFlow] FAIL: " + failure);
+                }
+
+                EditorApplication.Exit(1);
+            }
+        }
+
+        private static void WireMainMenuPlayButton(List<string> failures)
+        {
+            Scene scene = EditorSceneManager.OpenScene(MainMenuScenePath, OpenSceneMode.Single);
+            GameObject playImage = FindDeep(scene, "PlayButtonImage");
+            if (playImage == null)
+            {
+                failures.Add("MainMenu PlayButtonImage not found.");
+                return;
+            }
+
+            EnsureEventSystem(scene);
+
+            Image image = playImage.GetComponent<Image>();
+            if (image != null)
+            {
+                image.raycastTarget = true;
+            }
+
+            Button button = playImage.GetComponent<Button>();
+            if (button == null)
+            {
+                button = playImage.AddComponent<Button>();
+            }
+
+            button.transition = Selectable.Transition.None;
+            button.targetGraphic = image;
+
+            if (playImage.GetComponent<MainMenuPlayButton>() == null)
+            {
+                playImage.AddComponent<MainMenuPlayButton>();
+            }
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("[PlayFlow] Wired MainMenu PlayButtonImage → PlayMenu.");
+        }
+
+        private static void BuildPlayMenuScene(List<string> failures)
+        {
+            Sprite background = LoadBackground(failures);
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            EnsureEventSystem(scene);
+
+            GameObject canvasGo = CreateOverlayCanvas("PlayMenuCanvas");
+            PlayMenuController controller = canvasGo.AddComponent<PlayMenuController>();
+            RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
+
+            Image bg = CreateUiImage("Background", canvasRt, stretch: true);
+            bg.sprite = background;
+            bg.preserveAspect = false;
+            bg.raycastTarget = false;
+
+            CreateSafeArea(canvasRt);
+
+            Button backButton = CreateLabeledButton("BackButton", canvasRt, "Back", 168f, 64f, ButtonDark, GoldBright);
+            PlaceTopLeft(backButton.GetComponent<RectTransform>(), new Vector2(48f, -40f));
+
+            RectTransform cardsRoot = CreateRect("CardsRoot", canvasRt);
+            cardsRoot.anchorMin = new Vector2(0.5f, 0.5f);
+            cardsRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            cardsRoot.pivot = new Vector2(0.5f, 0.5f);
+            cardsRoot.anchoredPosition = Vector2.zero;
+            cardsRoot.sizeDelta = new Vector2(1400f, 520f);
+
+            Button quickPlay = CreateModeCard(
+                "QuickPlayCard",
+                cardsRoot,
+                "Quick Play",
+                "Instantly search for an available random multiplayer room.",
+                new Vector2(-360f, 0f));
+
+            Button invite = CreateModeCard(
+                "InviteFriendsCard",
+                cardsRoot,
+                "Invite Friends",
+                "Create a private room and invite friends.",
+                new Vector2(360f, 0f));
+
+            SerializedObject so = new SerializedObject(controller);
+            so.FindProperty("backButton").objectReferenceValue = backButton;
+            so.FindProperty("quickPlayButton").objectReferenceValue = quickPlay;
+            so.FindProperty("inviteFriendsButton").objectReferenceValue = invite;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            SaveScene(scene, PlayMenuScenePath, failures);
+        }
+
+        private static void BuildQuickPlayScene(List<string> failures)
+        {
+            Sprite background = LoadBackground(failures);
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            EnsureEventSystem(scene);
+
+            GameObject canvasGo = CreateOverlayCanvas("QuickPlayCanvas");
+            QuickPlayController controller = canvasGo.AddComponent<QuickPlayController>();
+            RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
+
+            Image bg = CreateUiImage("Background", canvasRt, stretch: true);
+            bg.sprite = background;
+            bg.preserveAspect = false;
+            bg.raycastTarget = false;
+
+            CreateSafeArea(canvasRt);
+
+            Button backButton = CreateLabeledButton("BackButton", canvasRt, "Back", 168f, 64f, ButtonDark, GoldBright);
+            PlaceTopLeft(backButton.GetComponent<RectTransform>(), new Vector2(48f, -40f));
+
+            RectTransform statusRoot = CreateRect("StatusRoot", canvasRt);
+            statusRoot.anchorMin = new Vector2(0.5f, 0.5f);
+            statusRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            statusRoot.pivot = new Vector2(0.5f, 0.5f);
+            statusRoot.anchoredPosition = new Vector2(0f, 40f);
+            statusRoot.sizeDelta = new Vector2(900f, 420f);
+
+            Image statusPanel = statusRoot.gameObject.AddComponent<Image>();
+            statusPanel.color = PanelBg;
+            statusPanel.raycastTarget = false;
+
+            Image spinnerImage = CreateUiImage("SearchingSpinner", statusRoot, stretch: false);
+            spinnerImage.sprite = GetBuiltinKnob();
+            spinnerImage.color = GoldBright;
+            spinnerImage.raycastTarget = false;
+            RectTransform spinnerRt = spinnerImage.rectTransform;
+            spinnerRt.anchorMin = new Vector2(0.5f, 0.5f);
+            spinnerRt.anchorMax = new Vector2(0.5f, 0.5f);
+            spinnerRt.pivot = new Vector2(0.5f, 0.5f);
+            spinnerRt.anchoredPosition = new Vector2(0f, 70f);
+            spinnerRt.sizeDelta = new Vector2(120f, 120f);
+
+            Text statusText = CreateUiText(
+                "StatusText",
+                statusRoot,
+                "Searching for available players...",
+                34,
+                FontStyle.Bold,
+                TextPrimary,
+                TextAnchor.MiddleCenter);
+            RectTransform statusRt = statusText.rectTransform;
+            statusRt.anchorMin = new Vector2(0f, 0.15f);
+            statusRt.anchorMax = new Vector2(1f, 0.45f);
+            statusRt.offsetMin = new Vector2(24f, 0f);
+            statusRt.offsetMax = new Vector2(-24f, 0f);
+
+            RectTransform labelsRoot = CreateRect("StatusLabels", statusRoot);
+            labelsRoot.anchorMin = new Vector2(0.5f, 0f);
+            labelsRoot.anchorMax = new Vector2(0.5f, 0f);
+            labelsRoot.pivot = new Vector2(0.5f, 0f);
+            labelsRoot.anchoredPosition = new Vector2(0f, 24f);
+            labelsRoot.sizeDelta = new Vector2(820f, 48f);
+
+            GameObject playersFound = CreateHiddenLabel("PlayersFoundLabel", labelsRoot, "Players Found");
+            GameObject joining = CreateHiddenLabel("JoiningRoomLabel", labelsRoot, "Joining Room");
+            GameObject creating = CreateHiddenLabel("CreatingRoomLabel", labelsRoot, "Creating Room");
+            GameObject waiting = CreateHiddenLabel("WaitingForPlayersLabel", labelsRoot, "Waiting For Players");
+
+            Button cancel = CreateLabeledButton("CancelButton", canvasRt, "Cancel", 280f, 80f, ButtonDark, GoldBright);
+            RectTransform cancelRt = cancel.GetComponent<RectTransform>();
+            cancelRt.anchorMin = new Vector2(0.5f, 0f);
+            cancelRt.anchorMax = new Vector2(0.5f, 0f);
+            cancelRt.pivot = new Vector2(0.5f, 0f);
+            cancelRt.anchoredPosition = new Vector2(0f, 64f);
+
+            SerializedObject so = new SerializedObject(controller);
+            so.FindProperty("backButton").objectReferenceValue = backButton;
+            so.FindProperty("cancelButton").objectReferenceValue = cancel;
+            so.FindProperty("statusText").objectReferenceValue = statusText;
+            so.FindProperty("spinner").objectReferenceValue = spinnerRt;
+            so.FindProperty("playersFoundLabel").objectReferenceValue = playersFound;
+            so.FindProperty("joiningRoomLabel").objectReferenceValue = joining;
+            so.FindProperty("creatingRoomLabel").objectReferenceValue = creating;
+            so.FindProperty("waitingForPlayersLabel").objectReferenceValue = waiting;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            SaveScene(scene, QuickPlayScenePath, failures);
+        }
+
+        private static void BuildInviteFriendsScene(List<string> failures)
+        {
+            Sprite background = LoadBackground(failures);
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            EnsureEventSystem(scene);
+
+            GameObject canvasGo = CreateOverlayCanvas("InviteFriendsCanvas");
+            InviteFriendsController controller = canvasGo.AddComponent<InviteFriendsController>();
+            RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
+
+            Image bg = CreateUiImage("Background", canvasRt, stretch: true);
+            bg.sprite = background;
+            bg.preserveAspect = false;
+            bg.raycastTarget = false;
+
+            CreateSafeArea(canvasRt);
+
+            Button backButton = CreateLabeledButton("BackButton", canvasRt, "Back", 168f, 64f, ButtonDark, GoldBright);
+            PlaceTopLeft(backButton.GetComponent<RectTransform>(), new Vector2(48f, -40f));
+
+            RectTransform cardsRoot = CreateRect("CardsRoot", canvasRt);
+            cardsRoot.anchorMin = new Vector2(0.5f, 0.5f);
+            cardsRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            cardsRoot.pivot = new Vector2(0.5f, 0.5f);
+            cardsRoot.anchoredPosition = new Vector2(0f, 20f);
+            cardsRoot.sizeDelta = new Vector2(1680f, 720f);
+
+            // Card 1 — Friends List
+            RectTransform friendsCard = CreateActionCard("FriendsListCard", cardsRoot, new Vector2(-560f, 0f), new Vector2(500f, 640f));
+            CreateUiText("Title", friendsCard, "Friends List", 30, FontStyle.Bold, GoldBright, TextAnchor.UpperCenter)
+                .rectTransform.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 18f, 40f);
+            StretchHorizontal(CreateUiText(
+                "Description",
+                friendsCard,
+                "Display friends list; select one or more friends to invite.",
+                18,
+                FontStyle.Normal,
+                TextMuted,
+                TextAnchor.UpperCenter).rectTransform, 64f, 70f);
+
+            RectTransform rowsRoot = CreateRect("FriendRows", friendsCard);
+            rowsRoot.anchorMin = new Vector2(0.5f, 0f);
+            rowsRoot.anchorMax = new Vector2(0.5f, 1f);
+            rowsRoot.pivot = new Vector2(0.5f, 0.5f);
+            rowsRoot.anchoredPosition = new Vector2(0f, -20f);
+            rowsRoot.sizeDelta = new Vector2(440f, -160f);
+
+            string[] fakeFriends = { "Ahmed_97", "NoorDesert", "FalconQ8", "SandRider", "GulfAce" };
+            var friendButtons = new List<Button>();
+            var friendHighlights = new List<Image>();
+            for (int i = 0; i < fakeFriends.Length; i++)
+            {
+                Button row = CreateFriendRow("FriendRow_" + i, rowsRoot, fakeFriends[i], i, fakeFriends.Length);
+                friendButtons.Add(row);
+                friendHighlights.Add(row.GetComponent<Image>());
+            }
+
+            // Card 2 — Player ID / Invite Code
+            RectTransform playerIdCard = CreateActionCard("PlayerIdCard", cardsRoot, new Vector2(0f, 0f), new Vector2(500f, 640f));
+            CreateUiText("Title", playerIdCard, "Player ID / Invite Code", 28, FontStyle.Bold, GoldBright, TextAnchor.UpperCenter)
+                .rectTransform.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 18f, 48f);
+            StretchHorizontal(CreateUiText(
+                "Description",
+                playerIdCard,
+                "Enter a Player ID or Invitation Code to send an invite.",
+                18,
+                FontStyle.Normal,
+                TextMuted,
+                TextAnchor.UpperCenter).rectTransform, 74f, 70f);
+
+            InputField input = CreateInputField("PlayerIdInput", playerIdCard, "Player ID or Invite Code");
+            RectTransform inputRt = input.GetComponent<RectTransform>();
+            inputRt.anchorMin = new Vector2(0.5f, 0.5f);
+            inputRt.anchorMax = new Vector2(0.5f, 0.5f);
+            inputRt.pivot = new Vector2(0.5f, 0.5f);
+            inputRt.anchoredPosition = new Vector2(0f, 40f);
+            inputRt.sizeDelta = new Vector2(400f, 64f);
+
+            Button send = CreateLabeledButton("SendInvitationButton", playerIdCard, "Send Invitation", 360f, 72f, Gold, new Color(0.20f, 0.14f, 0.02f, 1f));
+            RectTransform sendRt = send.GetComponent<RectTransform>();
+            sendRt.anchorMin = new Vector2(0.5f, 0.5f);
+            sendRt.anchorMax = new Vector2(0.5f, 0.5f);
+            sendRt.pivot = new Vector2(0.5f, 0.5f);
+            sendRt.anchoredPosition = new Vector2(0f, -60f);
+
+            // Card 3 — WhatsApp Invite
+            RectTransform whatsAppCard = CreateActionCard("WhatsAppCard", cardsRoot, new Vector2(560f, 0f), new Vector2(500f, 640f));
+            CreateUiText("Title", whatsAppCard, "WhatsApp Invite", 30, FontStyle.Bold, GoldBright, TextAnchor.UpperCenter)
+                .rectTransform.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 18f, 40f);
+            StretchHorizontal(CreateUiText(
+                "Description",
+                whatsAppCard,
+                "Copy or share a WhatsApp invitation link.",
+                18,
+                FontStyle.Normal,
+                TextMuted,
+                TextAnchor.UpperCenter).rectTransform, 64f, 70f);
+
+            Button copy = CreateLabeledButton("CopyLinkButton", whatsAppCard, "Copy Link", 360f, 72f, Gold, new Color(0.20f, 0.14f, 0.02f, 1f));
+            RectTransform copyRt = copy.GetComponent<RectTransform>();
+            copyRt.anchorMin = new Vector2(0.5f, 0.5f);
+            copyRt.anchorMax = new Vector2(0.5f, 0.5f);
+            copyRt.pivot = new Vector2(0.5f, 0.5f);
+            copyRt.anchoredPosition = new Vector2(0f, 40f);
+
+            Button share = CreateLabeledButton("ShareWhatsAppButton", whatsAppCard, "Share via WhatsApp", 360f, 72f, ButtonDark, GoldBright);
+            RectTransform shareRt = share.GetComponent<RectTransform>();
+            shareRt.anchorMin = new Vector2(0.5f, 0.5f);
+            shareRt.anchorMax = new Vector2(0.5f, 0.5f);
+            shareRt.pivot = new Vector2(0.5f, 0.5f);
+            shareRt.anchoredPosition = new Vector2(0f, -60f);
+
+            Text status = CreateUiText("StatusText", canvasRt, string.Empty, 24, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
+            RectTransform statusRt = status.rectTransform;
+            statusRt.anchorMin = new Vector2(0.5f, 0f);
+            statusRt.anchorMax = new Vector2(0.5f, 0f);
+            statusRt.pivot = new Vector2(0.5f, 0f);
+            statusRt.anchoredPosition = new Vector2(0f, 36f);
+            statusRt.sizeDelta = new Vector2(900f, 40f);
+
+            SerializedObject so = new SerializedObject(controller);
+            so.FindProperty("backButton").objectReferenceValue = backButton;
+            so.FindProperty("playerIdInput").objectReferenceValue = input;
+            so.FindProperty("sendInvitationButton").objectReferenceValue = send;
+            so.FindProperty("copyLinkButton").objectReferenceValue = copy;
+            so.FindProperty("shareWhatsAppButton").objectReferenceValue = share;
+            so.FindProperty("statusText").objectReferenceValue = status;
+
+            SerializedProperty friendButtonsProp = so.FindProperty("friendRowButtons");
+            friendButtonsProp.arraySize = friendButtons.Count;
+            for (int i = 0; i < friendButtons.Count; i++)
+            {
+                friendButtonsProp.GetArrayElementAtIndex(i).objectReferenceValue = friendButtons[i];
+            }
+
+            SerializedProperty friendHighlightsProp = so.FindProperty("friendRowHighlights");
+            friendHighlightsProp.arraySize = friendHighlights.Count;
+            for (int i = 0; i < friendHighlights.Count; i++)
+            {
+                friendHighlightsProp.GetArrayElementAtIndex(i).objectReferenceValue = friendHighlights[i];
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            SaveScene(scene, InviteFriendsScenePath, failures);
+        }
+
+        private static void EnsureBuildSettings(List<string> failures)
+        {
+            InsertSceneAfter(PlayMenuScenePath, MainMenuScenePath, failures);
+            InsertSceneAfter(QuickPlayScenePath, PlayMenuScenePath, failures);
+            InsertSceneAfter(InviteFriendsScenePath, QuickPlayScenePath, failures);
+        }
+
+        private static void InsertSceneAfter(string scenePath, string afterPath, List<string> failures)
+        {
+            string sceneGuid = AssetDatabase.AssetPathToGUID(scenePath);
+            if (string.IsNullOrEmpty(sceneGuid))
+            {
+                failures.Add(scenePath + " GUID missing after save.");
+                return;
+            }
+
+            var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            int existing = scenes.FindIndex(s => s.path == scenePath);
+            if (existing >= 0)
+            {
+                scenes.RemoveAt(existing);
+            }
+
+            int afterIndex = scenes.FindIndex(s => s.path == afterPath);
+            var entry = new EditorBuildSettingsScene(scenePath, true);
+            if (afterIndex >= 0)
+            {
+                scenes.Insert(afterIndex + 1, entry);
+            }
+            else
+            {
+                scenes.Add(entry);
+            }
+
+            EditorBuildSettings.scenes = scenes.ToArray();
+            Debug.Log("[PlayFlow] EditorBuildSettings inserted " + scenePath + " after " + afterPath);
+        }
+
+        private static void ValidateAll(List<string> failures)
+        {
+            ValidatePlayMenu(failures);
+            ValidateQuickPlay(failures);
+            ValidateInviteFriends(failures);
+            ValidateMainMenuWiring(failures);
+
+            if (CoreSceneManager.PlayMenuSceneName != "PlayMenu")
+            {
+                failures.Add("SceneManager.PlayMenuSceneName mismatch.");
+            }
+
+            if (CoreSceneManager.QuickPlaySceneName != "QuickPlay")
+            {
+                failures.Add("SceneManager.QuickPlaySceneName mismatch.");
+            }
+
+            if (CoreSceneManager.InviteFriendsSceneName != "InviteFriends")
+            {
+                failures.Add("SceneManager.InviteFriendsSceneName mismatch.");
+            }
+        }
+
+        private static void ValidatePlayMenu(List<string> failures)
+        {
+            Scene scene = EditorSceneManager.OpenScene(PlayMenuScenePath, OpenSceneMode.Single);
+            Require(FindDeep(scene, "PlayMenuCanvas"), "PlayMenuCanvas", failures);
+            Require(FindDeep(scene, "Background"), "PlayMenu Background", failures);
+            Require(FindDeep(scene, "SafeArea"), "PlayMenu SafeArea", failures);
+            Require(FindDeep(scene, "BackButton"), "PlayMenu BackButton", failures);
+            Require(FindDeep(scene, "CardsRoot"), "CardsRoot", failures);
+            Require(FindDeep(scene, "QuickPlayCard"), "QuickPlayCard", failures);
+            Require(FindDeep(scene, "InviteFriendsCard"), "InviteFriendsCard", failures);
+            RequireCanvasScaler(FindDeep(scene, "PlayMenuCanvas"), failures);
+            RequireInBuild(PlayMenuScenePath, failures);
+            RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
+        }
+
+        private static void ValidateQuickPlay(List<string> failures)
+        {
+            Scene scene = EditorSceneManager.OpenScene(QuickPlayScenePath, OpenSceneMode.Single);
+            Require(FindDeep(scene, "QuickPlayCanvas"), "QuickPlayCanvas", failures);
+            Require(FindDeep(scene, "Background"), "QuickPlay Background", failures);
+            Require(FindDeep(scene, "BackButton"), "QuickPlay BackButton", failures);
+            Require(FindDeep(scene, "CancelButton"), "CancelButton", failures);
+            Require(FindDeep(scene, "StatusText"), "StatusText", failures);
+            Require(FindDeep(scene, "SearchingSpinner"), "SearchingSpinner", failures);
+            Require(FindDeep(scene, "PlayersFoundLabel"), "PlayersFoundLabel", failures);
+            Require(FindDeep(scene, "JoiningRoomLabel"), "JoiningRoomLabel", failures);
+            Require(FindDeep(scene, "CreatingRoomLabel"), "CreatingRoomLabel", failures);
+            Require(FindDeep(scene, "WaitingForPlayersLabel"), "WaitingForPlayersLabel", failures);
+            RequireCanvasScaler(FindDeep(scene, "QuickPlayCanvas"), failures);
+            RequireInBuild(QuickPlayScenePath, failures);
+            RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
+        }
+
+        private static void ValidateInviteFriends(List<string> failures)
+        {
+            Scene scene = EditorSceneManager.OpenScene(InviteFriendsScenePath, OpenSceneMode.Single);
+            Require(FindDeep(scene, "InviteFriendsCanvas"), "InviteFriendsCanvas", failures);
+            Require(FindDeep(scene, "Background"), "InviteFriends Background", failures);
+            Require(FindDeep(scene, "BackButton"), "InviteFriends BackButton", failures);
+            Require(FindDeep(scene, "FriendsListCard"), "FriendsListCard", failures);
+            Require(FindDeep(scene, "PlayerIdCard"), "PlayerIdCard", failures);
+            Require(FindDeep(scene, "WhatsAppCard"), "WhatsAppCard", failures);
+            Require(FindDeep(scene, "PlayerIdInput"), "PlayerIdInput", failures);
+            Require(FindDeep(scene, "SendInvitationButton"), "SendInvitationButton", failures);
+            Require(FindDeep(scene, "CopyLinkButton"), "CopyLinkButton", failures);
+            Require(FindDeep(scene, "ShareWhatsAppButton"), "ShareWhatsAppButton", failures);
+            Require(FindDeep(scene, "FriendRow_0"), "FriendRow_0", failures);
+            RequireCanvasScaler(FindDeep(scene, "InviteFriendsCanvas"), failures);
+            RequireInBuild(InviteFriendsScenePath, failures);
+            RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
+        }
+
+        private static void ValidateMainMenuWiring(List<string> failures)
+        {
+            Scene mainMenu = EditorSceneManager.OpenScene(MainMenuScenePath, OpenSceneMode.Single);
+            GameObject play = FindDeep(mainMenu, "PlayButtonImage");
+            if (play == null || play.GetComponent<MainMenuPlayButton>() == null || play.GetComponent<Button>() == null)
+            {
+                failures.Add("MainMenu PlayButtonImage missing Button/MainMenuPlayButton.");
+            }
+
+            if (Object.FindObjectOfType<EventSystem>() == null)
+            {
+                failures.Add("MainMenu EventSystem missing (needed for Play click).");
+            }
+        }
+
+        private static Sprite LoadBackground(List<string> failures)
+        {
+            Sprite background = LoadSprite(BackgroundGuid, "MainMenuBackground");
+            if (background == null)
+            {
+                failures.Add("Background sprite GUID missing.");
+            }
+
+            return background;
+        }
+
+        private static GameObject CreateOverlayCanvas(string name)
+        {
+            GameObject canvasGo = new GameObject(name, typeof(RectTransform), typeof(Canvas),
+                typeof(CanvasScaler), typeof(GraphicRaycaster));
+            Canvas canvas = canvasGo.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 10;
+
+            CanvasScaler scaler = canvasGo.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0.5f;
+
+            RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
+            canvasRt.anchorMin = Vector2.zero;
+            canvasRt.anchorMax = Vector2.one;
+            canvasRt.offsetMin = Vector2.zero;
+            canvasRt.offsetMax = Vector2.zero;
+            return canvasGo;
+        }
+
+        private static RectTransform CreateSafeArea(RectTransform canvasRt)
+        {
+            RectTransform safeArea = CreateRect("SafeArea", canvasRt);
+            safeArea.anchorMin = Vector2.zero;
+            safeArea.anchorMax = Vector2.one;
+            safeArea.anchoredPosition = new Vector2(0f, -9f);
+            safeArea.sizeDelta = new Vector2(-96f, -86f);
+            return safeArea;
+        }
+
+        private static Button CreateModeCard(string name, RectTransform parent, string title, string description, Vector2 anchoredPos)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            go.transform.SetParent(parent, false);
+            RectTransform rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = anchoredPos;
+            rt.sizeDelta = new Vector2(620f, 420f);
+
+            Image border = go.GetComponent<Image>();
+            border.color = PanelBorder;
+            border.raycastTarget = true;
+
+            Button button = go.GetComponent<Button>();
+            button.targetGraphic = border;
+            button.transition = Selectable.Transition.ColorTint;
+
+            Image fill = CreateUiImage("Fill", rt, stretch: true);
+            fill.color = CardFill;
+            fill.raycastTarget = false;
+            fill.rectTransform.offsetMin = new Vector2(4f, 4f);
+            fill.rectTransform.offsetMax = new Vector2(-4f, -4f);
+
+            Text titleText = CreateUiText("Title", rt, title, 40, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
+            RectTransform titleRt = titleText.rectTransform;
+            titleRt.anchorMin = new Vector2(0f, 0.55f);
+            titleRt.anchorMax = new Vector2(1f, 0.85f);
+            titleRt.offsetMin = new Vector2(28f, 0f);
+            titleRt.offsetMax = new Vector2(-28f, 0f);
+
+            Text desc = CreateUiText("Description", rt, description, 22, FontStyle.Normal, TextMuted, TextAnchor.UpperCenter);
+            desc.horizontalOverflow = HorizontalWrapMode.Wrap;
+            desc.verticalOverflow = VerticalWrapMode.Overflow;
+            RectTransform descRt = desc.rectTransform;
+            descRt.anchorMin = new Vector2(0f, 0.12f);
+            descRt.anchorMax = new Vector2(1f, 0.52f);
+            descRt.offsetMin = new Vector2(40f, 20f);
+            descRt.offsetMax = new Vector2(-40f, 0f);
+
+            return button;
+        }
+
+        private static RectTransform CreateActionCard(string name, RectTransform parent, Vector2 anchoredPos, Vector2 size)
+        {
+            RectTransform card = CreateRect(name, parent);
+            card.anchorMin = new Vector2(0.5f, 0.5f);
+            card.anchorMax = new Vector2(0.5f, 0.5f);
+            card.pivot = new Vector2(0.5f, 0.5f);
+            card.anchoredPosition = anchoredPos;
+            card.sizeDelta = size;
+
+            Image border = card.gameObject.AddComponent<Image>();
+            border.color = PanelBorder;
+            border.raycastTarget = false;
+
+            Image fill = CreateUiImage("Fill", card, stretch: true);
+            fill.color = CardFill;
+            fill.raycastTarget = false;
+            fill.rectTransform.offsetMin = new Vector2(4f, 4f);
+            fill.rectTransform.offsetMax = new Vector2(-4f, -4f);
+            return card;
+        }
+
+        private static Button CreateFriendRow(string name, RectTransform parent, string label, int index, int total)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            go.transform.SetParent(parent, false);
+            RectTransform rt = go.GetComponent<RectTransform>();
+            float height = 1f / total;
+            rt.anchorMin = new Vector2(0f, 1f - (index + 1) * height);
+            rt.anchorMax = new Vector2(1f, 1f - index * height);
+            rt.offsetMin = new Vector2(8f, 4f);
+            rt.offsetMax = new Vector2(-8f, -4f);
+
+            Image image = go.GetComponent<Image>();
+            image.color = HighlightGold;
+            image.raycastTarget = true;
+
+            Button button = go.GetComponent<Button>();
+            button.targetGraphic = image;
+            button.transition = Selectable.Transition.ColorTint;
+
+            Text text = CreateUiText("Label", rt, label, 22, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
+            RectTransform textRt = text.rectTransform;
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
+            textRt.offsetMin = new Vector2(18f, 0f);
+            textRt.offsetMax = new Vector2(-18f, 0f);
+            return button;
+        }
+
+        private static InputField CreateInputField(string name, Transform parent, string placeholder)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(InputField));
+            go.transform.SetParent(parent, false);
+            Image image = go.GetComponent<Image>();
+            image.color = new Color(0.08f, 0.07f, 0.08f, 0.95f);
+
+            Text text = CreateUiText("Text", go.transform, string.Empty, 22, FontStyle.Normal, TextPrimary, TextAnchor.MiddleLeft);
+            RectTransform textRt = text.rectTransform;
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
+            textRt.offsetMin = new Vector2(14f, 6f);
+            textRt.offsetMax = new Vector2(-14f, -6f);
+            text.supportRichText = false;
+            text.raycastTarget = false;
+
+            Text placeholderText = CreateUiText("Placeholder", go.transform, placeholder, 20, FontStyle.Italic, TextMuted, TextAnchor.MiddleLeft);
+            RectTransform placeholderRt = placeholderText.rectTransform;
+            placeholderRt.anchorMin = Vector2.zero;
+            placeholderRt.anchorMax = Vector2.one;
+            placeholderRt.offsetMin = new Vector2(14f, 6f);
+            placeholderRt.offsetMax = new Vector2(-14f, -6f);
+            placeholderText.raycastTarget = false;
+
+            InputField field = go.GetComponent<InputField>();
+            field.textComponent = text;
+            field.placeholder = placeholderText;
+            field.transition = Selectable.Transition.None;
+            return field;
+        }
+
+        private static GameObject CreateHiddenLabel(string name, Transform parent, string value)
+        {
+            Text text = CreateUiText(name, parent, value, 20, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
+            RectTransform rt = text.rectTransform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            text.gameObject.SetActive(false);
+            return text.gameObject;
+        }
+
+        private static void SaveScene(Scene scene, string path, List<string> failures)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path)) ?? "Assets/_Project/Scenes");
+            bool saved = EditorSceneManager.SaveScene(scene, path);
+            if (!saved)
+            {
+                failures.Add("Failed to save " + path);
+                return;
+            }
+
+            AssetDatabase.Refresh();
+            Debug.Log("[PlayFlow] Saved " + path);
+        }
+
+        private static void EnsureEventSystem(Scene scene)
+        {
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                if (root.GetComponent<EventSystem>() != null || root.GetComponentInChildren<EventSystem>(true) != null)
+                {
+                    return;
+                }
+            }
+
+            GameObject es = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(es, scene);
+        }
+
+        private static Sprite LoadSprite(string guid, string label)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (string.IsNullOrEmpty(path))
+            {
+                Debug.LogError("Missing asset for " + label + " guid " + guid);
+                return null;
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        private static Sprite GetBuiltinKnob()
+        {
+            return AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        }
+
+        private static Font ResolveUiFont()
+        {
+            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (font == null)
+            {
+                font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            }
+
+            return font;
+        }
+
+        private static RectTransform CreateRect(string name, Transform parent)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            return go.GetComponent<RectTransform>();
+        }
+
+        private static Image CreateUiImage(string name, Transform parent, bool stretch)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.transform.SetParent(parent, false);
+            RectTransform rt = go.GetComponent<RectTransform>();
+            if (stretch)
+            {
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
+            }
+
+            return go.GetComponent<Image>();
+        }
+
+        private static Text CreateUiText(string name, Transform parent, string value, int size, FontStyle style,
+            Color color, TextAnchor anchor)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
+            go.transform.SetParent(parent, false);
+            Text text = go.GetComponent<Text>();
+            text.text = value;
+            text.font = ResolveUiFont();
+            text.fontSize = size;
+            text.fontStyle = style;
+            text.color = color;
+            text.alignment = anchor;
+            text.raycastTarget = false;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+            return text;
+        }
+
+        private static Button CreateLabeledButton(string name, Transform parent, string label, float width, float height,
+            Color bgColor, Color textColor)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            go.transform.SetParent(parent, false);
+            RectTransform rt = go.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(width, height);
+
+            Image image = go.GetComponent<Image>();
+            image.color = bgColor;
+            image.raycastTarget = true;
+
+            Button button = go.GetComponent<Button>();
+            button.targetGraphic = image;
+            button.transition = Selectable.Transition.ColorTint;
+            ColorBlock colors = button.colors;
+            colors.highlightedColor = Color.Lerp(bgColor, Color.white, 0.12f);
+            colors.pressedColor = Color.Lerp(bgColor, Color.black, 0.15f);
+            button.colors = colors;
+
+            Text text = CreateUiText("Label", rt, label, 24, FontStyle.Bold, textColor, TextAnchor.MiddleCenter);
+            RectTransform textRt = text.rectTransform;
+            textRt.anchorMin = Vector2.zero;
+            textRt.anchorMax = Vector2.one;
+            textRt.offsetMin = Vector2.zero;
+            textRt.offsetMax = Vector2.zero;
+            return button;
+        }
+
+        private static void PlaceTopLeft(RectTransform rt, Vector2 anchoredPos)
+        {
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(0f, 1f);
+            rt.pivot = new Vector2(0f, 1f);
+            rt.anchoredPosition = anchoredPos;
+        }
+
+        private static void StretchHorizontal(RectTransform rt, float top, float height)
+        {
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = new Vector2(0f, -top);
+            rt.sizeDelta = new Vector2(-40f, height);
+        }
+
+        private static void RequireCanvasScaler(GameObject canvasGo, List<string> failures)
+        {
+            if (canvasGo == null)
+            {
+                return;
+            }
+
+            CanvasScaler scaler = canvasGo.GetComponent<CanvasScaler>();
+            if (scaler == null || scaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize)
+            {
+                failures.Add(canvasGo.name + " CanvasScaler Scale With Screen Size missing.");
+            }
+            else if (scaler.referenceResolution != new Vector2(1920f, 1080f) ||
+                     !Mathf.Approximately(scaler.matchWidthOrHeight, 0.5f))
+            {
+                failures.Add(canvasGo.name + " CanvasScaler expected 1920x1080 match 0.5.");
+            }
+        }
+
+        private static void RequireBackgroundGuid(GameObject bg, List<string> failures)
+        {
+            if (bg == null)
+            {
+                return;
+            }
+
+            Image img = bg.GetComponent<Image>();
+            string guid = img != null && img.sprite != null
+                ? AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(img.sprite))
+                : null;
+            if (guid != BackgroundGuid)
+            {
+                failures.Add(bg.transform.root.name + " Background must reuse MainMenuBackground GUID.");
+            }
+        }
+
+        private static void RequireInBuild(string scenePath, List<string> failures)
+        {
+            bool inBuild = false;
+            foreach (EditorBuildSettingsScene s in EditorBuildSettings.scenes)
+            {
+                if (s.path == scenePath && s.enabled)
+                {
+                    inBuild = true;
+                    break;
+                }
+            }
+
+            if (!inBuild)
+            {
+                failures.Add(scenePath + " not in EditorBuildSettings.");
+            }
+        }
+
+        private static GameObject FindDeep(Scene scene, string name)
+        {
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                if (root.name == name)
+                {
+                    return root;
+                }
+
+                Transform found = FindChildRecursive(root.transform, name);
+                if (found != null)
+                {
+                    return found.gameObject;
+                }
+            }
+
+            return null;
+        }
+
+        private static Transform FindChildRecursive(Transform parent, string name)
+        {
+            for (int i = 0; i < parent.childCount; i++)
+            {
+                Transform child = parent.GetChild(i);
+                if (child.name == name)
+                {
+                    return child;
+                }
+
+                Transform nested = FindChildRecursive(child, name);
+                if (nested != null)
+                {
+                    return nested;
+                }
+            }
+
+            return null;
+        }
+
+        private static void Require(Object obj, string label, List<string> failures)
+        {
+            if (obj == null)
+            {
+                failures.Add("Missing " + label);
+            }
+        }
+    }
+}

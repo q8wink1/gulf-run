@@ -1,9 +1,8 @@
 {
-    "name": "GulfRun.Features.MainMenu",
-    "rootNamespace": "GulfRun.Features.MainMenu",
+    "name": "GulfRun.Features.QuickPlay",
+    "rootNamespace": "GulfRun.Features.QuickPlay",
     "references": [
         "GulfRun.Core",
-        "GulfRun.Domain",
         "UnityEngine.UI"
     ],
     "includePlatforms": [],

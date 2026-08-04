@@ -23,6 +23,9 @@ namespace GulfRun.Core.Managers
     /// and the new <c>Features.MainMenu.Bottom.PrivateRoomPanelView</c>); the
     /// Lobby scene itself calls <see cref="LoadGameplay"/> once its Auto
     /// Start countdown reaches GO.
+    /// Play flow adds <see cref="LoadPlayMenu"/> / <see cref="LoadQuickPlay"/> /
+    /// <see cref="LoadInviteFriends"/> — Main Menu Play Now opens Play Menu;
+    /// Quick Play and Invite Friends are UI-only placeholders (no networking).
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class SceneManager : Singleton<SceneManager>
@@ -31,6 +34,15 @@ namespace GulfRun.Core.Managers
         public const string IntroSceneName = "Intro";
 
         public const string MainMenuSceneName = "MainMenu";
+
+        /// <summary>Play Menu hub — entered from Main Menu Play Now; routes to Quick Play or Invite Friends.</summary>
+        public const string PlayMenuSceneName = "PlayMenu";
+
+        /// <summary>Quick Play UI placeholder — searching / joining / waiting status flow only (no matchmaking).</summary>
+        public const string QuickPlaySceneName = "QuickPlay";
+
+        /// <summary>Invite Friends UI placeholder — friends list / player ID / WhatsApp stubs only (no networking).</summary>
+        public const string InviteFriendsSceneName = "InviteFriends";
 
         /// <summary>Sprint 15: the Pre-Race Lobby scene, entered once a Quick Play match is found or a Private Room is created/joined.</summary>
         public const string LobbySceneName = "Lobby";
@@ -47,6 +59,15 @@ namespace GulfRun.Core.Managers
 
         /// <summary>Sprint 14 (Boot startup): the very first scene load after Boot finishes initializing — the GulfRun Brand Intro.</summary>
         public void LoadIntro() => UnityEngine.SceneManagement.SceneManager.LoadScene(IntroSceneName);
+
+        /// <summary>Main Menu Play Now → Play Menu hub (Quick Play / Invite Friends).</summary>
+        public void LoadPlayMenu() => UnityEngine.SceneManagement.SceneManager.LoadScene(PlayMenuSceneName);
+
+        /// <summary>Play Menu Quick Play card → Quick Play searching UI (placeholder status flow only).</summary>
+        public void LoadQuickPlay() => UnityEngine.SceneManagement.SceneManager.LoadScene(QuickPlaySceneName);
+
+        /// <summary>Play Menu Invite Friends card → Invite Friends options UI (placeholder only).</summary>
+        public void LoadInviteFriends() => UnityEngine.SceneManagement.SceneManager.LoadScene(InviteFriendsSceneName);
 
         /// <summary>Sprint 15 (Quick Play match found / Private Room created or joined): leaves Main Menu for the Pre-Race Lobby scene.</summary>
         public void LoadLobby() => UnityEngine.SceneManagement.SceneManager.LoadScene(LobbySceneName);

@@ -83,3 +83,7 @@ venv/
 
 # Logs
 *.log
+
+# Temp Unity batch build workspace
+_PlayFlowBuild/
+
