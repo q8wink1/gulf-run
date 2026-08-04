@@ -8,6 +8,7 @@ using GulfRun.Features.PlayMenu;
 using GulfRun.Features.QuickPlay;
 using GulfRun.Features.WinningMapRevealScreen;
 using GulfRun.Features.LoadingScreen;
+using GulfRun.Features.PreRaceIntro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -31,6 +32,7 @@ namespace GulfRun.Editor
         private const string MapVotingScenePath = "Assets/_Project/Scenes/MapVoting.unity";
         private const string WinningMapRevealScenePath = "Assets/_Project/Scenes/WinningMapReveal.unity";
         private const string LoadingScreenScenePath = "Assets/_Project/Scenes/LoadingScreen.unity";
+        private const string PreRaceIntroScenePath = "Assets/_Project/Scenes/PreRaceIntro.unity";
         private const string MainMenuScenePath = "Assets/_Project/Scenes/MainMenu.unity";
         private const string BackgroundGuid = "a18b0000000000000000000000000001";
         private const string LogoGuid = "a18c1000000000000000000000000001";
@@ -83,6 +85,9 @@ namespace GulfRun.Editor
 
         [MenuItem("GulfRun/Play Flow/Build Loading Screen (Sprint 22.5)")]
         public static void BuildLoadingScreenFromMenu() => BuildLoadingScreenBatch();
+
+        [MenuItem("GulfRun/Play Flow/Build Pre-Race Intro (Sprint 23.1)")]
+        public static void BuildPreRaceIntroFromMenu() => BuildPreRaceIntroBatch();
 
         public static void RunBatch()
         {
@@ -241,6 +246,40 @@ namespace GulfRun.Editor
             }
 
             ExitWithFailures(failures, "[PlayFlow] PASS — LoadingScreen Sprint 22.5 Premium Loading UI OK.");
+        }
+
+        /// <summary>
+        /// Sprint 23.1: build PreRaceIntro UI (map pan, starting-line players,
+        /// map info, Get Ready banner, audio placeholders). No countdown,
+        /// movement, networking, or race logic. Does not rebuild Main Menu.
+        /// </summary>
+        public static void BuildPreRaceIntroBatch()
+        {
+            var failures = new List<string>();
+
+            try
+            {
+                BuildPreRaceIntroScene(failures);
+                EnsureBuildSettings(failures);
+                ValidatePreRaceIntro(failures);
+
+                if (CoreSceneManager.PreRaceIntroSceneName != "PreRaceIntro")
+                {
+                    failures.Add("SceneManager.PreRaceIntroSceneName mismatch.");
+                }
+
+                if (CoreSceneManager.LoadingScreenSceneName != "LoadingScreen")
+                {
+                    failures.Add("SceneManager.LoadingScreenSceneName must remain LoadingScreen.");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                failures.Add("Unhandled: " + ex);
+                Debug.LogException(ex);
+            }
+
+            ExitWithFailures(failures, "[PlayFlow] PASS — PreRaceIntro Sprint 23.1 Pre-Race Intro UI OK.");
         }
 
         /// <summary>
@@ -1794,6 +1833,231 @@ namespace GulfRun.Editor
             SaveScene(scene, LoadingScreenScenePath, failures);
         }
 
+        private static void BuildPreRaceIntroScene(List<string> failures)
+        {
+            Sprite background = LoadBackground(failures);
+
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            EnsureEventSystem(scene);
+
+            GameObject canvasGo = CreateOverlayCanvas("PreRaceIntroCanvas");
+            PreRaceIntroController controller = canvasGo.AddComponent<PreRaceIntroController>();
+            PreRaceIntroPanAnimation panAnimation = canvasGo.AddComponent<PreRaceIntroPanAnimation>();
+            RectTransform canvasRt = canvasGo.GetComponent<RectTransform>();
+
+            RectTransform panRoot = CreateRect("BackgroundPanRoot", canvasRt);
+            panRoot.anchorMin = new Vector2(0.5f, 0.5f);
+            panRoot.anchorMax = new Vector2(0.5f, 0.5f);
+            panRoot.pivot = new Vector2(0.5f, 0.5f);
+            panRoot.anchoredPosition = new Vector2(-80f, 0f);
+            panRoot.sizeDelta = new Vector2(2400f, 1400f);
+
+            Image bg = CreateUiImage("Background", panRoot, stretch: true);
+            bg.sprite = background;
+            bg.preserveAspect = false;
+            bg.color = new Color(0.88f, 0.86f, 0.82f, 1f);
+            bg.raycastTarget = false;
+
+            Image dim = CreateUiImage("DimOverlay", canvasRt, stretch: true);
+            dim.color = new Color(0.02f, 0.02f, 0.04f, 0.48f);
+            dim.raycastTarget = false;
+
+            CreateSafeArea(canvasRt);
+
+            RectTransform bannerRoot = CreateRect("IntroBannerRoot", canvasRt);
+            bannerRoot.anchorMin = new Vector2(0.5f, 1f);
+            bannerRoot.anchorMax = new Vector2(0.5f, 1f);
+            bannerRoot.pivot = new Vector2(0.5f, 1f);
+            bannerRoot.anchoredPosition = new Vector2(0f, -64f);
+            bannerRoot.sizeDelta = new Vector2(720f, 110f);
+
+            Image bannerBorder = bannerRoot.gameObject.AddComponent<Image>();
+            bannerBorder.color = PanelBorder;
+            bannerBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(bannerRoot.gameObject);
+
+            Image bannerFill = CreateUiImage("BannerFill", bannerRoot, stretch: true);
+            bannerFill.color = PanelBg;
+            bannerFill.raycastTarget = false;
+            bannerFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            bannerFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Text bannerText = CreateUiText(
+                "BannerText",
+                bannerRoot,
+                "Get Ready",
+                52,
+                FontStyle.Bold,
+                GoldBright,
+                TextAnchor.MiddleCenter);
+            RectTransform bannerTextRt = bannerText.rectTransform;
+            bannerTextRt.anchorMin = Vector2.zero;
+            bannerTextRt.anchorMax = Vector2.one;
+            bannerTextRt.offsetMin = new Vector2(16f, 8f);
+            bannerTextRt.offsetMax = new Vector2(-16f, -8f);
+
+            RectTransform mapInfo = CreateRect("MapInfoPanel", canvasRt);
+            mapInfo.anchorMin = new Vector2(0f, 1f);
+            mapInfo.anchorMax = new Vector2(0f, 1f);
+            mapInfo.pivot = new Vector2(0f, 1f);
+            mapInfo.anchoredPosition = new Vector2(72f, -64f);
+            mapInfo.sizeDelta = new Vector2(420f, 220f);
+
+            Image mapInfoBorder = mapInfo.gameObject.AddComponent<Image>();
+            mapInfoBorder.color = PanelBorder;
+            mapInfoBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(mapInfo.gameObject);
+
+            Image mapInfoFill = CreateUiImage("Fill", mapInfo, stretch: true);
+            mapInfoFill.color = PanelBg;
+            mapInfoFill.raycastTarget = false;
+            mapInfoFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            mapInfoFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            CreateUiText("MapName", mapInfo, "Kuwait City Sprint", 26, FontStyle.Bold, GoldBright, TextAnchor.MiddleLeft)
+                .rectTransform.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 18f, 36f);
+            StretchHorizontal(
+                CreateUiText("Country", mapInfo, "Country: Kuwait", 20, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft)
+                    .rectTransform,
+                58f,
+                32f);
+            StretchHorizontal(
+                CreateUiText("Difficulty", mapInfo, "Difficulty: Medium", 20, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft)
+                    .rectTransform,
+                96f,
+                32f);
+            StretchHorizontal(
+                CreateUiText("RaceDistance", mapInfo, "Race Distance: 2.4 km", 20, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft)
+                    .rectTransform,
+                134f,
+                32f);
+
+            RectTransform playersRoot = CreateRect("PlayersRoot", canvasRt);
+            playersRoot.anchorMin = new Vector2(0.5f, 0f);
+            playersRoot.anchorMax = new Vector2(0.5f, 0f);
+            playersRoot.pivot = new Vector2(0.5f, 0f);
+            playersRoot.anchoredPosition = new Vector2(0f, 140f);
+            playersRoot.sizeDelta = new Vector2(1680f, 320f);
+
+            CreateStartingLinePlayer(playersRoot, "PlayerSlot_01", "DesertFox", "KW", new Vector2(-630f, 0f), AvatarTone);
+            CreateStartingLinePlayer(playersRoot, "PlayerSlot_02", "SandStorm", "SA", new Vector2(-210f, 0f),
+                new Color(0.62f, 0.52f, 0.38f, 1f));
+            CreateStartingLinePlayer(playersRoot, "PlayerSlot_03", "GulfHawk", "AE", new Vector2(210f, 0f),
+                new Color(0.55f, 0.48f, 0.40f, 1f));
+            CreateStartingLinePlayer(playersRoot, "PlayerSlot_04", "DuneRunner", "QA", new Vector2(630f, 0f),
+                new Color(0.68f, 0.55f, 0.36f, 1f));
+
+            RectTransform audioRoot = CreateRect("AudioPlaceholders", canvasRt);
+            audioRoot.gameObject.SetActive(false);
+
+            GameObject introMusic = new GameObject("IntroMusicSource");
+            introMusic.transform.SetParent(audioRoot, false);
+            introMusic.AddComponent<AudioSource>();
+
+            GameObject countdownSound = new GameObject("CountdownSoundSource");
+            countdownSound.transform.SetParent(audioRoot, false);
+            countdownSound.AddComponent<AudioSource>();
+
+            Button continueButton = CreateLabeledButton(
+                "ContinueButton",
+                canvasRt,
+                "Continue",
+                280f,
+                72f,
+                Gold,
+                GoldButtonLabel);
+            PlaceBottomRight(continueButton.GetComponent<RectTransform>(), new Vector2(-48f, 48f));
+
+            SerializedObject controllerSo = new SerializedObject(controller);
+            controllerSo.FindProperty("continueButton").objectReferenceValue = continueButton;
+            controllerSo.ApplyModifiedPropertiesWithoutUndo();
+
+            SerializedObject panSo = new SerializedObject(panAnimation);
+            panSo.FindProperty("panTarget").objectReferenceValue = panRoot;
+            panSo.ApplyModifiedPropertiesWithoutUndo();
+
+            SaveScene(scene, PreRaceIntroScenePath, failures);
+        }
+
+        private static void CreateStartingLinePlayer(
+            RectTransform parent,
+            string slotName,
+            string playerName,
+            string countryCode,
+            Vector2 anchoredPos,
+            Color silhouetteTone)
+        {
+            RectTransform slot = CreateRect(slotName, parent);
+            slot.anchorMin = new Vector2(0.5f, 0.5f);
+            slot.anchorMax = new Vector2(0.5f, 0.5f);
+            slot.pivot = new Vector2(0.5f, 0.5f);
+            slot.anchoredPosition = anchoredPos;
+            slot.sizeDelta = new Vector2(280f, 300f);
+
+            Image slotBorder = slot.gameObject.AddComponent<Image>();
+            slotBorder.color = PanelBorder;
+            slotBorder.raycastTarget = false;
+            EnsureLobbyPanelShadow(slot.gameObject);
+
+            Image slotFill = CreateUiImage("Fill", slot, stretch: true);
+            slotFill.color = CardFill;
+            slotFill.raycastTarget = false;
+            slotFill.rectTransform.offsetMin = new Vector2(3f, 3f);
+            slotFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
+
+            Image character = CreateUiImage("Character", slot, stretch: false);
+            character.sprite = GetBuiltinKnob();
+            character.color = silhouetteTone;
+            character.raycastTarget = false;
+            character.preserveAspect = true;
+            RectTransform characterRt = character.rectTransform;
+            characterRt.anchorMin = new Vector2(0.5f, 1f);
+            characterRt.anchorMax = new Vector2(0.5f, 1f);
+            characterRt.pivot = new Vector2(0.5f, 1f);
+            characterRt.anchoredPosition = new Vector2(0f, -28f);
+            characterRt.sizeDelta = new Vector2(120f, 140f);
+
+            Text name = CreateUiText(
+                "PlayerName",
+                slot,
+                playerName,
+                24,
+                FontStyle.Bold,
+                TextPrimary,
+                TextAnchor.MiddleCenter);
+            RectTransform nameRt = name.rectTransform;
+            nameRt.anchorMin = new Vector2(0f, 0f);
+            nameRt.anchorMax = new Vector2(1f, 0f);
+            nameRt.pivot = new Vector2(0.5f, 0f);
+            nameRt.anchoredPosition = new Vector2(0f, 52f);
+            nameRt.sizeDelta = new Vector2(-24f, 36f);
+
+            RectTransform flagRoot = CreateRect("CountryFlag", slot);
+            flagRoot.anchorMin = new Vector2(0.5f, 0f);
+            flagRoot.anchorMax = new Vector2(0.5f, 0f);
+            flagRoot.pivot = new Vector2(0.5f, 0f);
+            flagRoot.anchoredPosition = new Vector2(0f, 16f);
+            flagRoot.sizeDelta = new Vector2(72f, 36f);
+
+            Image flag = flagRoot.gameObject.AddComponent<Image>();
+            flag.color = Gold;
+            flag.raycastTarget = false;
+
+            Text flagCode = CreateUiText(
+                "FlagCode",
+                flagRoot,
+                countryCode,
+                18,
+                FontStyle.Bold,
+                GoldButtonLabel,
+                TextAnchor.MiddleCenter);
+            RectTransform flagCodeRt = flagCode.rectTransform;
+            flagCodeRt.anchorMin = Vector2.zero;
+            flagCodeRt.anchorMax = Vector2.one;
+            flagCodeRt.offsetMin = Vector2.zero;
+            flagCodeRt.offsetMax = Vector2.zero;
+        }
+
         /// <summary>
         /// Minimal Sprint 22.4 patch: ensure MapVoting has temporary Next button
         /// wired to LoadWinningMapReveal without rebuilding the full voting HUD.
@@ -2440,6 +2704,7 @@ namespace GulfRun.Editor
             InsertSceneAfter(MapVotingScenePath, LobbyScreenScenePath, failures);
             InsertSceneAfter(WinningMapRevealScenePath, MapVotingScenePath, failures);
             InsertSceneAfter(LoadingScreenScenePath, WinningMapRevealScenePath, failures);
+            InsertSceneAfter(PreRaceIntroScenePath, LoadingScreenScenePath, failures);
         }
 
         private static void InsertSceneAfter(string scenePath, string afterPath, List<string> failures)
@@ -3390,6 +3655,108 @@ namespace GulfRun.Editor
 
             // Ensure legacy Loading.unity remains in build (gameplay transition).
             RequireInBuild("Assets/_Project/Scenes/Loading.unity", failures);
+        }
+
+        private static void ValidatePreRaceIntro(List<string> failures)
+        {
+            Scene scene = EditorSceneManager.OpenScene(PreRaceIntroScenePath, OpenSceneMode.Single);
+            Require(FindDeep(scene, "PreRaceIntroCanvas"), "PreRaceIntroCanvas", failures);
+            Require(FindDeep(scene, "BackgroundPanRoot"), "PreRaceIntro BackgroundPanRoot", failures);
+            Require(FindDeep(scene, "Background"), "PreRaceIntro Background", failures);
+            Require(FindDeep(scene, "DimOverlay"), "PreRaceIntro DimOverlay", failures);
+            Require(FindDeep(scene, "SafeArea"), "PreRaceIntro SafeArea", failures);
+            Require(FindDeep(scene, "IntroBannerRoot"), "PreRaceIntro IntroBannerRoot", failures);
+            Require(FindDeep(scene, "BannerText"), "PreRaceIntro BannerText", failures);
+            Require(FindDeep(scene, "MapInfoPanel"), "PreRaceIntro MapInfoPanel", failures);
+            Require(FindDeep(scene, "MapName"), "PreRaceIntro MapName", failures);
+            Require(FindDeep(scene, "Country"), "PreRaceIntro Country", failures);
+            Require(FindDeep(scene, "Difficulty"), "PreRaceIntro Difficulty", failures);
+            Require(FindDeep(scene, "RaceDistance"), "PreRaceIntro RaceDistance", failures);
+            Require(FindDeep(scene, "PlayersRoot"), "PreRaceIntro PlayersRoot", failures);
+            Require(FindDeep(scene, "PlayerSlot_01"), "PreRaceIntro PlayerSlot_01", failures);
+            Require(FindDeep(scene, "PlayerSlot_02"), "PreRaceIntro PlayerSlot_02", failures);
+            Require(FindDeep(scene, "PlayerSlot_03"), "PreRaceIntro PlayerSlot_03", failures);
+            Require(FindDeep(scene, "PlayerSlot_04"), "PreRaceIntro PlayerSlot_04", failures);
+            Require(FindDeep(scene, "Character"), "PreRaceIntro Character", failures);
+            Require(FindDeep(scene, "PlayerName"), "PreRaceIntro PlayerName", failures);
+            Require(FindDeep(scene, "CountryFlag"), "PreRaceIntro CountryFlag", failures);
+            Require(FindDeep(scene, "AudioPlaceholders"), "PreRaceIntro AudioPlaceholders", failures);
+            Require(FindDeep(scene, "IntroMusicSource"), "PreRaceIntro IntroMusicSource", failures);
+            Require(FindDeep(scene, "CountdownSoundSource"), "PreRaceIntro CountdownSoundSource", failures);
+            Require(FindDeep(scene, "ContinueButton"), "PreRaceIntro ContinueButton", failures);
+
+            Text banner = FindDeep(scene, "BannerText")?.GetComponent<Text>();
+            if (banner == null || banner.text != "Get Ready")
+            {
+                failures.Add("PreRaceIntro BannerText must read 'Get Ready'.");
+            }
+
+            Text mapName = FindDeep(scene, "MapName")?.GetComponent<Text>();
+            if (mapName == null || mapName.text != "Kuwait City Sprint")
+            {
+                failures.Add("PreRaceIntro MapName must read 'Kuwait City Sprint'.");
+            }
+
+            GameObject audioRoot = FindDeep(scene, "AudioPlaceholders");
+            if (audioRoot != null && audioRoot.activeSelf)
+            {
+                failures.Add("PreRaceIntro AudioPlaceholders must start inactive.");
+            }
+
+            if (FindDeep(scene, "IntroMusicSource")?.GetComponent<AudioSource>() == null)
+            {
+                failures.Add("PreRaceIntro IntroMusicSource missing AudioSource.");
+            }
+
+            if (FindDeep(scene, "CountdownSoundSource")?.GetComponent<AudioSource>() == null)
+            {
+                failures.Add("PreRaceIntro CountdownSoundSource missing AudioSource.");
+            }
+
+            GameObject safeArea = FindDeep(scene, "SafeArea");
+            if (safeArea != null)
+            {
+                RectTransform safeRt = safeArea.GetComponent<RectTransform>();
+                if (safeRt == null ||
+                    safeRt.sizeDelta != new Vector2(-96f, -86f) ||
+                    !Mathf.Approximately(safeRt.anchoredPosition.y, -9f))
+                {
+                    failures.Add("PreRaceIntro SafeArea expected Main Menu insets (sizeDelta -96/-86, y -9).");
+                }
+            }
+
+            GameObject canvasGo = FindDeep(scene, "PreRaceIntroCanvas");
+            PreRaceIntroController controller = canvasGo?.GetComponent<PreRaceIntroController>();
+            if (controller == null)
+            {
+                failures.Add("PreRaceIntroCanvas missing PreRaceIntroController.");
+            }
+            else
+            {
+                SerializedObject so = new SerializedObject(controller);
+                if (so.FindProperty("continueButton").objectReferenceValue == null)
+                {
+                    failures.Add("PreRaceIntroController.continueButton must be wired.");
+                }
+            }
+
+            PreRaceIntroPanAnimation pan = canvasGo?.GetComponent<PreRaceIntroPanAnimation>();
+            if (pan == null)
+            {
+                failures.Add("PreRaceIntroCanvas missing PreRaceIntroPanAnimation.");
+            }
+            else
+            {
+                SerializedObject panSo = new SerializedObject(pan);
+                if (panSo.FindProperty("panTarget").objectReferenceValue == null)
+                {
+                    failures.Add("PreRaceIntroPanAnimation.panTarget must be wired.");
+                }
+            }
+
+            RequireCanvasScaler(canvasGo, failures);
+            RequireInBuild(PreRaceIntroScenePath, failures);
+            RequireBackgroundGuid(FindDeep(scene, "Background"), failures);
         }
 
         private static void ValidateMainMenuWiring(List<string> failures)

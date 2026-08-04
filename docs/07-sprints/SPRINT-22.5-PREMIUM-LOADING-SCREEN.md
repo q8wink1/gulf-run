@@ -38,7 +38,7 @@ LoadingScreenCanvas (+ LoadingScreenController)
 | From | Control | To |
 |------|---------|----|
 | WinningMapReveal | **Continue** | LoadingScreen |
-| LoadingScreen | **Continue** (Editor stub) | Gameplay |
+| LoadingScreen | **Continue** (Editor stub) | PreRaceIntro |
 
 - `SceneManager.LoadLoadingScreen()` / `LoadingScreenSceneName`
 - Legacy `Loading.unity` + `LoadLoading()` kept for `LoadingTransitionController`
@@ -46,7 +46,7 @@ LoadingScreenCanvas (+ LoadingScreenController)
 
 ## Scripts
 
-- `LoadingScreenController` — spinner rotate (visual), Continue → Gameplay only
+- `LoadingScreenController` — spinner rotate (visual), Continue → PreRaceIntro only
 - WinningMapReveal Continue retargeted to `LoadLoadingScreen`
 
 ## Rebuild

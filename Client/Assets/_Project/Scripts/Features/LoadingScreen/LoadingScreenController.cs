@@ -7,7 +7,7 @@ namespace GulfRun.Features.LoadingScreen
     /// <summary>
     /// Premium Loading Screen UI (Sprint 22.5). Visual-only placeholders —
     /// no scene load progress, networking, sync, or gameplay logic.
-    /// Optional Continue stub loads Gameplay for Editor flow testing.
+    /// Optional Continue stub loads PreRaceIntro for Editor flow testing.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class LoadingScreenController : MonoBehaviour
@@ -46,11 +46,11 @@ namespace GulfRun.Features.LoadingScreen
         {
             if (SceneManager.Instance != null)
             {
-                SceneManager.Instance.LoadGameplay();
+                SceneManager.Instance.LoadPreRaceIntro();
                 return;
             }
 
-            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.GameplaySceneName);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.PreRaceIntroSceneName);
         }
     }
 }

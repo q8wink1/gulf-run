@@ -39,6 +39,9 @@ EditorBuildSettings:
     path: Assets/_Project/Scenes/LoadingScreen.unity
     guid: b20c0000000000000000000000000090
   - enabled: 1
+    path: Assets/_Project/Scenes/PreRaceIntro.unity
+    guid: b20c00000000000000000000000000a0
+  - enabled: 1
     path: Assets/_Project/Scenes/Loading.unity
     guid: 20e3d0a659484a47b46314d7ce958855
   - enabled: 1
