@@ -62,7 +62,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Polish Play Menu (Sprint 20.1)")]
         public static void PolishPlayMenuFromMenu() => PolishPlayMenuBatch();
 
-        [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.3)")]
+        [MenuItem("GulfRun/Play Flow/Build Lobby Screen (Sprint 21.4)")]
         public static void BuildLobbyScreenFromMenu() => BuildLobbyScreenBatch();
 
         public static void RunBatch()
@@ -89,10 +89,11 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 21.3: rebuild LobbyScreen Ready System UI (status panel,
-        /// premium Ready button visual toggle, countdown placeholder, player
-        /// counter). Keeps Sprint 21.2 slot polish. Does not rebuild
-        /// PlayMenu / QuickPlay / InviteFriends.
+        /// Sprint 21.4: rebuild LobbyScreen Host Controls UI (premium HOST
+        /// badge, Play waiting/prepared states, Kick placeholders, lobby
+        /// info header, system message footer). Keeps 21.2 slots + 21.3
+        /// Ready System visuals. Does not rebuild PlayMenu / QuickPlay /
+        /// InviteFriends.
         /// </summary>
         public static void BuildLobbyScreenBatch()
         {
@@ -120,7 +121,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — LobbyScreen Sprint 21.3 Ready System UI OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — LobbyScreen Sprint 21.4 Host Controls UI OK.");
         }
 
         /// <summary>
@@ -510,13 +511,13 @@ namespace GulfRun.Editor
             Button backButton = CreateLabeledButton("BackButton", canvasRt, "Back", 168f, 64f, ButtonDark, GoldBright);
             PlaceTopLeft(backButton.GetComponent<RectTransform>(), new Vector2(48f, -40f));
 
-            // Header — room type, player count, room code
+            // Header — Room Type / Host / Players (+ room code) — Sprint 21.4
             RectTransform headerRoot = CreateRect("HeaderRoot", canvasRt);
             headerRoot.anchorMin = new Vector2(0.5f, 1f);
             headerRoot.anchorMax = new Vector2(0.5f, 1f);
             headerRoot.pivot = new Vector2(0.5f, 1f);
-            headerRoot.anchoredPosition = new Vector2(0f, -36f);
-            headerRoot.sizeDelta = new Vector2(1100f, 110f);
+            headerRoot.anchoredPosition = new Vector2(0f, -32f);
+            headerRoot.sizeDelta = new Vector2(1180f, 128f);
 
             Image headerBorder = headerRoot.gameObject.AddComponent<Image>();
             headerBorder.color = PanelBorder;
@@ -529,36 +530,44 @@ namespace GulfRun.Editor
             headerFill.rectTransform.offsetMin = new Vector2(3f, 3f);
             headerFill.rectTransform.offsetMax = new Vector2(-3f, -3f);
 
-            Text roomType = CreateUiText("RoomTypeText", headerRoot, "Public Lobby", 36, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
+            Text roomType = CreateUiText("RoomTypeText", headerRoot, "Room Type: Public", 32, FontStyle.Bold, GoldBright, TextAnchor.MiddleCenter);
             RectTransform roomTypeRt = roomType.rectTransform;
-            roomTypeRt.anchorMin = new Vector2(0f, 0.45f);
+            roomTypeRt.anchorMin = new Vector2(0f, 0.52f);
             roomTypeRt.anchorMax = new Vector2(1f, 1f);
             roomTypeRt.offsetMin = new Vector2(24f, 0f);
-            roomTypeRt.offsetMax = new Vector2(-24f, -8f);
+            roomTypeRt.offsetMax = new Vector2(-24f, -6f);
 
-            Text playerCount = CreateUiText("PlayerCountText", headerRoot, "Players: 3 / 4", 24, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
+            Text hostName = CreateUiText("HostNameText", headerRoot, "Host: DesertFox", 22, FontStyle.Bold, TextPrimary, TextAnchor.MiddleLeft);
+            RectTransform hostNameRt = hostName.rectTransform;
+            hostNameRt.anchorMin = new Vector2(0f, 0f);
+            hostNameRt.anchorMax = new Vector2(0.38f, 0.52f);
+            hostNameRt.offsetMin = new Vector2(36f, 10f);
+            hostNameRt.offsetMax = new Vector2(-8f, -4f);
+
+            Text playerCount = CreateUiText("PlayerCountText", headerRoot, "Players: 1 / 4", 22, FontStyle.Bold, TextPrimary, TextAnchor.MiddleCenter);
             RectTransform playerCountRt = playerCount.rectTransform;
-            playerCountRt.anchorMin = new Vector2(0f, 0f);
-            playerCountRt.anchorMax = new Vector2(0.5f, 0.5f);
-            playerCountRt.offsetMin = new Vector2(40f, 10f);
-            playerCountRt.offsetMax = new Vector2(-12f, -4f);
+            playerCountRt.anchorMin = new Vector2(0.32f, 0f);
+            playerCountRt.anchorMax = new Vector2(0.68f, 0.52f);
+            playerCountRt.offsetMin = new Vector2(8f, 10f);
+            playerCountRt.offsetMax = new Vector2(-8f, -4f);
 
-            Text roomCode = CreateUiText("RoomCodeText", headerRoot, "GULF-4821", 24, FontStyle.Bold, Gold, TextAnchor.MiddleRight);
+            Text roomCode = CreateUiText("RoomCodeText", headerRoot, "GULF-4821", 22, FontStyle.Bold, Gold, TextAnchor.MiddleRight);
             RectTransform roomCodeRt = roomCode.rectTransform;
-            roomCodeRt.anchorMin = new Vector2(0.5f, 0f);
-            roomCodeRt.anchorMax = new Vector2(1f, 0.5f);
-            roomCodeRt.offsetMin = new Vector2(12f, 10f);
-            roomCodeRt.offsetMax = new Vector2(-40f, -4f);
+            roomCodeRt.anchorMin = new Vector2(0.62f, 0f);
+            roomCodeRt.anchorMax = new Vector2(1f, 0.52f);
+            roomCodeRt.offsetMin = new Vector2(8f, 10f);
+            roomCodeRt.offsetMax = new Vector2(-36f, -4f);
 
             // Center — four vertical player slots (Sprint 21.2 polish; static mock only)
             RectTransform slotsRoot = CreateRect("SlotsRoot", canvasRt);
             slotsRoot.anchorMin = new Vector2(0.5f, 0.5f);
             slotsRoot.anchorMax = new Vector2(0.5f, 0.5f);
             slotsRoot.pivot = new Vector2(0.5f, 0.5f);
-            slotsRoot.anchoredPosition = new Vector2(0f, 70f);
-            slotsRoot.sizeDelta = new Vector2(980f, 660f);
+            slotsRoot.anchoredPosition = new Vector2(0f, 78f);
+            slotsRoot.sizeDelta = new Vector2(980f, 640f);
 
             // Mock hierarchy: host ready, guest not ready, connecting sample, empty waiting.
+            // Kick visible on slots 1–2 as Host preview mock only (no kick logic).
             CreatePlayerSlot(
                 "PlayerSlot_0",
                 slotsRoot,
@@ -570,7 +579,8 @@ namespace GulfRun.Editor
                 level: 12,
                 readyVisual: SlotReadyVisual.Ready,
                 online: true,
-                showHostBadge: true);
+                showHostBadge: true,
+                showKickButton: false);
 
             CreatePlayerSlot(
                 "PlayerSlot_1",
@@ -583,7 +593,8 @@ namespace GulfRun.Editor
                 level: 8,
                 readyVisual: SlotReadyVisual.NotReady,
                 online: true,
-                showHostBadge: false);
+                showHostBadge: false,
+                showKickButton: true);
 
             CreatePlayerSlot(
                 "PlayerSlot_2",
@@ -596,7 +607,8 @@ namespace GulfRun.Editor
                 level: 5,
                 readyVisual: SlotReadyVisual.Connecting,
                 online: false,
-                showHostBadge: false);
+                showHostBadge: false,
+                showKickButton: true);
 
             CreatePlayerSlot(
                 "PlayerSlot_3",
@@ -609,22 +621,23 @@ namespace GulfRun.Editor
                 level: 0,
                 readyVisual: SlotReadyVisual.NotReady,
                 online: false,
-                showHostBadge: false);
+                showHostBadge: false,
+                showKickButton: false);
 
             // Status band above footer buttons (Sprint 21.3 Ready System UI)
             RectTransform statusRoot = CreateRect("StatusRoot", canvasRt);
             statusRoot.anchorMin = new Vector2(0.5f, 0f);
             statusRoot.anchorMax = new Vector2(0.5f, 0f);
             statusRoot.pivot = new Vector2(0.5f, 0f);
-            statusRoot.anchoredPosition = new Vector2(0f, 168f);
-            statusRoot.sizeDelta = new Vector2(1200f, 120f);
+            statusRoot.anchoredPosition = new Vector2(0f, 196f);
+            statusRoot.sizeDelta = new Vector2(1200f, 100f);
 
             RectTransform lobbyStatusPanel = CreateRect("LobbyStatusPanel", statusRoot);
             lobbyStatusPanel.anchorMin = new Vector2(0.5f, 0.5f);
             lobbyStatusPanel.anchorMax = new Vector2(0.5f, 0.5f);
             lobbyStatusPanel.pivot = new Vector2(0.5f, 0.5f);
-            lobbyStatusPanel.anchoredPosition = new Vector2(0f, 12f);
-            lobbyStatusPanel.sizeDelta = new Vector2(980f, 88f);
+            lobbyStatusPanel.anchoredPosition = new Vector2(0f, 8f);
+            lobbyStatusPanel.sizeDelta = new Vector2(980f, 78f);
 
             Image statusBorder = lobbyStatusPanel.gameObject.AddComponent<Image>();
             statusBorder.color = PanelBorder;
@@ -642,7 +655,7 @@ namespace GulfRun.Editor
                 "LobbyStatusText",
                 lobbyStatusPanel,
                 "Waiting for everyone to be Ready...",
-                28,
+                26,
                 FontStyle.Bold,
                 TextMuted,
                 TextAnchor.MiddleCenter);
@@ -661,7 +674,7 @@ namespace GulfRun.Editor
                 "CountdownPlaceholder",
                 statusRoot,
                 "Starting in: 00:10",
-                30,
+                28,
                 FontStyle.Bold,
                 GoldBright,
                 TextAnchor.MiddleCenter);
@@ -669,17 +682,43 @@ namespace GulfRun.Editor
             countdownRt.anchorMin = new Vector2(0.5f, 0f);
             countdownRt.anchorMax = new Vector2(0.5f, 0f);
             countdownRt.pivot = new Vector2(0.5f, 0f);
-            countdownRt.anchoredPosition = new Vector2(0f, -4f);
-            countdownRt.sizeDelta = new Vector2(420f, 40f);
+            countdownRt.anchoredPosition = new Vector2(0f, -2f);
+            countdownRt.sizeDelta = new Vector2(420f, 36f);
             countdown.gameObject.SetActive(false);
 
-            // Footer — Ready (left, premium), Play disabled (right)
+            // System message footer placeholders (Sprint 21.4) — visual only.
+            RectTransform messageFooter = CreateRect("MessageFooterRoot", canvasRt);
+            messageFooter.anchorMin = new Vector2(0.5f, 0f);
+            messageFooter.anchorMax = new Vector2(0.5f, 0f);
+            messageFooter.pivot = new Vector2(0.5f, 0f);
+            messageFooter.anchoredPosition = new Vector2(0f, 148f);
+            messageFooter.sizeDelta = new Vector2(1100f, 40f);
+
+            Text systemSample = CreateUiText(
+                "SystemMsg_PlayerJoined",
+                messageFooter,
+                "Player joined...",
+                20,
+                FontStyle.Italic,
+                new Color(TextMuted.r, TextMuted.g, TextMuted.b, 0.75f),
+                TextAnchor.MiddleCenter);
+            RectTransform systemSampleRt = systemSample.rectTransform;
+            systemSampleRt.anchorMin = Vector2.zero;
+            systemSampleRt.anchorMax = Vector2.one;
+            systemSampleRt.offsetMin = Vector2.zero;
+            systemSampleRt.offsetMax = Vector2.zero;
+
+            CreateInactiveSystemMessage(messageFooter, "SystemMsg_PlayerLeft", "Player left...");
+            CreateInactiveSystemMessage(messageFooter, "SystemMsg_HostChanged", "Host changed...");
+            CreateInactiveSystemMessage(messageFooter, "SystemMsg_Searching", "Searching for player...");
+
+            // Footer — Ready (left, premium), Play waiting/disabled (right, Sprint 21.4)
             RectTransform footerRoot = CreateRect("FooterRoot", canvasRt);
             footerRoot.anchorMin = new Vector2(0.5f, 0f);
             footerRoot.anchorMax = new Vector2(0.5f, 0f);
             footerRoot.pivot = new Vector2(0.5f, 0f);
-            footerRoot.anchoredPosition = new Vector2(0f, 40f);
-            footerRoot.sizeDelta = new Vector2(1400f, 110f);
+            footerRoot.anchoredPosition = new Vector2(0f, 36f);
+            footerRoot.sizeDelta = new Vector2(1480f, 110f);
 
             Button readyButton = CreateLabeledButton("ReadyButton", footerRoot, "Ready", 340f, 96f, Gold, GoldButtonLabel);
             RectTransform readyRt = readyButton.GetComponent<RectTransform>();
@@ -696,21 +735,50 @@ namespace GulfRun.Editor
 
             Image readyImage = readyButton.GetComponent<Image>();
 
-            Button playButton = CreateLabeledButton("PlayButton", footerRoot, "Play", 280f, 80f, ButtonDark, GoldBright);
+            // Default Play state: disabled + greyed "Waiting for Players...".
+            // Prepared chrome ("Start Match") available via controller demo toggle.
+            Button playButton = CreateLabeledButton(
+                "PlayButton",
+                footerRoot,
+                "Waiting for Players...",
+                420f,
+                96f,
+                new Color(0.18f, 0.16f, 0.14f, 0.72f),
+                new Color(0.62f, 0.60f, 0.56f, 0.85f));
             RectTransform playRt = playButton.GetComponent<RectTransform>();
             playRt.anchorMin = new Vector2(1f, 0.5f);
             playRt.anchorMax = new Vector2(1f, 0.5f);
             playRt.pivot = new Vector2(1f, 0.5f);
             playRt.anchoredPosition = new Vector2(-40f, 0f);
             playButton.interactable = false;
+            playButton.transition = Selectable.Transition.None;
             ColorBlock playColors = playButton.colors;
-            playColors.disabledColor = new Color(0.18f, 0.16f, 0.14f, 0.55f);
+            playColors.disabledColor = new Color(0.18f, 0.16f, 0.14f, 0.72f);
             playButton.colors = playColors;
             Text playLabel = playButton.GetComponentInChildren<Text>();
             if (playLabel != null)
             {
-                playLabel.color = new Color(GoldBright.r, GoldBright.g, GoldBright.b, 0.45f);
+                playLabel.fontSize = 26;
+                playLabel.color = new Color(0.62f, 0.60f, 0.56f, 0.85f);
             }
+
+            Image playImage = playButton.GetComponent<Image>();
+
+            // Inactive prepared-state label placeholder (named state for builders / docs).
+            Text preparedLabel = CreateUiText(
+                "PlayLabel_StartMatch",
+                playRt,
+                "Start Match",
+                30,
+                FontStyle.Bold,
+                GoldButtonLabel,
+                TextAnchor.MiddleCenter);
+            RectTransform preparedLabelRt = preparedLabel.rectTransform;
+            preparedLabelRt.anchorMin = Vector2.zero;
+            preparedLabelRt.anchorMax = Vector2.one;
+            preparedLabelRt.offsetMin = Vector2.zero;
+            preparedLabelRt.offsetMax = Vector2.zero;
+            preparedLabel.gameObject.SetActive(false);
 
             // Optional local-slot chrome for Ready button visual demo (slot 0).
             Transform slot0Tf = slotsRoot.Find("PlayerSlot_0");
@@ -728,6 +796,9 @@ namespace GulfRun.Editor
             so.FindProperty("readyButtonLabel").objectReferenceValue = readyLabel;
             so.FindProperty("localReadyStatus").objectReferenceValue = localReadyStatus;
             so.FindProperty("localReadyLabel").objectReferenceValue = localReadyLabel;
+            so.FindProperty("playButton").objectReferenceValue = playButton;
+            so.FindProperty("playButtonImage").objectReferenceValue = playImage;
+            so.FindProperty("playButtonLabel").objectReferenceValue = playLabel;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             SaveScene(scene, LobbyScreenScenePath, failures);
@@ -744,6 +815,24 @@ namespace GulfRun.Editor
             text.gameObject.SetActive(false);
         }
 
+        private static void CreateInactiveSystemMessage(RectTransform parent, string name, string message)
+        {
+            Text text = CreateUiText(
+                name,
+                parent,
+                message,
+                20,
+                FontStyle.Italic,
+                new Color(TextMuted.r, TextMuted.g, TextMuted.b, 0.75f),
+                TextAnchor.MiddleCenter);
+            RectTransform rt = text.rectTransform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            text.gameObject.SetActive(false);
+        }
+
         private static void CreatePlayerSlot(
             string name,
             RectTransform parent,
@@ -755,7 +844,8 @@ namespace GulfRun.Editor
             int level,
             SlotReadyVisual readyVisual,
             bool online,
-            bool showHostBadge)
+            bool showHostBadge,
+            bool showKickButton)
         {
             // Touch-friendly vertical rhythm for mobile (CanvasScaler 1920×1080 match 0.5).
             const float slotHeight = 148f;
@@ -785,6 +875,12 @@ namespace GulfRun.Editor
             // Host badge exists on every slot; visible only as design mock on slot 0.
             CreateHostBadge(slot, showHostBadge);
 
+            // Kick exists on every non-host slot; Host preview shows on occupied guests only.
+            if (index != 0)
+            {
+                CreateKickButton(slot, showKickButton);
+            }
+
             if (!occupied)
             {
                 CreateEmptySlotContent(slot);
@@ -812,7 +908,7 @@ namespace GulfRun.Editor
             nameRt.anchorMax = new Vector2(0f, 0.5f);
             nameRt.pivot = new Vector2(0f, 0.5f);
             nameRt.anchoredPosition = new Vector2(148f, 22f);
-            nameRt.sizeDelta = new Vector2(360f, 42f);
+            nameRt.sizeDelta = new Vector2(300f, 42f);
 
             Image flag = CreateUiImage("CountryFlag", slot, stretch: false);
             flag.color = flagColor;
@@ -946,15 +1042,22 @@ namespace GulfRun.Editor
 
         private static void CreateHostBadge(RectTransform slot, bool visible)
         {
+            // Premium gold HOST badge — placed beside the room host name row.
             Image badge = CreateUiImage("HostBadge", slot, stretch: false);
-            badge.color = new Color(Gold.r, Gold.g, Gold.b, 0.92f);
+            badge.color = GoldBright;
             badge.raycastTarget = false;
             RectTransform badgeRt = badge.rectTransform;
-            badgeRt.anchorMin = new Vector2(1f, 1f);
-            badgeRt.anchorMax = new Vector2(1f, 1f);
-            badgeRt.pivot = new Vector2(1f, 1f);
-            badgeRt.anchoredPosition = new Vector2(-18f, -12f);
-            badgeRt.sizeDelta = new Vector2(92f, 32f);
+            badgeRt.anchorMin = new Vector2(0f, 0.5f);
+            badgeRt.anchorMax = new Vector2(0f, 0.5f);
+            badgeRt.pivot = new Vector2(0f, 0.5f);
+            badgeRt.anchoredPosition = new Vector2(460f, 22f);
+            badgeRt.sizeDelta = new Vector2(96f, 34f);
+
+            Image badgeInner = CreateUiImage("HostBadgeInner", badgeRt, stretch: true);
+            badgeInner.color = Gold;
+            badgeInner.raycastTarget = false;
+            badgeInner.rectTransform.offsetMin = new Vector2(2f, 2f);
+            badgeInner.rectTransform.offsetMax = new Vector2(-2f, -2f);
 
             Text label = CreateUiText("HostLabel", badgeRt, "HOST", 16, FontStyle.Bold, GoldButtonLabel, TextAnchor.MiddleCenter);
             RectTransform labelRt = label.rectTransform;
@@ -962,8 +1065,39 @@ namespace GulfRun.Editor
             labelRt.anchorMax = Vector2.one;
             labelRt.offsetMin = Vector2.zero;
             labelRt.offsetMax = Vector2.zero;
+            label.transform.SetAsLastSibling();
 
             badge.gameObject.SetActive(visible);
+        }
+
+        /// <summary>
+        /// Small Kick placeholder on non-host slots. No kick logic — Host preview
+        /// mock activates on occupied guest slots only.
+        /// </summary>
+        private static void CreateKickButton(RectTransform slot, bool visible)
+        {
+            Button kick = CreateLabeledButton(
+                "KickButton",
+                slot,
+                "Kick",
+                88f,
+                40f,
+                new Color(0.42f, 0.14f, 0.12f, 0.92f),
+                new Color(1f, 0.82f, 0.78f, 1f));
+            RectTransform kickRt = kick.GetComponent<RectTransform>();
+            kickRt.anchorMin = new Vector2(1f, 0.5f);
+            kickRt.anchorMax = new Vector2(1f, 0.5f);
+            kickRt.pivot = new Vector2(1f, 0.5f);
+            kickRt.anchoredPosition = new Vector2(-36f, 28f);
+            kick.transition = Selectable.Transition.None;
+            kick.interactable = false;
+            Text kickLabel = kick.GetComponentInChildren<Text>();
+            if (kickLabel != null)
+            {
+                kickLabel.fontSize = 18;
+            }
+
+            kick.gameObject.SetActive(visible);
         }
 
         private static void ResolveReadyVisual(SlotReadyVisual visual, out Color color, out string label)
@@ -1140,6 +1274,7 @@ namespace GulfRun.Editor
             Require(FindDeep(scene, "BackButton"), "LobbyScreen BackButton", failures);
             Require(FindDeep(scene, "HeaderRoot"), "HeaderRoot", failures);
             Require(FindDeep(scene, "RoomTypeText"), "RoomTypeText", failures);
+            Require(FindDeep(scene, "HostNameText"), "HostNameText", failures);
             Require(FindDeep(scene, "PlayerCountText"), "PlayerCountText", failures);
             Require(FindDeep(scene, "RoomCodeText"), "RoomCodeText", failures);
             Require(FindDeep(scene, "SlotsRoot"), "SlotsRoot", failures);
@@ -1150,6 +1285,7 @@ namespace GulfRun.Editor
             Require(FindDeep(scene, "FooterRoot"), "FooterRoot", failures);
             Require(FindDeep(scene, "ReadyButton"), "ReadyButton", failures);
             Require(FindDeep(scene, "PlayButton"), "PlayButton", failures);
+            Require(FindDeep(scene, "PlayLabel_StartMatch"), "PlayLabel_StartMatch", failures);
             Require(FindDeep(scene, "StatusRoot"), "StatusRoot", failures);
             Require(FindDeep(scene, "LobbyStatusPanel"), "LobbyStatusPanel", failures);
             Require(FindDeep(scene, "LobbyStatusText"), "LobbyStatusText", failures);
@@ -1158,6 +1294,11 @@ namespace GulfRun.Editor
             Require(FindDeep(scene, "StatusMsg_WaitingReady"), "StatusMsg_WaitingReady", failures);
             Require(FindDeep(scene, "StatusMsg_ReadyToStart"), "StatusMsg_ReadyToStart", failures);
             Require(FindDeep(scene, "CountdownPlaceholder"), "CountdownPlaceholder", failures);
+            Require(FindDeep(scene, "MessageFooterRoot"), "MessageFooterRoot", failures);
+            Require(FindDeep(scene, "SystemMsg_PlayerJoined"), "SystemMsg_PlayerJoined", failures);
+            Require(FindDeep(scene, "SystemMsg_PlayerLeft"), "SystemMsg_PlayerLeft", failures);
+            Require(FindDeep(scene, "SystemMsg_HostChanged"), "SystemMsg_HostChanged", failures);
+            Require(FindDeep(scene, "SystemMsg_Searching"), "SystemMsg_Searching", failures);
 
             GameObject occupied = FindDeep(scene, "PlayerSlot_0");
             Require(occupied != null ? FindChildRecursive(occupied.transform, "Avatar")?.gameObject : null, "PlayerSlot_0 Avatar", failures);
@@ -1175,6 +1316,12 @@ namespace GulfRun.Editor
                 failures.Add("PlayerSlot_0 HostBadge must be active (design mock).");
             }
 
+            GameObject slot0Kick = occupied != null ? FindChildRecursive(occupied.transform, "KickButton")?.gameObject : null;
+            if (slot0Kick != null)
+            {
+                failures.Add("PlayerSlot_0 must not have KickButton (host slot).");
+            }
+
             if (occupied != null && occupied.GetComponentInChildren<Mask>(true) == null)
             {
                 failures.Add("PlayerSlot_0 Avatar must use a Mask for circular clip.");
@@ -1189,6 +1336,12 @@ namespace GulfRun.Editor
                 failures.Add("PlayerSlot_1 HostBadge must exist and be inactive.");
             }
 
+            GameObject slot1Kick = slot1 != null ? FindChildRecursive(slot1.transform, "KickButton")?.gameObject : null;
+            if (slot1Kick == null || !slot1Kick.activeSelf)
+            {
+                failures.Add("PlayerSlot_1 KickButton must exist and be active (Host preview mock).");
+            }
+
             Text slot1Ready = slot1 != null ? FindChildRecursive(slot1.transform, "ReadyLabel")?.GetComponent<Text>() : null;
             if (slot1Ready == null || slot1Ready.text != "Not Ready")
             {
@@ -1200,6 +1353,12 @@ namespace GulfRun.Editor
             if (slot2Ready == null || slot2Ready.text != "Connecting")
             {
                 failures.Add("PlayerSlot_2 ReadyLabel expected 'Connecting' (visual mock).");
+            }
+
+            GameObject slot2Kick = slot2 != null ? FindChildRecursive(slot2.transform, "KickButton")?.gameObject : null;
+            if (slot2Kick == null || !slot2Kick.activeSelf)
+            {
+                failures.Add("PlayerSlot_2 KickButton must exist and be active (Host preview mock).");
             }
 
             GameObject empty = FindDeep(scene, "PlayerSlot_3");
@@ -1216,11 +1375,37 @@ namespace GulfRun.Editor
                 failures.Add("PlayerSlot_3 HostBadge must exist and be inactive.");
             }
 
+            GameObject emptyKick = empty != null ? FindChildRecursive(empty.transform, "KickButton")?.gameObject : null;
+            if (emptyKick == null || emptyKick.activeSelf)
+            {
+                failures.Add("PlayerSlot_3 KickButton must exist and be inactive.");
+            }
+
             GameObject playButtonGo = FindDeep(scene, "PlayButton");
             Button playButton = playButtonGo != null ? playButtonGo.GetComponent<Button>() : null;
             if (playButton == null || playButton.interactable)
             {
-                failures.Add("PlayButton must exist and be disabled (visual placeholder).");
+                failures.Add("PlayButton must exist and be disabled (Waiting for Players...).");
+            }
+
+            Text playLabel = playButtonGo != null
+                ? FindChildRecursive(playButtonGo.transform, "Label")?.GetComponent<Text>()
+                : null;
+            if (playLabel == null || playLabel.text != "Waiting for Players...")
+            {
+                failures.Add("PlayButton label expected 'Waiting for Players...'.");
+            }
+
+            RectTransform playRt = playButtonGo != null ? playButtonGo.GetComponent<RectTransform>() : null;
+            if (playRt == null || playRt.sizeDelta.x < 380f || playRt.sizeDelta.y < 90f)
+            {
+                failures.Add("PlayButton expected large premium size (>= 380x90).");
+            }
+
+            GameObject preparedLabelGo = FindDeep(scene, "PlayLabel_StartMatch");
+            if (preparedLabelGo == null || preparedLabelGo.activeSelf)
+            {
+                failures.Add("PlayLabel_StartMatch must exist and be inactive by default.");
             }
 
             GameObject countdownGo = FindDeep(scene, "CountdownPlaceholder");
@@ -1247,16 +1432,34 @@ namespace GulfRun.Editor
                 failures.Add("StatusMsg_PlayersJoining must exist and be inactive (example copy).");
             }
 
-            Text roomType = FindDeep(scene, "RoomTypeText")?.GetComponent<Text>();
-            if (roomType == null || roomType.text != "Public Lobby")
+            GameObject systemJoined = FindDeep(scene, "SystemMsg_PlayerJoined");
+            if (systemJoined == null || !systemJoined.activeSelf)
             {
-                failures.Add("RoomTypeText expected 'Public Lobby'.");
+                failures.Add("SystemMsg_PlayerJoined must exist and be active (sample footer message).");
+            }
+
+            GameObject systemLeft = FindDeep(scene, "SystemMsg_PlayerLeft");
+            if (systemLeft == null || systemLeft.activeSelf)
+            {
+                failures.Add("SystemMsg_PlayerLeft must exist and be inactive.");
+            }
+
+            Text roomType = FindDeep(scene, "RoomTypeText")?.GetComponent<Text>();
+            if (roomType == null || roomType.text != "Room Type: Public")
+            {
+                failures.Add("RoomTypeText expected 'Room Type: Public'.");
+            }
+
+            Text hostName = FindDeep(scene, "HostNameText")?.GetComponent<Text>();
+            if (hostName == null || hostName.text != "Host: DesertFox")
+            {
+                failures.Add("HostNameText expected 'Host: DesertFox'.");
             }
 
             Text playerCount = FindDeep(scene, "PlayerCountText")?.GetComponent<Text>();
-            if (playerCount == null || playerCount.text != "Players: 3 / 4")
+            if (playerCount == null || playerCount.text != "Players: 1 / 4")
             {
-                failures.Add("PlayerCountText expected 'Players: 3 / 4'.");
+                failures.Add("PlayerCountText expected 'Players: 1 / 4'.");
             }
 
             Text roomCode = FindDeep(scene, "RoomCodeText")?.GetComponent<Text>();
@@ -1288,6 +1491,16 @@ namespace GulfRun.Editor
                 if (so.FindProperty("readyButtonLabel").objectReferenceValue == null)
                 {
                     failures.Add("LobbyScreenController.readyButtonLabel must be wired.");
+                }
+
+                if (so.FindProperty("playButton").objectReferenceValue == null)
+                {
+                    failures.Add("LobbyScreenController.playButton must be wired.");
+                }
+
+                if (so.FindProperty("playButtonLabel").objectReferenceValue == null)
+                {
+                    failures.Add("LobbyScreenController.playButtonLabel must be wired.");
                 }
             }
 

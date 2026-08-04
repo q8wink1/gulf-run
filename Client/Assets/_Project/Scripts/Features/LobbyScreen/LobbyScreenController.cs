@@ -6,9 +6,9 @@ using UnityEngine.UI;
 namespace GulfRun.Features.LobbyScreen
 {
     /// <summary>
-    /// Premium Lobby UI (Sprint 21.1–21.3). Back → Play Menu.
-    /// Ready button is a local visual toggle only (text/color + optional local
-    /// slot chrome) — no SessionManager, matchmaking, or network sync.
+    /// Premium Lobby UI (Sprint 21.1–21.4). Back → Play Menu.
+    /// Ready / Play prepared toggles are local visual demos only — no
+    /// SessionManager, matchmaking, kick, host permissions, or network sync.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class LobbyScreenController : MonoBehaviour
@@ -20,14 +20,23 @@ namespace GulfRun.Features.LobbyScreen
         private static readonly Color SlotReadyColor = new Color(0.40f, 0.85f, 0.45f, 1f);
         private static readonly Color SlotNotReadyColor = new Color(0.55f, 0.55f, 0.55f, 1f);
 
+        private static readonly Color PlayWaitingBg = new Color(0.18f, 0.16f, 0.14f, 0.72f);
+        private static readonly Color PlayWaitingLabel = new Color(0.62f, 0.60f, 0.56f, 0.85f);
+        private static readonly Color PlayPreparedBg = new Color(0.90f, 0.71f, 0.25f, 1f);
+        private static readonly Color PlayPreparedLabel = new Color(0.20f, 0.14f, 0.02f, 1f);
+
         [SerializeField] private Button backButton;
         [SerializeField] private Button readyButton;
         [SerializeField] private Image readyButtonImage;
         [SerializeField] private Text readyButtonLabel;
         [SerializeField] private Image localReadyStatus;
         [SerializeField] private Text localReadyLabel;
+        [SerializeField] private Button playButton;
+        [SerializeField] private Image playButtonImage;
+        [SerializeField] private Text playButtonLabel;
 
         private bool _localReadyVisual;
+        private bool _playPreparedVisual;
 
         private void Awake()
         {
@@ -41,7 +50,13 @@ namespace GulfRun.Features.LobbyScreen
                 readyButton.onClick.AddListener(OnReadyClicked);
             }
 
-            // Default idle button chrome only — do not overwrite slot mock data on load.
+            if (playButton != null)
+            {
+                // Visual demo only — never starts a match.
+                playButton.onClick.AddListener(OnPlayClicked);
+            }
+
+            // Default idle Ready chrome — do not overwrite slot mock data on load.
             _localReadyVisual = false;
             if (readyButtonImage != null)
             {
@@ -53,6 +68,9 @@ namespace GulfRun.Features.LobbyScreen
                 readyButtonLabel.text = "Ready";
                 readyButtonLabel.color = ReadyIdleLabel;
             }
+
+            // Default Play: disabled "Waiting for Players..." (Sprint 21.4).
+            ApplyPlayPreparedVisual(false);
         }
 
         private void OnDestroy()
@@ -66,12 +84,29 @@ namespace GulfRun.Features.LobbyScreen
             {
                 readyButton.onClick.RemoveListener(OnReadyClicked);
             }
+
+            if (playButton != null)
+            {
+                playButton.onClick.RemoveListener(OnPlayClicked);
+            }
         }
 
         private void OnReadyClicked()
         {
             // Visual demo only — does not call SessionManager or sync ready state.
             ApplyReadyVisual(!_localReadyVisual);
+        }
+
+        private void OnPlayClicked()
+        {
+            // Optional local demo: prepared chrome only when already interactable.
+            // Default scene keeps Play disabled; ContextMenu can flip prepared state.
+            if (playButton == null || !playButton.interactable)
+            {
+                return;
+            }
+
+            ApplyPlayPreparedVisual(!_playPreparedVisual);
         }
 
         private void ApplyReadyVisual(bool ready)
@@ -100,6 +135,39 @@ namespace GulfRun.Features.LobbyScreen
                 localReadyLabel.color = ready ? SlotReadyColor : SlotNotReadyColor;
             }
         }
+
+        /// <summary>
+        /// Local visual placeholder for Play prepared vs waiting. No match start.
+        /// </summary>
+        public void ApplyPlayPreparedVisual(bool prepared)
+        {
+            _playPreparedVisual = prepared;
+
+            if (playButtonImage != null)
+            {
+                playButtonImage.color = prepared ? PlayPreparedBg : PlayWaitingBg;
+            }
+
+            if (playButtonLabel != null)
+            {
+                playButtonLabel.text = prepared ? "Start Match" : "Waiting for Players...";
+                playButtonLabel.color = prepared ? PlayPreparedLabel : PlayWaitingLabel;
+                playButtonLabel.fontSize = prepared ? 30 : 26;
+            }
+
+            if (playButton != null)
+            {
+                playButton.interactable = prepared;
+            }
+        }
+
+#if UNITY_EDITOR
+        [ContextMenu("Demo: Toggle Start Match Visual")]
+        private void DemoTogglePlayPreparedVisual()
+        {
+            ApplyPlayPreparedVisual(!_playPreparedVisual);
+        }
+#endif
 
         private static void OnBackClicked()
         {

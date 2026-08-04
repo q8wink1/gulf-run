@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate LobbyScreen.unity (Sprint 21.3 Ready System UI) without Unity batchmode."""
+"""Generate LobbyScreen.unity (Sprint 21.4 Host Controls UI) without Unity batchmode."""
 
 from __future__ import annotations
 
@@ -354,14 +354,42 @@ def find_node(root: Node, name: str) -> Node | None:
 def host_badge(visible: bool) -> Node:
     return img(
         "HostBadge",
-        (GOLD[0], GOLD[1], GOLD[2], 0.92),
+        GOLD_BRIGHT,
         active=1 if visible else 0,
-        amin=(1, 1),
-        amax=(1, 1),
-        pos=(-18, -12),
-        size=(92, 32),
-        pivot=(1, 1),
-        children=[txt("HostLabel", "HOST", 16, GOLD_LABEL, 4, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(0, 0))],
+        amin=(0, 0.5),
+        amax=(0, 0.5),
+        pos=(460, 22),
+        size=(96, 34),
+        pivot=(0, 0.5),
+        children=[
+            img(
+                "HostBadgeInner",
+                GOLD,
+                amin=(0, 0),
+                amax=(1, 1),
+                pos=(0, 0),
+                size=(-4, -4),
+            ),
+            txt("HostLabel", "HOST", 16, GOLD_LABEL, 4, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(0, 0)),
+        ],
+    )
+
+
+def kick_button(visible: bool) -> Node:
+    return btn(
+        "KickButton",
+        "Kick",
+        (0.42, 0.14, 0.12, 0.92),
+        (1.0, 0.82, 0.78, 1.0),
+        label_size=18,
+        active=1 if visible else 0,
+        amin=(1, 0.5),
+        amax=(1, 0.5),
+        pos=(-36, 28),
+        size=(88, 40),
+        pivot=(1, 0.5),
+        interactable=0,
+        transition=0,
     )
 
 
@@ -376,6 +404,7 @@ def player_slot(
     ready_color,
     online: bool,
     show_host: bool,
+    show_kick: bool,
 ) -> Node:
     slot_h, gap = 148.0, 22.0
     total = slot_h * 4 + gap * 3
@@ -384,6 +413,8 @@ def player_slot(
         img("Fill", CARD if occupied else EMPTY_FILL, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-8, -8)),
         host_badge(show_host),
     ]
+    if index != 0:
+        kids.append(kick_button(show_kick))
     if occupied:
         online_dot = img(
             "OnlineIndicator",
@@ -429,7 +460,7 @@ def player_slot(
                     amin=(0, 0.5),
                     amax=(0, 0.5),
                     pos=(148, 22),
-                    size=(360, 42),
+                    size=(300, 42),
                     pivot=(0, 0.5),
                 ),
                 img(
@@ -702,44 +733,55 @@ def main() -> None:
         shadow=True,
         amin=(0.5, 1),
         amax=(0.5, 1),
-        pos=(0, -36),
-        size=(1100, 110),
+        pos=(0, -32),
+        size=(1180, 128),
         pivot=(0.5, 1),
         children=[
             img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
             txt(
                 "RoomTypeText",
-                "Public Lobby",
-                36,
+                "Room Type: Public",
+                32,
                 GOLD_BRIGHT,
                 4,
-                amin=(0, 0.45),
+                amin=(0, 0.52),
                 amax=(1, 1),
-                pos=(0, -4),
+                pos=(0, -3),
                 size=(-48, 0),
             ),
             txt(
-                "PlayerCountText",
-                "Players: 3 / 4",
-                24,
+                "HostNameText",
+                "Host: DesertFox",
+                22,
                 WHITE,
                 3,
                 amin=(0, 0),
-                amax=(0.5, 0.5),
+                amax=(0.38, 0.52),
                 pos=(14, 3),
-                size=(-52, -14),
+                size=(-44, -14),
                 pivot=(0, 0.5),
+            ),
+            txt(
+                "PlayerCountText",
+                "Players: 1 / 4",
+                22,
+                WHITE,
+                4,
+                amin=(0.32, 0),
+                amax=(0.68, 0.52),
+                pos=(0, 3),
+                size=(-16, -14),
             ),
             txt(
                 "RoomCodeText",
                 "GULF-4821",
-                24,
+                22,
                 GOLD,
                 5,
-                amin=(0.5, 0),
-                amax=(1, 0.5),
+                amin=(0.62, 0),
+                amax=(1, 0.52),
                 pos=(-14, 3),
-                size=(-52, -14),
+                size=(-44, -14),
                 pivot=(1, 0.5),
             ),
         ],
@@ -749,13 +791,13 @@ def main() -> None:
         name="SlotsRoot",
         amin=(0.5, 0.5),
         amax=(0.5, 0.5),
-        pos=(0, 70),
-        size=(980, 660),
+        pos=(0, 78),
+        size=(980, 640),
         children=[
-            player_slot(0, True, "DesertFox", "KW", (0.05, 0.45, 0.25, 1), 12, "Ready", SUCCESS, True, True),
-            player_slot(1, True, "NightOwl", "AE", (0.05, 0.28, 0.55, 1), 8, "Not Ready", READY_MUTED, True, False),
-            player_slot(2, True, "SandWave", "SA", (0.10, 0.42, 0.22, 1), 5, "Connecting", CONNECTING, False, False),
-            player_slot(3, False, "", "", (0, 0, 0, 0), 0, "", READY_MUTED, False, False),
+            player_slot(0, True, "DesertFox", "KW", (0.05, 0.45, 0.25, 1), 12, "Ready", SUCCESS, True, True, False),
+            player_slot(1, True, "NightOwl", "AE", (0.05, 0.28, 0.55, 1), 8, "Not Ready", READY_MUTED, True, False, True),
+            player_slot(2, True, "SandWave", "SA", (0.10, 0.42, 0.22, 1), 5, "Connecting", CONNECTING, False, False, True),
+            player_slot(3, False, "", "", (0, 0, 0, 0), 0, "", READY_MUTED, False, False, False),
         ],
     )
 
@@ -772,24 +814,52 @@ def main() -> None:
         pivot=(0, 0.5),
         transition=0,
     )
-    play_btn = btn(
-        "PlayButton",
-        "Play",
-        BUTTON_DARK,
-        (GOLD_BRIGHT[0], GOLD_BRIGHT[1], GOLD_BRIGHT[2], 0.45),
+    play_waiting = (0.18, 0.16, 0.14, 0.72)
+    play_waiting_label = (0.62, 0.60, 0.56, 0.85)
+    play_btn = Node(
+        name="PlayButton",
+        image=play_waiting,
+        button=True,
+        raycast=1,
+        interactable=0,
+        transition=0,
         amin=(1, 0.5),
         amax=(1, 0.5),
         pos=(-40, 0),
-        size=(280, 80),
+        size=(420, 96),
         pivot=(1, 0.5),
-        interactable=0,
+        children=[
+            txt(
+                "Label",
+                "Waiting for Players...",
+                26,
+                play_waiting_label,
+                4,
+                amin=(0, 0),
+                amax=(1, 1),
+                pos=(0, 0),
+                size=(0, 0),
+            ),
+            txt(
+                "PlayLabel_StartMatch",
+                "Start Match",
+                30,
+                GOLD_LABEL,
+                4,
+                active=0,
+                amin=(0, 0),
+                amax=(1, 1),
+                pos=(0, 0),
+                size=(0, 0),
+            ),
+        ],
     )
     footer = Node(
         name="FooterRoot",
         amin=(0.5, 0),
         amax=(0.5, 0),
-        pos=(0, 40),
-        size=(1400, 110),
+        pos=(0, 36),
+        size=(1480, 110),
         pivot=(0.5, 0),
         children=[ready_btn, play_btn],
     )
@@ -814,14 +884,14 @@ def main() -> None:
         shadow=True,
         amin=(0.5, 0.5),
         amax=(0.5, 0.5),
-        pos=(0, 12),
-        size=(980, 88),
+        pos=(0, 8),
+        size=(980, 78),
         children=[
             img("Fill", PANEL_BG, amin=(0, 0), amax=(1, 1), pos=(0, 0), size=(-6, -6)),
             txt(
                 "LobbyStatusText",
                 "Waiting for everyone to be Ready...",
-                28,
+                26,
                 MUTED,
                 4,
                 amin=(0, 0),
@@ -838,24 +908,65 @@ def main() -> None:
     countdown = txt(
         "CountdownPlaceholder",
         "Starting in: 00:10",
-        30,
+        28,
         GOLD_BRIGHT,
         4,
         active=0,
         amin=(0.5, 0),
         amax=(0.5, 0),
-        pos=(0, -4),
-        size=(420, 40),
+        pos=(0, -2),
+        size=(420, 36),
         pivot=(0.5, 0),
     )
     status_root = Node(
         name="StatusRoot",
         amin=(0.5, 0),
         amax=(0.5, 0),
-        pos=(0, 168),
-        size=(1200, 120),
+        pos=(0, 196),
+        size=(1200, 100),
         pivot=(0.5, 0),
         children=[lobby_status_panel, countdown],
+    )
+
+    def inactive_system(name: str, message: str) -> Node:
+        return txt(
+            name,
+            message,
+            20,
+            (MUTED[0], MUTED[1], MUTED[2], 0.75),
+            4,
+            active=0,
+            amin=(0, 0),
+            amax=(1, 1),
+            pos=(0, 0),
+            size=(0, 0),
+            font_style=2,
+        )
+
+    message_footer = Node(
+        name="MessageFooterRoot",
+        amin=(0.5, 0),
+        amax=(0.5, 0),
+        pos=(0, 148),
+        size=(1100, 40),
+        pivot=(0.5, 0),
+        children=[
+            txt(
+                "SystemMsg_PlayerJoined",
+                "Player joined...",
+                20,
+                (MUTED[0], MUTED[1], MUTED[2], 0.75),
+                4,
+                amin=(0, 0),
+                amax=(1, 1),
+                pos=(0, 0),
+                size=(0, 0),
+                font_style=2,
+            ),
+            inactive_system("SystemMsg_PlayerLeft", "Player left..."),
+            inactive_system("SystemMsg_HostChanged", "Host changed..."),
+            inactive_system("SystemMsg_Searching", "Searching for player..."),
+        ],
     )
 
     bg = img(
@@ -877,7 +988,7 @@ def main() -> None:
         size=(0, 0),
         pivot=(0, 0),
         scale=(0, 0, 0),
-        children=[bg, safe, back, header, slots, status_root, footer],
+        children=[bg, safe, back, header, slots, status_root, message_footer, footer],
     )
     canvas.prep()
     slot0 = find_node(slots, "PlayerSlot_0")
@@ -1112,6 +1223,9 @@ def main() -> None:
         f"  readyButtonLabel: {{fileID: {ready_btn.children[0].txt_id}}}",
         f"  localReadyStatus: {{fileID: {local_ready_status.img_id}}}",
         f"  localReadyLabel: {{fileID: {local_ready_label.txt_id}}}",
+        f"  playButton: {{fileID: {play_btn.btn_id}}}",
+        f"  playButtonImage: {{fileID: {play_btn.img_id}}}",
+        f"  playButtonLabel: {{fileID: {play_btn.children[0].txt_id}}}",
     ]
 
     for ch in canvas.children:
