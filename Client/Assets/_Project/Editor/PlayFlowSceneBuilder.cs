@@ -96,7 +96,7 @@ namespace GulfRun.Editor
         [MenuItem("GulfRun/Play Flow/Build Gameplay HUD (Sprint 23.3)")]
         public static void BuildGameplayHudFromMenu() => BuildGameplayHudBatch();
 
-        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.10)")]
+        [MenuItem("GulfRun/Play Flow/Validate Gameplay Runner (Sprint 23.4–23.11)")]
         public static void ValidateGameplayRunnerFromMenu() => ValidateGameplayRunnerBatch();
 
         public static void RunBatch()
@@ -320,7 +320,7 @@ namespace GulfRun.Editor
         }
 
         /// <summary>
-        /// Sprint 23.4–23.10: validate runner, camera, track, spawn, race, and obstacle gameplay.
+        /// Sprint 23.4–23.11: validate runner, camera, track, spawn, race, obstacles, and game rules.
         /// </summary>
         public static void ValidateGameplayRunnerBatch()
         {
@@ -336,7 +336,7 @@ namespace GulfRun.Editor
                 Debug.LogException(ex);
             }
 
-            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn + Race + Obstacles Sprint 23.4–23.10 OK.");
+            ExitWithFailures(failures, "[PlayFlow] PASS — Gameplay Runner + Camera + Track + Spawn + Race + Obstacles + Game Rules Sprint 23.4–23.11 OK.");
         }
 
         /// <summary>
@@ -4085,10 +4085,35 @@ namespace GulfRun.Editor
                 }
             }
 
+            GameObject rulesGo = FindDeep(scene, "GameRulesManager");
+            Require(rulesGo, "GameRulesManager", failures);
+            if (rulesGo != null)
+            {
+                var rulesManager = rulesGo.GetComponent<GulfRun.Features.Gameplay.GameRulesManager>();
+                if (rulesManager == null)
+                {
+                    failures.Add("GameRulesManager missing GameRulesManager component.");
+                }
+                else if (rulesManager.RulesConfig == null)
+                {
+                    failures.Add("GameRulesManager missing GameRulesConfig (Sprint 23.11).");
+                }
+                else if (rulesManager.RaceManager == null)
+                {
+                    failures.Add("GameRulesManager missing RaceManager ref (Sprint 23.11).");
+                }
+            }
+
             if (AssetDatabase.LoadAssetAtPath<GulfRun.Features.Gameplay.ObstacleCatalog>(
                     "Assets/_Project/Settings/Obstacles/ObstacleCatalog_Default.asset") == null)
             {
                 failures.Add("ObstacleCatalog_Default.asset missing under Settings/Obstacles.");
+            }
+
+            if (AssetDatabase.LoadAssetAtPath<GulfRun.Features.Gameplay.GameRulesConfig>(
+                    "Assets/_Project/Settings/GameRules/GameRulesConfig_Default.asset") == null)
+            {
+                failures.Add("GameRulesConfig_Default.asset missing under Settings/GameRules.");
             }
 
             Require(FindDeep(scene, "ObjectPoolManager"), "ObjectPoolManager", failures);
