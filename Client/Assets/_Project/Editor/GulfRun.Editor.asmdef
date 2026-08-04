@@ -20,7 +20,8 @@
         "GulfRun.Features.GameplayHud",
         "GulfRun.Features.Gameplay",
         "GulfRun.Features.CameraSystem",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

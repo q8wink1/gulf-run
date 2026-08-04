@@ -4,7 +4,8 @@
     "references": [
         "GulfRun.Core",
         "GulfRun.Domain",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

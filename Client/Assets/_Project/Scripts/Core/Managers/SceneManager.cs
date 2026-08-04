@@ -33,7 +33,11 @@ namespace GulfRun.Core.Managers
 
         public void LoadIntro() => UnityEngine.SceneManagement.SceneManager.LoadScene(IntroSceneName);
 
-        public void LoadPlayMenu() => UnityEngine.SceneManagement.SceneManager.LoadScene(PlayMenuSceneName);
+        public void LoadPlayMenu()
+        {
+            Debug.Log("[SceneManager] LoadPlayMenu() → loading scene '" + PlayMenuSceneName + "'");
+            UnityEngine.SceneManagement.SceneManager.LoadScene(PlayMenuSceneName);
+        }
 
         public void LoadQuickPlay() => UnityEngine.SceneManagement.SceneManager.LoadScene(QuickPlaySceneName);
 
